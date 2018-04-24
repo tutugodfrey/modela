@@ -1,0 +1,36 @@
+{
+  "name": "dummy-data-model",
+  "version": "1.0.0",
+  "description": "an application that uses sequelize methods to work with dummy-data when building appliication",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha trans/test/",
+    "build": "babel main -s -d trans",
+    "start:test": "npm run build && npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tutugodfrey/dummy-data-model.git"
+  },
+  "keywords": [
+    "js",
+    "mocha",
+    "opp",
+    "class"
+  ],
+  "author": "Tutu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tutugodfrey/dummy-data-model/issues"
+  },
+  "homepage": "https://github.com/tutugodfrey/dummy-data-model#readme",
+  "dependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^4.0.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "nodemon": "^1.12.1"
+  }
+}
