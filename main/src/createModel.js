@@ -8,30 +8,7 @@ const userController = (object) => {
 }
 
 userController({ name: 'godfey', });
-console.log('result')
 userController({ name: 'gdfey', });
-console.log('result')
-userController({ name: 'godfy', });
-console.log('result')
-userController({ name: 'godfe', });
+userController({ name: 'gofey', });
 
-/*
-users.findAll().then(all => console.log(all))
-users.create({
-	name: 'gdfey',
-}).then(result => console.log(result));
-
-
-users.findAll().then(all => console.log(all))
-users.create({
-	name: 'godfy',
-}).then(result => console.log(result));
-
-
-users.findAll().then(all => console.log(all))
-users.create({
-	name: 'godfe',
-}).then(result => console.log(result));
-
-*/
 

@@ -16,7 +16,8 @@
     "js",
     "mocha",
     "opp",
-    "class"
+    "class",
+    "dummy-data"
   ],
   "author": "Tutu",
   "license": "ISC",
