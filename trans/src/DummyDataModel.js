@@ -105,6 +105,8 @@ var DummyDataModel = function () {
 								model[property] = propsToUpdate[property];
 							});
 							resolve(model);
+						} else {
+							reject({ message: _this2.singleModel + ' not found' });
 						}
 					});
 				} else {

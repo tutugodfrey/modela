@@ -58,6 +58,8 @@ const DummyDataModel = class {
 							model[property] = propsToUpdate[property]
 						});
 						resolve(model);
+					} else {
+						reject({ message: `${this.singleModel} not found` })
 					}
 				})
 					
