@@ -2,26 +2,41 @@ const DummyDataModel = class {
 	constructor(modelName) {
 		this.modelName = modelName;
 		this.model = [];
+		this.getObjectByField = this.getObjectByField.bind(this);
+		this.getFields = this.getFields.bind(this)
 	}
 
+	getObjectByField(arrayOfObjects, objectField, fieldValue) {
+    for(let objCollection of arrayOfObjects) {
+      // const objCollection = arrayOfObjects[arraySize];
+      if (objCollection[objectField] === fieldValue) {
+        return objCollection;
+      }
+    }
+    return `No object with field ${objectField} found`;
+  }
+
+  getFields(objCollector, field) {
+    if (objCollector[field]) {
+      return objCollector[field];
+    }
+    return undefined;
+  }
 	// define class methods
 	create(modelToCreate) {
 		// create a new model
+		if(this.model.length === 0) {
+			modelToCreate.id = 1;
+		} else {
+			const lastModel = this.model[this.model.length - 1];
+			const lastModelId = this.getFields(lastModel, 'id');
+			modelToCreate.id = lastModelId + 1;
+		}
 		const result = new Promise((resolve, reject)  => {
-			// check if data already exist
-			if(this.model.length === 0) {
-				if(this.model.push(modelToCreate)) {
-					resolve(modelToCreate);
-				};
-				reject({message: `Can not create ${modelName}`});
-			} else {
-				this.model.forEach((model) => {
-					modelToCreate.map((property, value) => {
-						console.log(`model ${value}`);
-					})
-				})
-			}
-			
+			if(this.model.push(modelToCreate)) {
+				resolve(modelToCreate);
+			};
+			reject({message: `Can not create ${modelName}`});
 		});
 		return result;
 	}
@@ -62,3 +77,20 @@ const DummyDataModel = class {
 }
 
 export default DummyDataModel;
+
+/*
+else {
+				this.model.forEach((model) => {
+					const props = Object.keys(model);
+					let duplicate = false;
+					props.forEach((property) => {
+						if(model[property] === model[property]) {
+							duplicate = true;
+						}
+						console.log(model[property]);
+						console.log(model[property]);
+					})
+				})
+			}
+
+*/

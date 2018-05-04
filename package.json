@@ -6,7 +6,9 @@
   "scripts": {
     "test": "mocha trans/test/",
     "build": "babel main -s -d trans",
-    "start:test": "npm run build && npm run test"
+    "babel:node": "babel-node main/src/createModel",
+    "start:test": "npm run build && npm run test",
+    "start": "nodemon --exec npm run babel:node"
   },
   "repository": {
     "type": "git",
