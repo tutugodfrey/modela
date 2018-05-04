@@ -114,7 +114,7 @@ const DummyDataModel = class {
 					}
 				});
 				if(!searchResult) {
-					resolve({ messsage: `No ${this.singleModel} found`});
+					reject({ message: `${this.singleModel} not found`});
 				}
 			}
 		});

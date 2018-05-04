@@ -107,4 +107,71 @@ describe('Dummy Data Model', () => {
 			})
 		});
 	});
+
+	describe('findById', () => {
+		it('should return the model with the given id', () => {
+			users.findById(1)
+			.then((user) => {
+				expect(user).to.eql({
+					id: 1,
+					name: 'jane doe',
+					email: 'jane_doe@somebody.com',
+					address: 'somewhere in the world',
+				});
+			});
+		});
+
+		it('should return not found if model with given id is not not found', () => {
+			users.findById(3)
+			.then((user) => {
+				expect(user).to.eql({
+					id: 1,
+					name: 'jane doe',
+					email: 'jane_doe@somebody.com',
+					address: 'somewhere in the world',
+				});
+			})
+			.catch((error) => {
+				expect(error).to.eql({ error: 'user not found' });
+			});
+		});
+	});
+
+	describe('find', () => {
+		it('should find a model that meet the given conditions', () => {
+			users.find({
+				where: {
+					name: 'alice bob',
+				}
+			})
+			.then((user) => {
+				expect(user).to.eql({
+					id: 2,
+					email: 'alice@somebody.com',
+					name: 'alice bob',
+					address: 'now living in planet earth',
+				})
+			})
+		});
+
+		it('should only return a model that meet all conditions', () => {
+			users.find({
+				where: {
+					name: 'alice bob',
+					id: 4,
+				}
+			})
+			.then((user) => {
+				expect(user).to.eql({
+					id: 2,
+					email: 'alice@somebody.com',
+					name: 'alice bob',
+					address: 'now living in planet earth',
+				});
+			})
+			.catch((error) => {
+				expect(error).to.eql({ message: 'user not found' });
+			});
+		});
+	});
 });

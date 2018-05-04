@@ -37,7 +37,7 @@ var wrongdUser2 = {
 };
 var updateUser2 = {
 	name: 'alice bob',
-	address: 'no living in planet earth'
+	address: 'now living in planet earth'
 };
 
 describe('Dummy Data Model', function () {
@@ -94,7 +94,7 @@ describe('Dummy Data Model', function () {
 					id: 2,
 					email: 'alice@somebody.com',
 					name: 'alice bob',
-					address: 'no living in planet earth'
+					address: 'now living in planet earth'
 				});
 			});
 		});
@@ -104,7 +104,68 @@ describe('Dummy Data Model', function () {
 					id: 2,
 					email: 'alice@somebody.com',
 					name: 'alice bob',
-					address: 'no living in planet earth'
+					address: 'now living in planet earth'
+				});
+			}).catch(function (error) {
+				expect(error).to.eql({ message: 'user not found' });
+			});
+		});
+	});
+
+	describe('findById', function () {
+		it('should return the model with the given id', function () {
+			users.findById(1).then(function (user) {
+				expect(user).to.eql({
+					id: 1,
+					name: 'jane doe',
+					email: 'jane_doe@somebody.com',
+					address: 'somewhere in the world'
+				});
+			});
+		});
+
+		it('should return not found if model with given id is not not found', function () {
+			users.findById(3).then(function (user) {
+				expect(user).to.eql({
+					id: 1,
+					name: 'jane doe',
+					email: 'jane_doe@somebody.com',
+					address: 'somewhere in the world'
+				});
+			}).catch(function (error) {
+				expect(error).to.eql({ error: 'user not found' });
+			});
+		});
+	});
+
+	describe('find', function () {
+		it('should find a model that meet the given conditions', function () {
+			users.find({
+				where: {
+					name: 'alice bob'
+				}
+			}).then(function (user) {
+				expect(user).to.eql({
+					id: 2,
+					email: 'alice@somebody.com',
+					name: 'alice bob',
+					address: 'now living in planet earth'
+				});
+			});
+		});
+
+		it('should only return a model that meet all conditions', function () {
+			users.find({
+				where: {
+					name: 'alice bob',
+					id: 4
+				}
+			}).then(function (user) {
+				expect(user).to.eql({
+					id: 2,
+					email: 'alice@somebody.com',
+					name: 'alice bob',
+					address: 'now living in planet earth'
 				});
 			}).catch(function (error) {
 				expect(error).to.eql({ message: 'user not found' });

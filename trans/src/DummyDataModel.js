@@ -165,7 +165,7 @@ var DummyDataModel = function () {
 						}
 					});
 					if (!searchResult) {
-						resolve({ messsage: 'No ' + _this4.singleModel + ' found' });
+						reject({ message: _this4.singleModel + ' not found' });
 					}
 				}
 			});
