@@ -1,6 +1,7 @@
 const DummyDataModel = class {
 	constructor(modelName) {
 		this.modelName = modelName;
+		this.singleModel = modelName.substring(0, modelName.length - 1);
 		this.model = [];
 		this.getObjectByField = this.getObjectByField.bind(this);
 		this.getFields = this.getFields.bind(this)
@@ -36,7 +37,7 @@ const DummyDataModel = class {
 			if(this.model.push(modelToCreate)) {
 				resolve(modelToCreate);
 			};
-			reject({message: `Can not create ${modelName}`});
+			reject({message: `Can not create ${this.singleModel}`});
 		});
 		return result;
 	}
@@ -58,7 +59,7 @@ const DummyDataModel = class {
 			if(modelToFind) {
 				resolve(modelToFind)
 			} else {
-				reject({ error: `${this.modelName} not found` });
+				reject({ error: `${this.singleModel} not found` });
 			}
 		})
 		return result;
