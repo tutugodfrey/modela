@@ -76,7 +76,7 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('lenght of model should increase', () => {
-			expect(users.model).to.be.an('array');
+			expect(users.model.length).to.equal(2);
 		})
 	});
 
@@ -174,4 +174,39 @@ describe('Dummy Data Model', () => {
 			});
 		});
 	});
+
+	describe('findAll', () => {
+		it('should return all models if no condition is specified', () => {
+			users.findAll()
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.equal(2);
+			});
+		});
+
+		it('should return all models that meets the specified conditions', () => {
+			users.findAll({
+				where: {
+					address: 'somewhere in the world',
+				}
+			})
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers).to.have.length.of.at.least(1);
+			});
+		});
+	});
+
+	describe('destroy', () => {
+		it('should delete a model that meets the specified condition', () => {
+			users.destroy({
+				where: {
+					id: 1,
+				}
+			})
+			.then((message) => {
+				expect(message).to.eql({ message: 'user has been deleted' });
+			})
+		})
+	})
 });
