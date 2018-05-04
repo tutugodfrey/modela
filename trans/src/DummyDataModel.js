@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -85,14 +87,36 @@ var DummyDataModel = function () {
 		}
 	}, {
 		key: 'update',
-		value: function update(modelToUpdate) {
-			// update the model 
+		value: function update(modelToUpdate, propsToUpdate) {
+			var _this2 = this;
 
+			/* 
+   	propsToUpdate contain the new properties to replace the old ones
+   	this method should be called on the particular object to update.
+   	which means that before call update you must use the finder methods to 
+   	get the particular object.
+   */
+			var result = new Promise(function (resolve, reject) {
+				if ((typeof propsToUpdate === 'undefined' ? 'undefined' : _typeof(propsToUpdate)) === 'object' && (typeof modelToUpdate === 'undefined' ? 'undefined' : _typeof(modelToUpdate)) === 'object') {
+					var props = Object.keys(propsToUpdate);
+					_this2.model.filter(function (model) {
+						if (model === modelToUpdate) {
+							props.forEach(function (property) {
+								model[property] = propsToUpdate[property];
+							});
+							resolve(model);
+						}
+					});
+				} else {
+					reject({ message: 'missing object propertiy \'where\' to find model' });
+				}
+			});
+			return result;
 		}
 	}, {
 		key: 'findById',
 		value: function findById(id) {
-			var _this2 = this;
+			var _this3 = this;
 
 			// return an object with the given id
 			var modelToFind = void 0;
@@ -105,7 +129,7 @@ var DummyDataModel = function () {
 				if (modelToFind) {
 					resolve(modelToFind);
 				} else {
-					reject({ error: _this2.singleModel + ' not found' });
+					reject({ error: _this3.singleModel + ' not found' });
 				}
 			});
 			return result;
@@ -113,7 +137,7 @@ var DummyDataModel = function () {
 	}, {
 		key: 'find',
 		value: function find(condition) {
-			var _this3 = this;
+			var _this4 = this;
 
 			/* return a single object that meet the condition
    	condition is single object with property where whose value is further
@@ -126,7 +150,7 @@ var DummyDataModel = function () {
 					var props = Object.keys(condition.where);
 					var propMatch = void 0;
 					var searchResult = void 0;
-					_this3.model.forEach(function (model) {
+					_this4.model.forEach(function (model) {
 						propMatch = true;
 						props.forEach(function (property) {
 							if (condition.where[property] !== model[property]) {
@@ -139,7 +163,7 @@ var DummyDataModel = function () {
 						}
 					});
 					if (!searchResult) {
-						resolve({ messsage: 'No ' + _this3.singleModel + ' found' });
+						resolve({ messsage: 'No ' + _this4.singleModel + ' found' });
 					}
 				}
 			});
@@ -149,7 +173,7 @@ var DummyDataModel = function () {
 	}, {
 		key: 'findAll',
 		value: function findAll() {
-			var _this4 = this;
+			var _this5 = this;
 
 			var condition = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'all';
 
@@ -160,7 +184,7 @@ var DummyDataModel = function () {
 			var result = new Promise(function (resolve, reject) {
 				if (condition === 'all') {
 					// all model in this instance
-					resolve(_this4.model);
+					resolve(_this5.model);
 				} else {
 					// find model that meets the given condition
 					var props = Object.keys(condition.where);
@@ -168,7 +192,7 @@ var DummyDataModel = function () {
 					// array of objects that meet the condition
 					var searchResult = [];
 					var propMatch = void 0;
-					_this4.model.forEach(function (model) {
+					_this5.model.forEach(function (model) {
 						propMatch = true;
 						props.forEach(function (property) {
 							if (condition.where[property] !== model[property]) {
@@ -187,7 +211,7 @@ var DummyDataModel = function () {
 	}, {
 		key: 'destroy',
 		value: function destroy(condition) {
-			var _this5 = this;
+			var _this6 = this;
 
 			/* 
    	delete the object that meet the condition 
@@ -199,7 +223,7 @@ var DummyDataModel = function () {
 			var result = new Promise(function (resolve, reject) {
 				var props = Object.keys(condition.where);
 				var propMatch = void 0;
-				_this5.model.forEach(function (model) {
+				_this6.model.forEach(function (model) {
 					propMatch = true;
 					props.forEach(function (property) {
 						if (condition.where[property] !== model[property]) {
@@ -207,15 +231,15 @@ var DummyDataModel = function () {
 						}
 					});
 					if (propMatch) {
-						var indexOfMatchedModel = _this5.model.indexOf(model);
-						if (_this5.model.splice(indexOfMatchedModel, 1)) {
-							resolve({ message: _this5.singleModel + ' has been deleted' });
+						var indexOfMatchedModel = _this6.model.indexOf(model);
+						if (_this6.model.splice(indexOfMatchedModel, 1)) {
+							resolve({ message: _this6.singleModel + ' has been deleted' });
 						} else {
-							reject({ message: _this5.singleModel + ' could not be deleted' });
+							reject({ message: _this6.singleModel + ' could not be deleted' });
 						}
 					}
 				});
-				reject({ message: _this5.singleModel + ' not found, not action taken' });
+				reject({ message: _this6.singleModel + ' not found, not action taken' });
 			});
 
 			return result;

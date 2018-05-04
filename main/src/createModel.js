@@ -47,3 +47,11 @@ users.destroy({
 }).then(result => console.log(result)).catch(error => console.log(error));
 
 users.findAll().then(all => console.log(all));
+
+users.findById(2).then((user) => {
+	users.update(user, {
+		name: 'godfrey',
+		address: 'warri',
+		age:30
+	}).then(newUser => console.log(newUser))
+});

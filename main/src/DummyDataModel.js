@@ -42,12 +42,34 @@ const DummyDataModel = class {
 		return result;
 	}
 
-	update(modelToUpdate) {
-		// update the model 
-
+	update(modelToUpdate, propsToUpdate) {
+		/* 
+			propsToUpdate contain the new properties to replace the old ones
+			this method should be called on the particular object to update.
+			which means that before call update you must use the finder methods to 
+			get the particular object.
+		*/
+		const result = new Promise((resolve, reject) => {
+			if((typeof propsToUpdate === 'object') && (typeof modelToUpdate === 'object')) {
+				const props = Object.keys(propsToUpdate);
+				this.model.filter((model) => {
+					if(model === modelToUpdate) {
+						props.forEach((property) => {
+							model[property] = propsToUpdate[property]
+						});
+						resolve(model);
+					}
+				})
+					
+			} else {
+				reject({ message: `missing object propertiy 'where' to find model` });
+			}
+		});
+		return result;
 	}
 
 	findById(id) {
+
 		// return an object with the given id
 		let modelToFind;
 		this.model.filter((model) => {
