@@ -48,7 +48,20 @@ const DummyDataModel = class {
 
 	findById(id) {
 		// return an object with the given id
-
+		let modelToFind;
+		this.model.filter((model) => {
+			if(model.id === id) {
+				modelToFind = model;
+			}
+		});
+		const result = new Promise((resolve, reject) => {
+			if(modelToFind) {
+				resolve(modelToFind)
+			} else {
+				reject({ error: `${this.modelName} not found` });
+			}
+		})
+		return result;
 	}
 
 	find(condition) {
