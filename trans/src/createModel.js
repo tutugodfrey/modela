@@ -45,4 +45,22 @@ users.find({
 }).catch(function (error) {
   return console.log(error);
 });
+
+users.findAll().then(function (all) {
+  return console.log(all);
+});
+
+users.destroy({
+  where: {
+    id: 3
+  }
+}).then(function (result) {
+  return console.log(result);
+}).catch(function (error) {
+  return console.log(error);
+});
+
+users.findAll().then(function (all) {
+  return console.log(all);
+});
 //# sourceMappingURL=createModel.js.map

@@ -38,9 +38,12 @@ users.find({
 .then(user => console.log(user))
 .catch(error => console.log(error));
 
-users.findAll({
+users.findAll().then(all => console.log(all));
+
+users.destroy({
 	where: {
-		id: 1,
-		address: 'warri'
+		id: 3
 	}
-}).then(all => console.log(all));
+}).then(result => console.log(result)).catch(error => console.log(error));
+
+users.findAll().then(all => console.log(all));

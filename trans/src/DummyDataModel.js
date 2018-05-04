@@ -126,7 +126,7 @@ var DummyDataModel = function () {
 					var props = Object.keys(condition.where);
 					var propMatch = void 0;
 					var searchResult = void 0;
-					_this3.model.filter(function (model) {
+					_this3.model.forEach(function (model) {
 						propMatch = true;
 						props.forEach(function (property) {
 							if (condition.where[property] !== model[property]) {
@@ -151,19 +151,74 @@ var DummyDataModel = function () {
 		value: function findAll() {
 			var _this4 = this;
 
-			// return all the collection
-			var result = new Promise(function (resolve, reject) {
+			var condition = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'all';
 
-				resolve(_this4.model);
-				reject({ message: 'Can not create ' + _this4.model });
+			/* return all objects that meet the condition 
+   	condition is single object with property where whose value is further
+   	an object with key => value pair of the properties of the object to find
+   */
+			var result = new Promise(function (resolve, reject) {
+				if (condition === 'all') {
+					// all model in this instance
+					resolve(_this4.model);
+				} else {
+					// find model that meets the given condition
+					var props = Object.keys(condition.where);
+
+					// array of objects that meet the condition
+					var searchResult = [];
+					var propMatch = void 0;
+					_this4.model.forEach(function (model) {
+						propMatch = true;
+						props.forEach(function (property) {
+							if (condition.where[property] !== model[property]) {
+								propMatch = false;
+							}
+						});
+						if (propMatch) {
+							searchResult.push(model);;
+						}
+					});
+					resolve(searchResult);
+				}
 			});
 			return result;
 		}
 	}, {
 		key: 'destroy',
-		value: function destroy(id) {
-			// delete an object from the collection
+		value: function destroy(condition) {
+			var _this5 = this;
 
+			/* 
+   	delete the object that meet the condition 
+   	condition is single object with property where whose value is further
+   	an object with key => value pair of the properties of the object to find.
+   	if several object match the specified condition, only the first match will
+   	be deleted
+   */
+			var result = new Promise(function (resolve, reject) {
+				var props = Object.keys(condition.where);
+				var propMatch = void 0;
+				_this5.model.forEach(function (model) {
+					propMatch = true;
+					props.forEach(function (property) {
+						if (condition.where[property] !== model[property]) {
+							propMatch = false;
+						}
+					});
+					if (propMatch) {
+						var indexOfMatchedModel = _this5.model.indexOf(model);
+						if (_this5.model.splice(indexOfMatchedModel, 1)) {
+							resolve({ message: _this5.singleModel + ' has been deleted' });
+						} else {
+							reject({ message: _this5.singleModel + ' could not be deleted' });
+						}
+					}
+				});
+				reject({ message: _this5.singleModel + ' not found, not action taken' });
+			});
+
+			return result;
 		}
 	}]);
 
