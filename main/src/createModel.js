@@ -37,3 +37,10 @@ users.find({
 })
 .then(user => console.log(user))
 .catch(error => console.log(error));
+
+users.findAll({
+	where: {
+		id: 1,
+		address: 'warri'
+	}
+}).then(all => console.log(all));
