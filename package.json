@@ -8,7 +8,10 @@
     "build": "babel main -s -d trans",
     "babel:node": "babel-node main/src/createModel",
     "test": "npm run build && npm run test:build",
-    "start": "nodemon --exec npm run babel:node"
+    "start": "nodemon --exec npm run babel:node",
+    "js:lint": "eslint main/",
+    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./trans/test/",
+    "send:coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec ./trans/test/ && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "repository": {
     "type": "git",
@@ -29,11 +32,18 @@
   "homepage": "https://github.com/tutugodfrey/dummy-data-model#readme",
   "dependencies": {
     "chai": "^4.1.2",
+    "codeclimate-test-reporter": "^0.5.0",
+    "coveralls": "^3.0.1",
+    "istanbul": "^0.4.5",
     "mocha": "^4.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.11.0",
+    "mocha-lcov-reporter": "^1.3.0",
     "nodemon": "^1.12.1"
   }
 }
