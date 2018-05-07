@@ -12,12 +12,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var expect = _chai2.default.expect;
 
-var users = new _DummyDataModel2.default('users', ['email']);
+var users = new _DummyDataModel2.default('users', ['email'], ['name', 'email']);
 var user1 = {
   name: 'jane doe',
   email: 'jane_doe@somebody.com',
   address: 'somewhere in the world'
 };
+
+var incompleteUser1 = {
+  name: '',
+  email: 'jane_doe@somebody.com',
+  address: 'somewhere in the world'
+};
+
 var user2 = {
   name: 'alice',
   email: 'alice@somebody.com',
@@ -56,6 +63,20 @@ describe('Dummy Data Model', function () {
     it('user model should be an array', function () {
       expect(users.model).to.be.an('array');
     });
+
+    it('should not create a new user if required is null', function () {
+      users.create(incompleteUser1).then(function (user) {
+        expect(user).to.eql({
+          id: 1,
+          name: 'jane doe',
+          email: 'jane_doe@somebody.com',
+          address: 'somewhere in the world'
+        });
+      }).catch(function (error) {
+        expect(error).to.eql({ message: 'missing required field' });
+      });
+    });
+
     it('it should create new user', function () {
       users.create(user1).then(function (user) {
         Object.assign(createdUser1, user);
@@ -249,6 +270,16 @@ describe('Dummy Data Model', function () {
         }
       }).then(function (message) {
         expect(message).to.eql({ message: 'user has been deleted' });
+      });
+    });
+
+    it('should do nothing if no model meet the specified condition', function () {
+      users.destroy({
+        where: {
+          name: 'linda'
+        }
+      }).catch(function (message) {
+        expect(message).to.eql({ message: users.singleModel + ' not found, not action taken' });
       });
     });
   });

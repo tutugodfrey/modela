@@ -1,9 +1,11 @@
 const DummyDataModel = class {
-  constructor(modelName, uniqueKeys = [], requeiredFields = []) {
+  constructor(modelName, uniqueKeys = [], requiredFields = []) {
     this.modelName = modelName;
     this.uniqueKeys = uniqueKeys;
+    this.requiredFields = requiredFields;
     this.singleModel = modelName.substring(0, modelName.length - 1);
     this.model = [];
+    this.createModel = this.createModel.bind(this);
     this.getObjectByField = this.getObjectByField.bind(this);
     this.getFields = this.getFields.bind(this);
   }
@@ -28,42 +30,62 @@ const DummyDataModel = class {
   create(modelToCreate) {
     // create a new model
     const result = new Promise((resolve, reject) => {
-      if (this.model.length === 0) {
-        modelToCreate.id = 1;
+      if(this.requiredFields.length === 0) {
+        this.createModel(modelToCreate, resolve, reject);
+        console.log('models', this.model)
+      } else {
+        let allFieldsPassed = true;
+        this.requiredFields.forEach((required) => {
+          if(!modelToCreate[required]) {
+            console.log(modelToCreate[required])
+            allFieldsPassed = false;
+          }
+        });
+        if(!allFieldsPassed) {
+          reject({ message: 'missing required field' })
+        } else {
+          this.createModel(modelToCreate, resolve, reject);
+        }
+      }
+    });
+    return result;
+  }
+
+  createModel(modelToCreate, resolve, reject) {
+    if (this.model.length === 0) {
+      modelToCreate.id = 1;
+      if (this.model.push(modelToCreate)) {
+        resolve(modelToCreate);
+      }
+      reject({ message: `Can not create ${this.singleModel}` });
+    } else {
+      const lastModel = this.model[this.model.length - 1];
+      const lastModelId = this.getFields(lastModel, 'id');
+      // verify uniqueKeys
+      if(this.uniqueKeys.length === 0) {
         if (this.model.push(modelToCreate)) {
           resolve(modelToCreate);
         }
         reject({ message: `Can not create ${this.singleModel}` });
       } else {
-        const lastModel = this.model[this.model.length - 1];
-        const lastModelId = this.getFields(lastModel, 'id');
-        // verify uniqueKeys
-        if(this.uniqueKeys.length === 0) {
+        let foundDuplicate = false;
+        this.model.forEach((model) => {
+          this.uniqueKeys.forEach((prop) => {
+            if(model[prop] === modelToCreate[prop]) {
+              foundDuplicate = true;
+              reject({ message: `duplicate entry for unique key`});
+            }
+          });
+        });
+        if(!foundDuplicate) {
+          modelToCreate.id = lastModelId + 1;
           if (this.model.push(modelToCreate)) {
             resolve(modelToCreate);
           }
           reject({ message: `Can not create ${this.singleModel}` });
-        } else {
-          let foundDuplicate = false;
-          this.model.forEach((model) => {
-            this.uniqueKeys.forEach((prop) => {
-              if(model[prop] === modelToCreate[prop]) {
-                foundDuplicate = true;
-                reject({ message: `duplicate entry for unique key`});
-              }
-            });
-          });
-          if(!foundDuplicate) {
-            modelToCreate.id = lastModelId + 1;
-            if (this.model.push(modelToCreate)) {
-              resolve(modelToCreate);
-            }
-            reject({ message: `Can not create ${this.singleModel}` });
-          }
         }
       }
-    });
-    return result;
+    }
   }
 
   update(modelToUpdate, propsToUpdate) {
@@ -95,9 +117,7 @@ const DummyDataModel = class {
               this.model[indexOfModel] = model;
               resolve(model);
             }
-          } //else {
-           // reject({ message: `${this.singleModel} not found` });
-         // }
+          }
         });
       } else {
         reject({ message: 'invalid argument passed to update! expects argument1 and argument2 to be objects' });

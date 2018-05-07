@@ -3,12 +3,19 @@ import chai from 'chai';
 import DataModel from './../src/DummyDataModel';
 
 const { expect } = chai;
-const users = new DataModel('users', ['email']);
+const users = new DataModel('users', ['email'], ['name', 'email']);
 const user1 = {
   name: 'jane doe',
   email: 'jane_doe@somebody.com',
   address: 'somewhere in the world',
 };
+
+const incompleteUser1 = {
+	name: '',
+  email: 'jane_doe@somebody.com',
+  address: 'somewhere in the world',
+};
+
 const user2 = {
   name: 'alice',
   email: 'alice@somebody.com',
@@ -47,6 +54,22 @@ describe('Dummy Data Model', () => {
     it('user model should be an array', () => {
       expect(users.model).to.be.an('array');
     });
+
+    it('should not create a new user if required is null', () => {
+      users.create(incompleteUser1)
+        .then((user) => {
+          expect(user).to.eql({
+            id: 1,
+            name: 'jane doe',
+            email: 'jane_doe@somebody.com',
+            address: 'somewhere in the world',
+          });
+        })
+        .catch((error) => {
+        	expect (error).to.eql({ message: 'missing required field' })
+        });
+    });
+
     it('it should create new user', () => {
       users.create(user1)
         .then((user) => {
@@ -261,6 +284,17 @@ describe('Dummy Data Model', () => {
       })
         .then((message) => {
           expect(message).to.eql({ message: 'user has been deleted' });
+        });
+    });
+
+    it('should do nothing if no model meet the specified condition', () => {
+      users.destroy({
+        where: {
+          name: 'linda',
+        },
+      })
+        .catch((message) => {
+          expect(message).to.eql({ message: `${users.singleModel} not found, not action taken` });
         });
     });
   });

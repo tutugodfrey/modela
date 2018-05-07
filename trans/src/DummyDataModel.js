@@ -13,13 +13,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var DummyDataModel = function () {
   function DummyDataModel(modelName) {
     var uniqueKeys = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+    var requiredFields = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
     _classCallCheck(this, DummyDataModel);
 
     this.modelName = modelName;
     this.uniqueKeys = uniqueKeys;
+    this.requiredFields = requiredFields;
     this.singleModel = modelName.substring(0, modelName.length - 1);
     this.model = [];
+    this.createModel = this.createModel.bind(this);
     this.getObjectByField = this.getObjectByField.bind(this);
     this.getFields = this.getFields.bind(this);
   }
@@ -74,47 +77,70 @@ var DummyDataModel = function () {
 
       // create a new model
       var result = new Promise(function (resolve, reject) {
-        if (_this.model.length === 0) {
-          modelToCreate.id = 1;
-          if (_this.model.push(modelToCreate)) {
-            resolve(modelToCreate);
-          }
-          reject({ message: 'Can not create ' + _this.singleModel });
+        if (_this.requiredFields.length === 0) {
+          _this.createModel(modelToCreate, resolve, reject);
+          console.log('models', _this.model);
         } else {
-          var lastModel = _this.model[_this.model.length - 1];
-          var lastModelId = _this.getFields(lastModel, 'id');
-          // verify uniqueKeys
-          if (_this.uniqueKeys.length === 0) {
-            if (_this.model.push(modelToCreate)) {
-              resolve(modelToCreate);
+          var allFieldsPassed = true;
+          _this.requiredFields.forEach(function (required) {
+            if (!modelToCreate[required]) {
+              console.log(modelToCreate[required]);
+              allFieldsPassed = false;
             }
-            reject({ message: 'Can not create ' + _this.singleModel });
+          });
+          if (!allFieldsPassed) {
+            reject({ message: 'missing required field' });
           } else {
-            var foundDuplicate = false;
-            _this.model.forEach(function (model) {
-              _this.uniqueKeys.forEach(function (prop) {
-                if (model[prop] === modelToCreate[prop]) {
-                  foundDuplicate = true;
-                  reject({ message: 'duplicate entry for unique key' });
-                }
-              });
-            });
-            if (!foundDuplicate) {
-              modelToCreate.id = lastModelId + 1;
-              if (_this.model.push(modelToCreate)) {
-                resolve(modelToCreate);
-              }
-              reject({ message: 'Can not create ' + _this.singleModel });
-            }
+            _this.createModel(modelToCreate, resolve, reject);
           }
         }
       });
       return result;
     }
   }, {
+    key: 'createModel',
+    value: function createModel(modelToCreate, resolve, reject) {
+      var _this2 = this;
+
+      if (this.model.length === 0) {
+        modelToCreate.id = 1;
+        if (this.model.push(modelToCreate)) {
+          resolve(modelToCreate);
+        }
+        reject({ message: 'Can not create ' + this.singleModel });
+      } else {
+        var lastModel = this.model[this.model.length - 1];
+        var lastModelId = this.getFields(lastModel, 'id');
+        // verify uniqueKeys
+        if (this.uniqueKeys.length === 0) {
+          if (this.model.push(modelToCreate)) {
+            resolve(modelToCreate);
+          }
+          reject({ message: 'Can not create ' + this.singleModel });
+        } else {
+          var foundDuplicate = false;
+          this.model.forEach(function (model) {
+            _this2.uniqueKeys.forEach(function (prop) {
+              if (model[prop] === modelToCreate[prop]) {
+                foundDuplicate = true;
+                reject({ message: 'duplicate entry for unique key' });
+              }
+            });
+          });
+          if (!foundDuplicate) {
+            modelToCreate.id = lastModelId + 1;
+            if (this.model.push(modelToCreate)) {
+              resolve(modelToCreate);
+            }
+            reject({ message: 'Can not create ' + this.singleModel });
+          }
+        }
+      }
+    }
+  }, {
     key: 'update',
     value: function update(modelToUpdate, propsToUpdate) {
-      var _this2 = this;
+      var _this3 = this;
 
       /*
       propsToUpdate contain the new properties to replace the old ones
@@ -125,28 +151,26 @@ var DummyDataModel = function () {
       var result = new Promise(function (resolve, reject) {
         if ((typeof propsToUpdate === 'undefined' ? 'undefined' : _typeof(propsToUpdate)) === 'object' && (typeof modelToUpdate === 'undefined' ? 'undefined' : _typeof(modelToUpdate)) === 'object') {
           var props = Object.keys(propsToUpdate);
-          _this2.model.forEach(function (model) {
+          _this3.model.forEach(function (model) {
             if (modelToUpdate.id === model.id) {
               var wrongModel = false;
-              if (_this2.uniqueKeys.length !== 0) {
-                _this2.uniqueKeys.forEach(function (prop) {
+              if (_this3.uniqueKeys.length !== 0) {
+                _this3.uniqueKeys.forEach(function (prop) {
                   if (modelToUpdate[prop] !== model[prop]) {
                     wrongModel = true;
-                    reject({ message: _this2.singleModel + ' not found' });
+                    reject({ message: _this3.singleModel + ' not found' });
                   }
                 });
               }
               if (!wrongModel) {
-                var indexOfModel = _this2.model.indexOf(model);
+                var indexOfModel = _this3.model.indexOf(model);
                 props.forEach(function (property) {
                   model[property] = propsToUpdate[property];
                 });
-                _this2.model[indexOfModel] = model;
+                _this3.model[indexOfModel] = model;
                 resolve(model);
               }
-            } //else {
-            // reject({ message: `${this.singleModel} not found` });
-            // }
+            }
           });
         } else {
           reject({ message: 'invalid argument passed to update! expects argument1 and argument2 to be objects' });
@@ -157,7 +181,7 @@ var DummyDataModel = function () {
   }, {
     key: 'findById',
     value: function findById(id) {
-      var _this3 = this;
+      var _this4 = this;
 
       // return an object with the given id
       var modelToFind = void 0;
@@ -170,7 +194,7 @@ var DummyDataModel = function () {
         if (modelToFind) {
           resolve(modelToFind);
         } else {
-          reject({ error: _this3.singleModel + ' not found' });
+          reject({ error: _this4.singleModel + ' not found' });
         }
       });
       return result;
@@ -178,7 +202,7 @@ var DummyDataModel = function () {
   }, {
     key: 'find',
     value: function find(condition) {
-      var _this4 = this;
+      var _this5 = this;
 
       /* return a single object that meet the condition
       condition is single object with property where whose value is further
@@ -191,7 +215,7 @@ var DummyDataModel = function () {
           var props = Object.keys(condition.where);
           var propMatch = void 0;
           var searchResult = void 0;
-          _this4.model.forEach(function (model) {
+          _this5.model.forEach(function (model) {
             propMatch = true;
             props.forEach(function (property) {
               if (condition.where[property] !== model[property]) {
@@ -204,7 +228,7 @@ var DummyDataModel = function () {
             }
           });
           if (!searchResult) {
-            reject({ message: _this4.singleModel + ' not found' });
+            reject({ message: _this5.singleModel + ' not found' });
           }
         }
       });
@@ -214,7 +238,7 @@ var DummyDataModel = function () {
   }, {
     key: 'findAll',
     value: function findAll() {
-      var _this5 = this;
+      var _this6 = this;
 
       var condition = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'all';
 
@@ -225,7 +249,7 @@ var DummyDataModel = function () {
       var result = new Promise(function (resolve, reject) {
         if (condition === 'all') {
           // all model in this instance
-          resolve(_this5.model);
+          resolve(_this6.model);
         } else {
           // find model that meets the given condition
           var props = Object.keys(condition.where);
@@ -233,7 +257,7 @@ var DummyDataModel = function () {
           // array of objects that meet the condition
           var searchResult = [];
           var propMatch = void 0;
-          _this5.model.forEach(function (model) {
+          _this6.model.forEach(function (model) {
             propMatch = true;
             props.forEach(function (property) {
               if (condition.where[property] !== model[property]) {
@@ -256,7 +280,7 @@ var DummyDataModel = function () {
   }, {
     key: 'destroy',
     value: function destroy(condition) {
-      var _this6 = this;
+      var _this7 = this;
 
       /*
       delete the object that meet the condition
@@ -268,7 +292,7 @@ var DummyDataModel = function () {
       var result = new Promise(function (resolve, reject) {
         var props = Object.keys(condition.where);
         var propMatch = void 0;
-        _this6.model.forEach(function (model) {
+        _this7.model.forEach(function (model) {
           propMatch = true;
           props.forEach(function (property) {
             if (condition.where[property] !== model[property]) {
@@ -276,15 +300,15 @@ var DummyDataModel = function () {
             }
           });
           if (propMatch) {
-            var indexOfMatchedModel = _this6.model.indexOf(model);
-            if (_this6.model.splice(indexOfMatchedModel, 1)) {
-              resolve({ message: _this6.singleModel + ' has been deleted' });
+            var indexOfMatchedModel = _this7.model.indexOf(model);
+            if (_this7.model.splice(indexOfMatchedModel, 1)) {
+              resolve({ message: _this7.singleModel + ' has been deleted' });
             } else {
-              reject({ message: _this6.singleModel + ' could not be deleted' });
+              reject({ message: _this7.singleModel + ' could not be deleted' });
             }
           }
         });
-        reject({ message: _this6.singleModel + ' not found, not action taken' });
+        reject({ message: _this7.singleModel + ' not found, not action taken' });
       });
 
       return result;
