@@ -9,7 +9,7 @@
     "babel:node": "babel-node main/src/createModel",
     "test": "npm run build && npm run test:build",
     "start": "nodemon --exec npm run babel:node",
-    "js:lint": "eslint main/",
+    "js:lint": "eslint main/ --fix",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./trans/test/",
     "send:coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec ./trans/test/ && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },

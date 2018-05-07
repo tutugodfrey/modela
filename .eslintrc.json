@@ -1,0 +1,8 @@
+{   
+    "extends": "airbnb-base",
+    "rules": {
+        "linebreak-style": 0,
+        "import/no-unresolved": 0,
+        "arrow-body-style": 0
+      }
+}
