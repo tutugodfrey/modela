@@ -11,7 +11,7 @@ const user1 = {
 };
 
 const incompleteUser1 = {
-	name: '',
+  name: '',
   email: 'jane_doe@somebody.com',
   address: 'somewhere in the world',
 };
@@ -48,6 +48,18 @@ describe('Dummy Data Model', () => {
     it('should be an instance of DataModel', () => {
       expect(users).to.be.an.instanceOf(DataModel);
     });
+
+    it('should have property modelName that is of type string', () => {
+      expect(users.modelName).to.be.an('string');
+    });
+
+    it('should have property uniquekeys that is of type array', () => {
+      expect(users.uniqueKeys).to.be.an('array');
+    });
+
+    it('should have property requiredFields that is of type array', () => {
+      expect(users.requiredFields).to.be.an('array');
+    });
   });
 
   describe('create method', () => {
@@ -66,14 +78,14 @@ describe('Dummy Data Model', () => {
           });
         })
         .catch((error) => {
-        	expect (error).to.eql({ message: 'missing required field' })
+          expect(error).to.eql({ message: 'missing required field' });
         });
     });
 
     it('it should create new user', () => {
       users.create(user1)
         .then((user) => {
-        	Object.assign(createdUser1, user);
+          Object.assign(createdUser1, user);
           expect(user).to.eql({
             id: 1,
             name: 'jane doe',
@@ -86,7 +98,7 @@ describe('Dummy Data Model', () => {
     it('it should create another user', () => {
       users.create(user2)
         .then((user) => {
-        	Object.assign(createdUser2, user);
+          Object.assign(createdUser2, user);
           expect(user).to.eql({
             id: 2,
             name: 'alice',
@@ -104,10 +116,10 @@ describe('Dummy Data Model', () => {
             name: 'alice',
             email: 'alice@somebody.com',
             address: 'lives in another planet',
-          })
+          });
         })
         .catch((error) => {
-        	expect(error).to.eql({ message: `duplicate entry for unique key` });
+          expect(error).to.eql({ message: 'duplicate entry for unique key' });
         });
     });
 
@@ -128,23 +140,23 @@ describe('Dummy Data Model', () => {
           });
         });
     });
-   
-    it('should not update a wrong model', () => {
-	    users.update(wrongdUser2, updateUser2)
-	      .then((newUser2) => {
-	        expect(newUser2).to.eql({
-	          id: 2,
-	          email: 'alice@somebody.com',
-	          name: 'alice bob',
-	          address: 'now living in planet earth',
-	        });
-	      })
-	      .catch((error) => {
-	        expect(error).to.eql({ message: 'user not found' });
-	      });
-	 	});
 
-	 	it('should fail if arguments are not objects', () => {
+    it('should not update a wrong model', () => {
+      users.update(wrongdUser2, updateUser2)
+        .then((newUser2) => {
+          expect(newUser2).to.eql({
+            id: 2,
+            email: 'alice@somebody.com',
+            name: 'alice bob',
+            address: 'now living in planet earth',
+          });
+        })
+        .catch((error) => {
+          expect(error).to.eql({ message: 'user not found' });
+        });
+    });
+
+    it('should fail if arguments are not objects', () => {
       users.update('wrongdUser2', updateUser2)
         .then((newUser2) => {
           expect(newUser2).to.eql({
@@ -191,20 +203,20 @@ describe('Dummy Data Model', () => {
 
   describe('find', () => {
     it('should find a model that meet the given conditions', () => {
-    	//  console.log(users)
+      //  console.log(users)
       users.find({
         where: {
           name: 'alice bob',
         },
       })
-      .then((user) => {
-        expect(user).to.eql({
-          id: 2,
-          email: 'alice@somebody.com',
-          name: 'alice bob',
-          address: 'now living in planet earth',
+        .then((user) => {
+          expect(user).to.eql({
+            id: 2,
+            email: 'alice@somebody.com',
+            name: 'alice bob',
+            address: 'now living in planet earth',
+          });
         });
-      });
     });
 
     it('should only return a model that meet all conditions', () => {
@@ -230,14 +242,14 @@ describe('Dummy Data Model', () => {
     it('should fail if no condition is specified', () => {
       users.find()
         .catch((error) => {
-          expect(error).to.eql({ message: 'missing object propertiy \'where\' to find model'});
+          expect(error).to.eql({ message: 'missing object propertiy \'where\' to find model' });
         });
     });
 
     it('should fail if condition does not have property "where"', () => {
       users.find({})
         .catch((error) => {
-          expect(error).to.eql({ message: 'missing object propertiy \'where\' to find model'});
+          expect(error).to.eql({ message: 'missing object propertiy \'where\' to find model' });
         });
     });
   });

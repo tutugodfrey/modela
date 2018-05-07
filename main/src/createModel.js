@@ -1,7 +1,7 @@
 import DummyDataModel from './DummyDataModel';
 
 const users = new DummyDataModel('users');
-
+/* eslint-disable no-console */
 const userController = (object) => {
   // users.create(object).then(result => console.log(result));
   users.create(object);
@@ -15,14 +15,14 @@ userController({
   email: 'godfrey_tutU@yahoo.com',
 });
 userController({
- 	name: 'gdfey',
- 	address: 'lagos',
- 	email: 'gdfey@gmail.com',
+  name: 'gdfey',
+  address: 'lagos',
+  email: 'gdfey@gmail.com',
 });
 userController({
- 	name: 'gofey',
- 	address: 'warri',
- 	email: 'gofey@yahoo.com',
+  name: 'gofey',
+  address: 'warri',
+  email: 'gofey@yahoo.com',
 });
 
 // users.findById(3).then(user => console.log(user));

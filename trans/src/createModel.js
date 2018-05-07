@@ -7,7 +7,7 @@ var _DummyDataModel2 = _interopRequireDefault(_DummyDataModel);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var users = new _DummyDataModel2.default('users');
-
+/* eslint-disable no-console */
 var userController = function userController(object) {
   // users.create(object).then(result => console.log(result));
   users.create(object);

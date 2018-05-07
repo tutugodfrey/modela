@@ -1,5 +1,8 @@
 const DummyDataModel = class {
   constructor(modelName, uniqueKeys = [], requiredFields = []) {
+    if (!Array.isArray(uniqueKeys) || !Array.isArray(requiredFields)) {
+      return { typeError: 'argument2 and argument3 must be of type array' };
+    }
     this.modelName = modelName;
     this.uniqueKeys = uniqueKeys;
     this.requiredFields = requiredFields;
@@ -30,19 +33,17 @@ const DummyDataModel = class {
   create(modelToCreate) {
     // create a new model
     const result = new Promise((resolve, reject) => {
-      if(this.requiredFields.length === 0) {
+      if (this.requiredFields.length === 0) {
         this.createModel(modelToCreate, resolve, reject);
-        console.log('models', this.model)
       } else {
         let allFieldsPassed = true;
         this.requiredFields.forEach((required) => {
-          if(!modelToCreate[required]) {
-            console.log(modelToCreate[required])
+          if (!modelToCreate[required]) {
             allFieldsPassed = false;
           }
         });
-        if(!allFieldsPassed) {
-          reject({ message: 'missing required field' })
+        if (!allFieldsPassed) {
+          reject({ message: 'missing required field' });
         } else {
           this.createModel(modelToCreate, resolve, reject);
         }
@@ -62,7 +63,7 @@ const DummyDataModel = class {
       const lastModel = this.model[this.model.length - 1];
       const lastModelId = this.getFields(lastModel, 'id');
       // verify uniqueKeys
-      if(this.uniqueKeys.length === 0) {
+      if (this.uniqueKeys.length === 0) {
         if (this.model.push(modelToCreate)) {
           resolve(modelToCreate);
         }
@@ -71,13 +72,13 @@ const DummyDataModel = class {
         let foundDuplicate = false;
         this.model.forEach((model) => {
           this.uniqueKeys.forEach((prop) => {
-            if(model[prop] === modelToCreate[prop]) {
+            if (model[prop] === modelToCreate[prop]) {
               foundDuplicate = true;
-              reject({ message: `duplicate entry for unique key`});
+              reject({ message: 'duplicate entry for unique key' });
             }
           });
         });
-        if(!foundDuplicate) {
+        if (!foundDuplicate) {
           modelToCreate.id = lastModelId + 1;
           if (this.model.push(modelToCreate)) {
             resolve(modelToCreate);
@@ -90,26 +91,26 @@ const DummyDataModel = class {
 
   update(modelToUpdate, propsToUpdate) {
     /*
-			propsToUpdate contain the new properties to replace the old ones
-			this method should be called on the particular object to update.
-			which means that before call update you must use the finder methods to
-			get the particular object.
-		*/
+      propsToUpdate contain the new properties to replace the old ones
+      this method should be called on the particular object to update.
+      which means that before call update you must use the finder methods to
+      get the particular object.
+    */
     const result = new Promise((resolve, reject) => {
       if ((typeof propsToUpdate === 'object') && (typeof modelToUpdate === 'object')) {
         const props = Object.keys(propsToUpdate);
         this.model.forEach((model) => {
           if (modelToUpdate.id === model.id) {
             let wrongModel = false;
-            if(this.uniqueKeys.length !== 0) {
+            if (this.uniqueKeys.length !== 0) {
               this.uniqueKeys.forEach((prop) => {
-                if(modelToUpdate[prop] !== model[prop]) {
+                if (modelToUpdate[prop] !== model[prop]) {
                   wrongModel = true;
                   reject({ message: `${this.singleModel} not found` });
                 }
-              }) 
+              });
             }
-            if(!wrongModel) {
+            if (!wrongModel) {
               const indexOfModel = this.model.indexOf(model);
               props.forEach((property) => {
                 model[property] = propsToUpdate[property];
@@ -146,12 +147,12 @@ const DummyDataModel = class {
 
   find(condition) {
     /* return a single object that meet the condition
-			condition is single object with property where whose value is further
-			an object with key => value pair of the properties of the object to find
-		*/
+      condition is single object with property where whose value is further
+      an object with key => value pair of the properties of the object to find
+    */
     const result = new Promise((resolve, reject) => {
       if (!condition || !condition.where) {
-        reject({ message: 'missing object propertiy \'where\' to find model'});
+        reject({ message: 'missing object propertiy \'where\' to find model' });
       } else {
         const props = Object.keys(condition.where);
         let propMatch;
@@ -178,10 +179,10 @@ const DummyDataModel = class {
   }
 
   findAll(condition = 'all') {
-    /* return all objects that meet the condition
-			condition is single object with property where whose value is further
-			an object with key => value pair of the properties of the object to find
-		*/
+  /* return all objects that meet the condition
+    condition is single object with property where whose value is further
+      an object with key => value pair of the properties of the object to find
+    */
     const result = new Promise((resolve, reject) => {
       if (condition === 'all') {
         // all model in this instance
@@ -204,7 +205,7 @@ const DummyDataModel = class {
             searchResult.push(model);
           }
         });
-        if(searchResult) {
+        if (searchResult) {
           resolve(searchResult);
         } else {
           resolve(searchResult);
@@ -216,12 +217,12 @@ const DummyDataModel = class {
 
   destroy(condition) {
     /*
-			delete the object that meet the condition
-			condition is single object with property where whose value is further
-			an object with key => value pair of the properties of the object to find.
-			if several object match the specified condition, only the first match will
-			be deleted
-		*/
+    delete the object that meet the condition
+      condition is single object with property where whose value is further
+      an object with key => value pair of the properties of the object to find.
+      if several object match the specified condition, only the first match will
+      be deleted
+    */
     const result = new Promise((resolve, reject) => {
       const props = Object.keys(condition.where);
       let propMatch;

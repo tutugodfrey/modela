@@ -17,6 +17,9 @@ var DummyDataModel = function () {
 
     _classCallCheck(this, DummyDataModel);
 
+    if (!Array.isArray(uniqueKeys) || !Array.isArray(requiredFields)) {
+      return { typeError: 'argument2 and argument3 must be of type array' };
+    }
     this.modelName = modelName;
     this.uniqueKeys = uniqueKeys;
     this.requiredFields = requiredFields;
@@ -79,12 +82,10 @@ var DummyDataModel = function () {
       var result = new Promise(function (resolve, reject) {
         if (_this.requiredFields.length === 0) {
           _this.createModel(modelToCreate, resolve, reject);
-          console.log('models', _this.model);
         } else {
           var allFieldsPassed = true;
           _this.requiredFields.forEach(function (required) {
             if (!modelToCreate[required]) {
-              console.log(modelToCreate[required]);
               allFieldsPassed = false;
             }
           });
@@ -143,10 +144,10 @@ var DummyDataModel = function () {
       var _this3 = this;
 
       /*
-      propsToUpdate contain the new properties to replace the old ones
-      this method should be called on the particular object to update.
-      which means that before call update you must use the finder methods to
-      get the particular object.
+        propsToUpdate contain the new properties to replace the old ones
+        this method should be called on the particular object to update.
+        which means that before call update you must use the finder methods to
+        get the particular object.
       */
       var result = new Promise(function (resolve, reject) {
         if ((typeof propsToUpdate === 'undefined' ? 'undefined' : _typeof(propsToUpdate)) === 'object' && (typeof modelToUpdate === 'undefined' ? 'undefined' : _typeof(modelToUpdate)) === 'object') {
@@ -205,8 +206,8 @@ var DummyDataModel = function () {
       var _this5 = this;
 
       /* return a single object that meet the condition
-      condition is single object with property where whose value is further
-      an object with key => value pair of the properties of the object to find
+        condition is single object with property where whose value is further
+        an object with key => value pair of the properties of the object to find
       */
       var result = new Promise(function (resolve, reject) {
         if (!condition || !condition.where) {
@@ -243,9 +244,9 @@ var DummyDataModel = function () {
       var condition = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'all';
 
       /* return all objects that meet the condition
-      condition is single object with property where whose value is further
-      an object with key => value pair of the properties of the object to find
-      */
+        condition is single object with property where whose value is further
+          an object with key => value pair of the properties of the object to find
+        */
       var result = new Promise(function (resolve, reject) {
         if (condition === 'all') {
           // all model in this instance
@@ -284,10 +285,10 @@ var DummyDataModel = function () {
 
       /*
       delete the object that meet the condition
-      condition is single object with property where whose value is further
-      an object with key => value pair of the properties of the object to find.
-      if several object match the specified condition, only the first match will
-      be deleted
+        condition is single object with property where whose value is further
+        an object with key => value pair of the properties of the object to find.
+        if several object match the specified condition, only the first match will
+        be deleted
       */
       var result = new Promise(function (resolve, reject) {
         var props = Object.keys(condition.where);

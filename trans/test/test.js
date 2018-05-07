@@ -57,6 +57,18 @@ describe('Dummy Data Model', function () {
     it('should be an instance of DataModel', function () {
       expect(users).to.be.an.instanceOf(_DummyDataModel2.default);
     });
+
+    it('should have property modelName that is of type string', function () {
+      expect(users.modelName).to.be.an('string');
+    });
+
+    it('should have property uniquekeys that is of type array', function () {
+      expect(users.uniqueKeys).to.be.an('array');
+    });
+
+    it('should have property requiredFields that is of type array', function () {
+      expect(users.requiredFields).to.be.an('array');
+    });
   });
 
   describe('create method', function () {
