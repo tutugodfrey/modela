@@ -4,14 +4,14 @@
   "description": "an application that uses sequelize methods to work with dummy-data when building appliication",
   "main": "index.js",
   "scripts": {
-    "test:build": "mocha trans/test/",
-    "build": "babel main -s -d trans",
+    "test:build": "mocha build/test/",
+    "build": "babel main -s -d build",
     "babel:node": "babel-node main/src/createModel",
     "test": "npm run build && npm run test:build",
     "start": "nodemon --exec npm run babel:node",
     "js:lint": "eslint main/",
-    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./trans/test/",
-    "send:coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec ./trans/test/ && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./build/test/",
+    "send:coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec ./build/test/ && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "repository": {
     "type": "git",
