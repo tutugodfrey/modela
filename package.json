@@ -1,5 +1,5 @@
 {
-  "name": "dummy-data-model",
+  "name": "modela",
   "version": "1.0.4",
   "description": "an application that uses sequelize methods to work with dummy-data when building appliication",
   "main": "build/src/DummyDataModel.js",
@@ -32,7 +32,6 @@
   "homepage": "https://github.com/tutugodfrey/dummy-data-model#readme",
   "dependencies": {
     "chai": "^4.1.2",
-    "codeclimate-test-reporter": "^0.5.0",
     "coveralls": "^3.0.1",
     "istanbul": "^0.4.5",
     "mocha": "^4.0.1"
