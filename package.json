@@ -2,14 +2,14 @@
   "name": "modela",
   "version": "1.0.4",
   "description": "an application that uses sequelize methods to work with dummy-data when building appliication",
-  "main": "build/src/DummyDataModel.js",
+  "main": "build/main/DummyDataModel.js",
   "scripts": {
     "test:build": "mocha build/test/",
-    "build": "babel main -s -d build",
-    "babel:node": "babel-node main/src/createModel",
+    "build": "babel src -s -d build",
+    "babel:node": "babel-node src/main/createModel",
     "test": "npm run build && npm run test:build",
     "start": "nodemon --exec npm run babel:node",
-    "js:lint": "eslint main/",
+    "js:lint": "eslint src/",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./build/test/",
     "send:coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec ./build/test/ && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },

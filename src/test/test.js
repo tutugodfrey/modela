@@ -1,9 +1,9 @@
 
 import chai from 'chai';
-import DataModel from './../src/DummyDataModel';
+import DataModel from '../main/DummyDataModel';
 
 const { expect } = chai;
-const users = new DataModel('users', ['name'], ['name', 'email']);
+const users = new DataModel('users', ['name', 'email'], ['name']);
 const user1 = {
 	name: 'jane doe',
 	email: 'jane_doe@somebody.com',
@@ -51,6 +51,9 @@ const userToUpdate1 = {
 	address: 'now living in planet earth',
 }
 
+const userToUpdate2 = {
+	address: 'has moved to jupiter',
+}
 describe('Dummy Data Model', () => {
 	describe('DataModel', () => {
 		it('should export a function', () => {
@@ -123,8 +126,43 @@ describe('Dummy Data Model', () => {
 	});
 
 	describe('update method', () => {
+		it('should return error no params if no params are pass in', () => {
+			users.update()
+			.catch(err => {
+				expect(err).to.have.property('message')
+				expect(err.message).to.equal(
+					'require argument at position 1 to specify update condition'
+				)
+			})
+		})
+		it('should return error no params if no params are pass in', () => {
+			users.update(
+				{ where: {}},
+			)
+			.catch(err => {
+				expect(err).to.have.property('message')
+				expect(err.message).to.equal(
+					'require argument 2 of type object. only one argument supplied!'
+				)
+			})
+		})
+		it('should not update a wrong model', () => {
+			users.update({
+				where: {
+					id: wrongdUser1.id,
+				}
+			}, userToUpdate1)
+			.catch((error) => {
+				expect(error).to.eql({ message: `user not found` })
+			})
+		});
+
 		it('should update a model', () => {
-			users.update(createdUser2, userToUpdate1)
+			users.update({
+				where: {
+					id: createdUser2.id
+				}
+			}, userToUpdate1)
 			.then((newUser2) => {
 				expect(newUser2).to.eql({
 					id: 2,
@@ -134,11 +172,22 @@ describe('Dummy Data Model', () => {
 				});
 			});
 		});
-		it('should not update a wrong model', () => {
-			users.update(wrongdUser1, userToUpdate1)
-			.catch((error) => {
-				expect(error).to.eql({ message: `user not found` })
-			})
+
+		it('should update a model with condition other than id specified', () => {
+			users.update({
+				where: {
+					email: createdUser2.email,
+					name: 'alice bob',
+				}
+			}, userToUpdate2)
+			.then((newUser2) => {
+				expect(newUser2).to.eql({
+					id: 2,
+					email: 'alice@somebody.com',
+					name: 'alice bob',
+					address: 'has moved to jupiter',
+				});
+			});
 		});
 	});
 
@@ -190,7 +239,7 @@ describe('Dummy Data Model', () => {
 					id: 2,
 					email: 'alice@somebody.com',
 					name: 'alice bob',
-					address: 'now living in planet earth',
+					address: 'has moved to jupiter',
 				})
 			})
 		});

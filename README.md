@@ -6,7 +6,7 @@ modela is a module for working with In memory dummy-data while developing an app
 ---
 
 [![Build Status](https://www.travis-ci.org/tutugodfrey/modela.svg?branch=develop)](https://www.travis-ci.org/tutugodfrey/modela)
-[![Coverage Status](https://coveralls.io/repos/github/tutugodfrey/modela/badge.svg?branch=develop)](https://coveralls.io/github/tutugodfrey/modela?branch=develop)
+[![Coverage Status](https://coveralls.io/repos/github/tutugodfrey/modela/badge.svg)](https://coveralls.io/github/tutugodfrey/modela)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f9a36d501a936eb890b9/maintainability)](https://codeclimate.com/github/tutugodfrey/modela/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/f9a36d501a936eb890b9/test_coverage)](https://codeclimate.com/github/tutugodfrey/modela/test_coverage)
 
@@ -142,7 +142,10 @@ To create new record with the bulkCreate method, simple pass an array of your re
 !(function() {
   return users
     .update({
-      id: 2,
+			where: {
+      	id: 2,
+				// you can specify other properties as well
+			}
     }, {
     name: 'Janet doe',
     email: 'Janet@email.com',
