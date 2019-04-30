@@ -3,7 +3,11 @@ function create(modelToCreate) {
   // create a new model
   const result = new Promise((resolve, reject) => {
     if (this.requiredFields.length === 0) {
-      this.createModel(modelToCreate, resolve, reject);
+      if (this.using_db) {
+        return this.createModelWithDB(modelToCreate, resolve, reject);
+      } else {
+        this.createModel(modelToCreate, resolve, reject);
+      }
     } else {
       let allFieldsPassed = true;
       const requiredFieldsCollection = [];
@@ -16,7 +20,11 @@ function create(modelToCreate) {
       if (!allFieldsPassed) {
         reject({ message: `missing required field ${requiredFieldsCollection}` });
       } else {
-        this.createModel(modelToCreate, resolve, reject);
+        if (this.using_db) {
+          return this.createModelWithDB(modelToCreate, resolve, reject);
+        } else {
+          this.createModel(modelToCreate, resolve, reject);
+        }
       }
     }
   });
@@ -51,7 +59,7 @@ function createModel(modelToCreate, resolve, reject) {
           if (model[prop] === modelToCreate[prop]) {
             foundDuplicate = true;
             return reject({
-              message: `duplicate entry for unique key "${prop}" with value "${modelToCreate[prop]}"`,
+              message: `${this.singleModel} with ${prop} = ${modelToCreate[prop]} already exists`,
             });
           }
         });
@@ -67,7 +75,26 @@ function createModel(modelToCreate, resolve, reject) {
   }
 }
 
+function createModelWithDB(modelToCreate, resolve, reject) {
+  modelToCreate.createdAt = 'now()';
+  modelToCreate.updatedAt = 'now()';
+  const queryString = this.createQuery(this.modelName, modelToCreate);
+  this.db_connection.query(queryString)
+    .then(res => {
+      return resolve(res.rows[0]);
+    })
+    .catch(err => {
+      if (err.detail.includes('already exists')) {
+        const key = err.detail.split('=')[0].split('(')[1].split(')')[0];
+        const value = err.detail.split('=')[1].split(')')[0].split('(')[1];
+        return reject({ message: `${this.singleModel} with ${key} = ${value} already exists` });
+      }
+      return reject(err.detail);
+    });
+};
+
 export {
   create,
   createModel,
+  createModelWithDB,
 };

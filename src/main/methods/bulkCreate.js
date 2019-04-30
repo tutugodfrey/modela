@@ -3,12 +3,20 @@ function bulkCreate(modelsToCreate) {
   let createdModels = [];
   const failingObj = [];
     if (!this.requiredFields.length) {
-      modelsToCreate.forEach((modelToCreate) => {
-        this.createBulkItem(modelToCreate)
-          .then(response => {
-            return createdModels.push(response);
+      if (this.using_db) {
+        return this.createBulkItemWithDB(modelsToCreate, createdModels);
+      } else {
+        const result = new Promise((resolve, reject) => {
+          modelsToCreate.forEach((modelToCreate) => {
+            this.createBulkItem(modelToCreate)
+              .then(response => {
+                return createdModels.push(response);
+              });
+              resolve(createdModels);
           });
-      });
+        }); 
+        return result;
+      }
     }
 
     if (this.requiredFields.length) {
@@ -21,19 +29,31 @@ function bulkCreate(modelsToCreate) {
       if (requiredFieldsChecked.length) {
         failingObj.push({ message: 'missing required field' });
       } else {
-         modelsToCreate.forEach((modelToCreate) => {
-          this.createBulkItem(modelToCreate)
-            .then(response => {
-              return createdModels.push(response);
-            });
-        });
+        if (this.using_db) {
+          return this.createBulkItemWithDB(modelsToCreate, createdModels);
+        } else {
+          modelsToCreate.forEach((modelToCreate) => {
+            this.createBulkItem(modelToCreate)
+              .then(response => {
+                return createdModels.push(response);
+              });
+          });
+
+          const result =  new Promise((resolve, reject) => {
+            if (failingObj.length) return reject(failingObj);
+            return resolve(createdModels);
+          });
+        
+          return result
+        }
       }
     }
-  const result =  new Promise((resolve, reject) => {
-    if (failingObj.length) return reject(failingObj);
-    return resolve(createdModels);
-  });
-  return result
+    if (failingObj.length) {
+      const result =  new Promise((resolve, reject) => {
+        return reject(failingObj);
+      });
+      return result;
+    }
 }
 
 // send each item to createModel 
@@ -45,6 +65,24 @@ function createBulkItem(modelToCreate) {
 	return result;
 }
 
+function createBulkItemWithDB(modelsToCreate, createdModels) {
+  const queryStrings = modelsToCreate.map(modelToCreate => {
+    modelToCreate.createdAt = 'now()';
+    modelToCreate.updatedAt = 'now()';
+    return this.createQuery(this.modelName, modelToCreate);
+  });
+  const result = queryStrings.map(queryString => {
+    const newModel = new Promise((resolve, reject) => {
+      this.db_connection.query(queryString)
+        .then(res => resolve(res.rows[0]))
+        .catch(error => reject(error.details));
+    });
+    return newModel;
+  });
+  return Promise.all(result)
+  .then(allCreatedModel => createdModels.concat(allCreatedModel));
+}
+
 export default bulkCreate;
 
-export { createBulkItem };
+export { createBulkItem, createBulkItemWithDB };

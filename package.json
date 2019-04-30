@@ -8,8 +8,11 @@
     "build": "babel src -s -d lib",
     "babel:node": "babel-node src/main/createModel",
     "test": "npm run build && npm run test:lib",
+    "test:local": ". ./.env && npm run build && npm run test:lib && USE_DB=0 npm run test:lib",
     "prepublish": "npm test",
     "start": "nodemon --exec npm run babel:node",
+    "test:db": "npm run build && mocha lib/test/dbclass",
+    "test:db2": "mocha lib/test/dbclass",
     "js:lint": "eslint src/",
     "coverage2": "nyc npm run test && nyc report --reporter=lcov",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./lib/test/",
@@ -40,7 +43,8 @@
     "chai": "^4.1.2",
     "coveralls": "^3.0.1",
     "istanbul": "^0.4.5",
-    "mocha": "^4.0.1"
+    "mocha": "^4.0.1",
+    "pg": "^8.4.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",

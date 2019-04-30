@@ -1,12 +1,15 @@
-
 import chai from 'chai';
 import DataModel from '../main/DummyDataModel';
+import { connect } from '../main/connection';
 import { testData } from './helpers';
 
 console.time('timeChecked');
 const { expect } = chai;
 const users = new DataModel('users', ['name', 'email'], ['name']);
 const messages = new DataModel('messages');
+if (process.env.USE_DB) {
+	const connection = connect(process.env.DATABASE_URL, [ users, messages ]);
+}
 const {
 	user1,
 	user2,
@@ -59,7 +62,7 @@ describe('Dummy Data Model', () => {
 			return users.create(user)
 			.then((user) => {
 				Object.assign(createdUser1, user);
-				expect(user.id).to.equal(1);
+				expect(user).to.have.property('id');
 				expect(user.name).to.equal(user1.name);
 				expect(user.email).to.equal(user1.email);
 				expect(user.address).to.equal(user1.address);
@@ -73,7 +76,7 @@ describe('Dummy Data Model', () => {
 			return users.create(user)
 			.then((user) => {
 				Object.assign(createdUser2, user);
-				expect(user.id).to.equal(2);
+				expect(user).to.have.property('id');
 				expect(user.name).to.equal(user2.name);
 				expect(user.email).to.equal(user2.email);
 				expect(user.address).to.equal(user2.address);
@@ -87,7 +90,7 @@ describe('Dummy Data Model', () => {
 			return users.create(user)
 			.then((user) => {
 				Object.assign(createdUser3, user);
-				expect(user.id).to.equal(3);
+				expect(user).to.have.property('id');
 				expect(user.name).to.equal(user3.name);
 				expect(user.email).to.equal(user3.email);
 				expect(user.address).to.equal(user3.address);
@@ -104,7 +107,7 @@ describe('Dummy Data Model', () => {
 			})
 			.catch((error) => {
 				expect(error).to.eql({ 
-					message: `duplicate entry for unique key "name" with value "${user1.name}"`,
+					message: `user with name = ${user1.name} already exists`,
 				});
 			});
 		});
@@ -147,13 +150,13 @@ describe('Dummy Data Model', () => {
 					expect(user.name).to.equal('undefined');
 				})
 				.catch((error) => {
-					expect(error).to.eql({ error: 'user not found' });
+					expect(error).to.eql({ message: 'user not found' });
 				});
 		});
 		it('should return the model with the given id', () => {
 			return users.findById(createdUser1.id)
 				.then((user) => {
-					expect(user.id).to.equal(1);
+					expect(user.id).to.equal(createdUser1.id);
 					expect(user.name).to.equal(user1.name);
 					expect(user.email).to.equal(user1.email);
 					expect(user.address).to.equal(user1.address);
@@ -218,7 +221,7 @@ describe('Dummy Data Model', () => {
 			})
 		});
 
-		it('should find a model using multiple attributes', () => {
+		it('should find a model using multiple attributes value', () => {
 			return users.find({
 				where: {
 					name: [createdUser1.name, createdUser2.name],
@@ -474,7 +477,7 @@ describe('Dummy Data Model', () => {
 		it('should delete a model that meets the specified condition', () => {
 			return users.destroy({
 				where: {
-					id: 1,
+					id: createdUser1.id,
 				}
 			})
 			.then((message) => {
@@ -485,7 +488,7 @@ describe('Dummy Data Model', () => {
 		it('should not delete a model that does not meets the specified condition', () => {
 			return users.destroy({
 				where: {
-					id: 5,
+					id: createdBulkUsers[1].id,
 				}
 			})
 			.catch((message) => {
@@ -526,15 +529,15 @@ describe('Dummy Data Model', () => {
 		it('should create bulk model with required fields', () => {
 			const message = [
 				{
-					message: 'Hello world!'
+					message: 'Hello world!!!'
 				}
 			];
 			return messages.bulkCreate(message)
 				.then(res => {
 					expect(res.length).to.equal(1);
 					expect(res[0]).to.have
-						.property('message').to.equal('Hello world!')
-				});
+						.property('message').to.equal('Hello world!!!')
+				})
 		});
 		it('should create bulk model with required fields', () => {
 			const message = { message: 'Hello world!' };
@@ -544,6 +547,15 @@ describe('Dummy Data Model', () => {
 						.to.equal('Hello world!')
 				});
 		});
+
+		it('should clear the table', () => {
+			return messages.clear()
+				.then(res => {
+					expect(res)
+						.to.have.property('message')
+						.to.equal('Successful cleared messages');
+				});
+		})
 	})
 });
 
