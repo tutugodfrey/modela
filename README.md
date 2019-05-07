@@ -1,6 +1,6 @@
 # Modela
 
-modela is a module for working with In memory dummy-data while developing an application and allows you to use common ORM search methods in like `create`, `bulkCreate`, `find`, `findById`, `findAll`, `update`, `update`, and `destroy` in your controller. The return value is a promise which you can use the ...then() ...catch() block on, or simple use async ...await in your function to get the return value. Example are given below
+Modela is a module for working with In memory dummy-data while developing an application and allows you to use common ORM search methods in like `create`, `bulkCreate`, `find`, `findById`, `findAll`, `update`, and `destroy` in your controller. The return value is a promise which you can use the ...then() ...catch() block on, or simple use async ...await in your function to get the return value. Example are given below
 
 ## status
 ---
@@ -13,14 +13,18 @@ modela is a module for working with In memory dummy-data while developing an app
 ---
 
 
-# Usage
+## Usage
 ---
 
 import the module into your project
- `import DummyData from modela`
+`import DummyData from modela`
+
+if you are using es5
+`const Modela = require('data-modele').default`
+
 initialize your model instance
 	```
-	const users = new DummyData('users');
+	const users = new DummyData('users' [ /* specify required fields */ ], [ /* specify unique fields */ ]);
 	```
 #### Creating a new model
 
@@ -69,7 +73,7 @@ To create new record with the bulkCreate method, simple pass an array of your re
 ```
 !(function() {
   return  users
-  .create([{
+  .bulkCreate([{
     name: 'Johb doe',
     email: 'johndoe@email.com',
     username: 'johndoe',
@@ -174,3 +178,9 @@ To create new record with the bulkCreate method, simple pass an array of your re
 ```
 { message: 'user has been deleted' }
 ```
+
+## Links
+[npm data-modela](https://www.npmjs.com/package/data-modela)
+
+## Author
+- Tutu Godfrey<godfrey_tutu@yahool.com>
