@@ -36,7 +36,9 @@ const DummyDataModel = class {
 	// then create a new model 
 	createModel(modelToCreate, resolve, reject) {
     if (this.model.length === 0) {
-      modelToCreate.id = 1;
+			modelToCreate.id = 1;
+			modelToCreate.createdAt = new Date();
+			modelToCreate.updatedAt = new Date();
       if (this.model.push(modelToCreate)) {
         resolve(modelToCreate);
       }
@@ -47,6 +49,8 @@ const DummyDataModel = class {
       // verify uniqueKeys
       if (this.uniqueKeys.length === 0) {
 				modelToCreate.id = lastModelId + 1;
+				modelToCreate.createdAt = new Date();
+				modelToCreate.updatedAt = new Date();
         if (this.model.push(modelToCreate)) {
           resolve(modelToCreate);
         }
@@ -62,7 +66,9 @@ const DummyDataModel = class {
           });
         });
         if (!foundDuplicate) {
-          modelToCreate.id = lastModelId + 1;
+					modelToCreate.id = lastModelId + 1;
+					modelToCreate.createdAt = new Date();
+					modelToCreate.updatedAt = new Date();
           if (this.model.push(modelToCreate)) {
             resolve(modelToCreate);
           }
@@ -193,6 +199,7 @@ const DummyDataModel = class {
 				props.forEach((property) => {
 					model[property] = propsToUpdate[property]
 				});
+				model.updatedAt = new Date();
 			})
 			// return a single object
 			if (foundModel.length === 1) resolve(foundModel[0]);

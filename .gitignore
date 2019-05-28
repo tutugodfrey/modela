@@ -1,3 +1,5 @@
 node_modules
 lib
 testfile.js
+coverage
+.nyc_output

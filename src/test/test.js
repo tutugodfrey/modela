@@ -78,12 +78,12 @@ describe('Dummy Data Model', () => {
 			users.create(user1)
 			.then((user) => {
 				Object.assign(createdUser1, user);
-				expect(user).to.eql({
-					id: 1,
-					name: 'jane doe',
-					email: 'jane_doe@somebody.com',
-					address: 'somewhere in the world'
-				});
+				expect(user.id).to.equal(1);
+				expect(user.name).to.equal('jane doe');
+				expect(user.email).to.equal('jane_doe@somebody.com');
+				expect(user.address).to.equal('somewhere in the world');
+				expect(user).to.have.property('createdAt');
+				expect(user).to.have.property('updatedAt')
 			});
 		});
 
@@ -91,12 +91,12 @@ describe('Dummy Data Model', () => {
 			users.create(user2)
 			.then((user) => {
 				Object.assign(createdUser2, user);
-				expect(user).to.eql({
-					id: 2,
-					name: 'alice',
-					email: 'alice@somebody.com',
-					address: 'lives in another planet'
-				});
+				expect(user.id).to.equal(2);
+				expect(user.name).to.equal('alice');
+				expect(user.email).to.equal('alice@somebody.com');
+				expect(user.address).to.equal('lives in another planet');
+				expect(user).to.have.property('createdAt');
+				expect(user).to.have.property('updatedAt')
 			});
 		});
 		it('should not create a model with unique key constriant', () => {
@@ -164,12 +164,11 @@ describe('Dummy Data Model', () => {
 				}
 			}, userToUpdate1)
 			.then((newUser2) => {
-				expect(newUser2).to.eql({
-					id: 2,
-					email: 'alice@somebody.com',
-					name: 'alice bob',
-					address: 'now living in planet earth',
-				});
+				expect(newUser2.id).to.equal(2);
+				expect(newUser2.name).to.equal('alice bob');
+				expect(newUser2.email).to.equal('alice@somebody.com');
+				expect(newUser2.address).to.equal('now living in planet earth');
+				expect(newUser2.updatedAt).to.not.equal(createdUser2.updatedAt)
 			});
 		});
 
@@ -181,12 +180,10 @@ describe('Dummy Data Model', () => {
 				}
 			}, userToUpdate2)
 			.then((newUser2) => {
-				expect(newUser2).to.eql({
-					id: 2,
-					email: 'alice@somebody.com',
-					name: 'alice bob',
-					address: 'has moved to jupiter',
-				});
+				expect(newUser2.id).to.equal(2);
+				expect(newUser2.name).to.equal('alice bob');
+				expect(newUser2.email).to.equal('alice@somebody.com');
+				expect(newUser2.address).to.equal('has moved to jupiter');
 			});
 		});
 	});
@@ -195,24 +192,20 @@ describe('Dummy Data Model', () => {
 		it('should return the model with the given id', () => {
 			users.findById(1)
 			.then((user) => {
-				expect(user).to.eql({
-					id: 1,
-					name: 'jane doe',
-					email: 'jane_doe@somebody.com',
-					address: 'somewhere in the world',
-				});
+				expect(user.id).to.equal(1);
+				expect(user.name).to.equal('jane doe');
+				expect(user.email).to.equal('jane_doe@somebody.com');
+				expect(user.address).to.equal('somewhere in the world');
 			});
 		});
 
 		it('should return not found if model with given id is not not found', () => {
 			users.findById(10)
 			.then((user) => {
-				expect(user).to.eql({
-					id: 1,
-					name: 'jane doe',
-					email: 'jane_doe@somebody.com',
-					address: 'somewhere in the world',
-				});
+				expect(user.id).to.equal(1);
+				expect(user.name).to.equal('jane doe');
+				expect(user.email).to.equal('jane_doe@somebody.com');
+				expect(user.address).to.equal('somewhere in the world');
 			})
 			.catch((error) => {
 				expect(error).to.eql({ error: 'user not found' });
@@ -235,12 +228,10 @@ describe('Dummy Data Model', () => {
 				}
 			})
 			.then((user) => {
-				expect(user).to.eql({
-					id: 2,
-					email: 'alice@somebody.com',
-					name: 'alice bob',
-					address: 'has moved to jupiter',
-				})
+				expect(user.id).to.equal(2);
+				expect(user.name).to.equal('alice bob');
+				expect(user.email).to.equal('alice@somebody.com');
+				expect(user.address).to.equal('has moved to jupiter');
 			})
 		});
 
