@@ -84,7 +84,7 @@ describe('Dummy Data Model', () => {
 				expect(user.address).to.equal('somewhere in the world');
 				expect(user).to.have.property('createdAt');
 				expect(user).to.have.property('updatedAt')
-			});
+			})
 		});
 
 		it('should create a another user', () => {
