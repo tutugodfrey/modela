@@ -12,10 +12,10 @@ before_script:
   - ./cc-test-reporter before-build
 
 # run test
-script: "npm run test"
+script: "npm run coverage2"
 
 # send coverage report to ci
 after_success:
-  - "npm run send:coverage"
+  - "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
   
