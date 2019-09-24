@@ -75,7 +75,7 @@ describe('Dummy Data Model', () => {
 			expect(users.model).to.be.an('array');
 		})
 		it('should create a new user', () => {
-			users.create(user1)
+			return users.create(user1)
 			.then((user) => {
 				Object.assign(createdUser1, user);
 				expect(user.id).to.equal(1);
@@ -88,7 +88,7 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should create a another user', () => {
-			users.create(user2)
+			return users.create(user2)
 			.then((user) => {
 				Object.assign(createdUser2, user);
 				expect(user.id).to.equal(2);
@@ -100,34 +100,34 @@ describe('Dummy Data Model', () => {
 			});
 		});
 		it('should not create a model with unique key constriant', () => {
-			users.create(user1)
+			return users.create(user1)
 			.catch((error) => {
-				expect(error).to.eql({ message: 'duplicate entry for unique key name' });
+				expect(error).to.eql({ message: `duplicate entry for unique key "name" with value "${user1.name}"` });
 			});
 		});
 
 		it('should not create a model if a required field is not present', () => {
-			users.create(userWithoutEmail)
+			return users.create(userWithoutEmail)
 			.catch((error) => {
 				expect(error).to.eql({ message: `missing required field email` });
 			});
 		});
 
 		it('should create multiple users using bulk create', () => {
-			users.bulkCreate(bulkUsers)
-			.then(result => {
-				expect(result.length).to.equal(3)
-			})
-		})
+			return users.bulkCreate(bulkUsers).then(res => res)
+				.then(result => {
+					expect(result.length).to.equal(3)
+				})
+		});
 
 		it('lenght of model should increase', () => {
 			expect(users.model.length).to.equal(5);
-		})
+		});
 	});
 
 	describe('update method', () => {
 		it('should return error no params if no params are pass in', () => {
-			users.update()
+			return users.update()
 			.catch(err => {
 				expect(err).to.have.property('message')
 				expect(err.message).to.equal(
@@ -136,7 +136,7 @@ describe('Dummy Data Model', () => {
 			})
 		})
 		it('should return error no params if no params are pass in', () => {
-			users.update(
+			return users.update(
 				{ where: {}},
 			)
 			.catch(err => {
@@ -147,7 +147,7 @@ describe('Dummy Data Model', () => {
 			})
 		})
 		it('should not update a wrong model', () => {
-			users.update({
+			return users.update({
 				where: {
 					id: wrongdUser1.id,
 				}
@@ -158,7 +158,7 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should update a model', () => {
-			users.update({
+			return users.update({
 				where: {
 					id: createdUser2.id
 				}
@@ -173,7 +173,7 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should update a model with condition other than id specified', () => {
-			users.update({
+			return users.update({
 				where: {
 					email: createdUser2.email,
 					name: 'alice bob',
@@ -190,7 +190,7 @@ describe('Dummy Data Model', () => {
 
 	describe('findById', () => {
 		it('should return the model with the given id', () => {
-			users.findById(1)
+			return users.findById(1)
 			.then((user) => {
 				expect(user.id).to.equal(1);
 				expect(user.name).to.equal('jane doe');
@@ -200,7 +200,7 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should return not found if model with given id is not not found', () => {
-			users.findById(10)
+			return users.findById(10)
 			.then((user) => {
 				expect(user.id).to.equal(1);
 				expect(user.name).to.equal('jane doe');
@@ -215,14 +215,14 @@ describe('Dummy Data Model', () => {
 
 	describe('find', () => {
 		it('should return an error message if no where condition is specified', () => {
-			users.find()
+			return users.find()
 			.catch((error) => {
 				expect(error).to.eql({ message: `missing object propertiy 'where' to find model`})
 			})
 		});
 
 		it('should find a model that meet the given conditions', () => {
-			users.find({
+			return users.find({
 				where: {
 					name: 'alice bob',
 				}
@@ -236,7 +236,7 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should only return a model that meet all conditions', () => {
-			users.find({
+			return users.find({
 				where: {
 					name: 'alice bob',
 					id: 4,
@@ -258,7 +258,7 @@ describe('Dummy Data Model', () => {
 
 	describe('findAll', () => {
 		it('should return all models if no condition is specified', () => {
-			users.findAll()
+			return users.findAll()
 			.then((allUsers) => {
 				expect(allUsers).to.be.an('array');
 				expect(allUsers.length).to.equal(5);
@@ -266,7 +266,7 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should return all models that meets the specified conditions', () => {
-			users.findAll({
+			return users.findAll({
 				where: {
 					address: 'somewhere in the world',
 				}
@@ -278,7 +278,7 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should return an empty if no matching condition is found', () => {
-			users.findAll({
+			return users.findAll({
 				where: {
 					address: 'somewhere in the world a',
 				}
@@ -292,7 +292,7 @@ describe('Dummy Data Model', () => {
 
 	describe('destroy', () => {
 		it('should delete a model that meets the specified condition', () => {
-			users.destroy({
+			return users.destroy({
 				where: {
 					id: 1,
 				}
@@ -303,7 +303,7 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should  not delete a model that does not meets the specified condition', () => {
-			users.destroy({
+			return users.destroy({
 				where: {
 					id: 5,
 				}
@@ -312,5 +312,27 @@ describe('Dummy Data Model', () => {
 				expect(message).to.eql({ message: 'user not found, not action taken' });
 			});
 		});
+	});
+
+	describe('Clear', () => {
+		it('should get available users', () => {
+			return users.findAll().then(result => {
+				expect(result.length).to.equal(3);
+			})
+		});
+
+		it('should clear the model users', () => {
+			return users.clear().then(res => {
+				expect(res)
+					.to.have.property('message')
+					.to.equal('Successful cleared users')
+			});
+		});
+
+		it('should return 0 users', () => {
+			return users.findAll().then(result => {
+				expect(result.length).to.equal(0);
+			})
+		})
 	});
 });

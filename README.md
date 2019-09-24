@@ -1,6 +1,6 @@
 # Modela
 
-Modela is a module for working with In memory dummy-data while developing an application and allows you to use common ORM search methods in like `create`, `bulkCreate`, `find`, `findById`, `findAll`, `update`, and `destroy` in your controller. The return value is a promise which you can use the ...then() ...catch() block on, or simple use async ...await in your function to get the return value. Example are given below
+Modela is a module for working with In memory dummy-data while developing an application and allows you to use common ORM search methods in like `create`, `bulkCreate`, `find`, `findById`, `findAll`, `update`, and `destroy`, `clear` in your controller. The return value is a promise which you can use the ...then() ...catch() block on, or simple use async ...await in your function to get the return value. Example are given below
 
 ## status
 ---
@@ -177,6 +177,20 @@ To create new record with the bulkCreate method, simple pass an array of your re
 #### Returns
 ```
 { message: 'user has been deleted' }
+```
+
+#### Clearing a model
+
+```
+!(function() {
+  return users
+  .clear({ where: { id: 1 }})
+  .then(res => console.log(res))
+}())
+```
+#### Returns
+```
+{ message: 'Successfully cleared users' }
 ```
 
 ## Links

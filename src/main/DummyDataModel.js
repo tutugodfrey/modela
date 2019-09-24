@@ -4,6 +4,8 @@ import find from './methods/find';
 import findById from './methods/findById'
 import findAll from './methods/findAll';
 import destroy from './methods/destroy';
+import clear from './methods/clear';
+
 import bulkCreate, {createBulkItem } from './methods/bulkCreate';
 
 const DummyDataModel = class {
@@ -27,6 +29,7 @@ const DummyDataModel = class {
 		this.find = find.bind(this);
 		this.findAll = findAll.bind(this);
 		this.destroy = destroy.bind(this);
+		this.clear = clear.bind(this);
 	}
 
 	getObjectByField(arrayOfObjects, objectField, fieldValue) {
