@@ -45,14 +45,14 @@ function bulkCreate(modelsToCreate) {
   return result
 }
 
-	// send each item to createModel 
-	// and resolve result as a promise
+// send each item to createModel 
+// and resolve result as a promise
 function createBulkItem(modelToCreate) {
-		const result =  new Promise((resolve, reject) => {
-			this.createModel(modelToCreate, resolve, reject);
-		});
-		return result;
-  }
+  const result =  new Promise((resolve, reject) => {
+    this.createModel(modelToCreate, resolve, reject);
+  });
+	return result;
+}
 
 export default bulkCreate;
 
