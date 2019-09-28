@@ -27,34 +27,32 @@ function create(modelToCreate) {
 // check for unique keys
 // then create a new model 
 function createModel(modelToCreate, resolve, reject) {
-  if (this.model.length === 0) {
+  if (!this.model.length) {
     modelToCreate.id = 1;
     modelToCreate.createdAt = new Date();
     modelToCreate.updatedAt = new Date();
-    if (this.model.push(modelToCreate)) {
-      return resolve(modelToCreate);
-    }
-    return reject({ message: `Can not create ${this.singleModel}` });
+    this.model.push(modelToCreate);
+    return resolve(modelToCreate);
   } else {
     const lastModel = this.model[this.model.length - 1];
-    const lastModelId = this.getFields(lastModel, 'id');
+    const lastModelId = lastModel.id;
 
     // verify uniqueKeys
-    if (this.uniqueKeys.length === 0) {
+    if (!this.uniqueKeys.length) {
       modelToCreate.id = lastModelId + 1;
       modelToCreate.createdAt = new Date();
       modelToCreate.updatedAt = new Date();
-      if (this.model.push(modelToCreate)) {
-        return resolve(modelToCreate);
-      }
-      return reject({ message: `Can not create ${this.singleModel}` });
+      this.model.push(modelToCreate);
+      return resolve(modelToCreate);
     } else {
       let foundDuplicate = false;
       this.model.forEach((model) => {
         this.uniqueKeys.forEach((prop) => {
           if (model[prop] === modelToCreate[prop]) {
             foundDuplicate = true;
-            return reject({ message: `duplicate entry for unique key "${prop}" with value "${modelToCreate[prop]}"` });
+            return reject({
+              message: `duplicate entry for unique key "${prop}" with value "${modelToCreate[prop]}"`,
+            });
           }
         });
       });
@@ -62,10 +60,8 @@ function createModel(modelToCreate, resolve, reject) {
         modelToCreate.id = lastModelId + 1;
         modelToCreate.createdAt = new Date();
         modelToCreate.updatedAt = new Date();
-        if (this.model.push(modelToCreate)) {
-          return resolve(modelToCreate);
-        }
-        return reject({ message: `Can not create ${this.singleModel}` });
+        this.model.push(modelToCreate);
+        return resolve(modelToCreate);
       }
     }
   }

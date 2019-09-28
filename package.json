@@ -15,6 +15,9 @@
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./lib/test/",
     "send:coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec ./lib/test/ && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
+  "nyc": {
+    "exclude": "**/test"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tutugodfrey/modela.git"

@@ -18,8 +18,6 @@ const DummyDataModel = class {
     this.requiredFields = requiredFields;
 		this.singleModel = modelName.substring(0, modelName.length - 1);
 		this.model = [];
-		this.getObjectByField = this.getObjectByField.bind(this);
-		this.getFields = this.getFields.bind(this);
 		this.create = create.bind(this);
 		this.createModel = createModel.bind(this);
 		this.bulkCreate = bulkCreate.bind(this);
@@ -30,23 +28,6 @@ const DummyDataModel = class {
 		this.findAll = findAll.bind(this);
 		this.destroy = destroy.bind(this);
 		this.clear = clear.bind(this);
-	}
-
-	getObjectByField(arrayOfObjects, objectField, fieldValue) {
-    for(let objCollection of arrayOfObjects) {
-      // const objCollection = arrayOfObjects[arraySize];
-      if (objCollection[objectField] === fieldValue) {
-        return objCollection;
-      }
-    }
-    return `No object with field ${objectField} found`;
-  }
-
-  getFields(objCollector, field) {
-    if (objCollector[field]) {
-      return objCollector[field];
-    }
-    return undefined;
 	}
 }
 export default DummyDataModel;

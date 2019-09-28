@@ -1,4 +1,6 @@
+import helpers from './helpers';
 
+const { propMatchFail} = helpers;
 function destroy(condition) {
 		/* 
 			delete the object that meet the condition 
@@ -8,22 +10,11 @@ function destroy(condition) {
 			be deleted
 		*/
 		const result = new Promise((resolve, reject)  => {
-			const props = Object.keys(condition.where);
-			let propMatch;
-			this.model.forEach((model) => {
-				propMatch = true;
-				props.forEach((property) => {
-					if(condition.where[property] !== model[property]) {
-						propMatch = false;
-					}
-				});
-				if(propMatch) {
-					const indexOfMatchedModel = this.model.indexOf(model);
-					if(this.model.splice(indexOfMatchedModel, 1)) {
-						resolve({ message: `${this.singleModel} has been deleted` });
-					} else {
-						reject({ message: `${this.singleModel} could not be deleted` });
-					}
+			this.model.forEach((model, index) => {
+				const mismatch = propMatchFail(condition.where, model)
+				if(!mismatch) {
+					this.model.splice(index, 1)
+					resolve({ message: `${this.singleModel} has been deleted` });
 				}
 			});
 			reject({ message: `${this.singleModel} not found, not action taken` });

@@ -1,47 +1,38 @@
 function bulkCreate(modelsToCreate) {
   // create a new model
-  const createdModels = [];
-    if (this.requiredFields.length === 0) {
+  let createdModels = [];
+  const failingObj = [];
+    if (!this.requiredFields.length) {
       modelsToCreate.forEach((modelToCreate) => {
-        const res =	this.createBulkItem(modelToCreate);
-        res.then(response => {
-          createdModels.push(response)
-          if (createdModels.length === modelsToCreate.length) {
-            return createdModels;
-          }
-        });
-      });
-    } else {
-      let allFieldsPassed = true;
-      let allModelsPassed = true;
-      modelsToCreate.forEach((modelToCreate) => {
-        this.requiredFields.forEach((required) => {
-          if (!modelToCreate[required]) {
-            allFieldsPassed = false;
-            allModelsPassed = false;
-          }
-        });
-      });
-
-      if (!allFieldsPassed && !allModelsPassed) {
-        reject({ message: 'missing required field' });
-      } else {
-        modelsToCreate.forEach((modelToCreate) => {
-          const res =	this.createBulkItem(modelToCreate);
-          res.then(response => {
-            createdModels.push(response)
-            if (createdModels.length === modelsToCreate.length) {
-              return createdModels;
-            }
+        this.createBulkItem(modelToCreate)
+          .then(response => {
+            return createdModels.push(response);
           });
+      });
+    }
+
+    if (this.requiredFields.length) {
+      const requiredFieldsChecked = modelsToCreate.filter((modelToCreate) => {
+        return this.requiredFields.filter((required) => {
+          return !modelToCreate[required];
+        }).length;
+      });
+  
+      if (requiredFieldsChecked.length) {
+        failingObj.push({ message: 'missing required field' });
+      } else {
+         modelsToCreate.forEach((modelToCreate) => {
+          this.createBulkItem(modelToCreate)
+            .then(response => {
+              return createdModels.push(response);
+            });
         });
       }
     }
-    
   const result =  new Promise((resolve, reject) => {
-    resolve(createdModels);
+    if (failingObj.length) return reject(failingObj);
+    return resolve(createdModels);
   });
-
   return result
 }
 
