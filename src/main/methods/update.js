@@ -1,3 +1,6 @@
+import helpers from './helpers';
+
+const { propMatchFail } = helpers;
 function update(conditions, propsToUpdate) {
   /* 
     propsToUpdate contain the new properties to replace the old ones
@@ -17,34 +20,30 @@ function update(conditions, propsToUpdate) {
     }
 
     const props = Object.keys(propsToUpdate);
-    let foundModel = this.model.filter((model) => {
+    let modelsFound = this.model.filter((model) => {
+
       // use id as the primary condition to check
       if (conditions.where.id) {
         return model.id === conditions.where.id
-      } else {
-        let check = true;
-        for(let key in conditions.where) {
-          if (conditions.where[key] !== model[key]) {
-            check = false;
-          }
-        }
-        if (check) return true;
       }
+      const checkFail = propMatchFail(conditions.where, model);
+      if (!checkFail) return true;
     });
-    if (!foundModel.length) {
+    if (!modelsFound.length) {
       reject({ message: `${this.singleModel} not found` })
     }
-    foundModel.forEach(model => {
+    const updatedModels = modelsFound.map((model) => {
       props.forEach((property) => {
         model[property] = propsToUpdate[property]
       });
       model.updatedAt = new Date();
+      return model;
     })
     // return a single object
-    if (foundModel.length === 1) resolve(foundModel[0]);
+    if (updatedModels.length === 1) resolve(updatedModels[0]);
 
     // return an array of the modified models
-    resolve(foundModel);
+    resolve(updatedModels);
   });
   return result;
 }

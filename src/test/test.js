@@ -1,9 +1,11 @@
 
 import chai from 'chai';
 import DataModel from '../main/DummyDataModel';
-
+console.time('timeChecked');
 const { expect } = chai;
 const users = new DataModel('users', ['name', 'email'], ['name']);
+const messages = new DataModel('messages');
+
 const user1 = {
 	name: 'jane doe',
 	email: 'jane_doe@somebody.com',
@@ -113,8 +115,22 @@ describe('Dummy Data Model', () => {
 			});
 		});
 
+		it('should not create multiple users if any user without a required field', () => {
+			const bulkUsersObj = bulkUsers.map(user => {
+				return {...user };
+			});
+			delete bulkUsersObj[0].name;
+			return users.bulkCreate(bulkUsersObj)
+				.catch(error => {
+					expect(error).to.be.an('array')
+					expect(error[0]).to.have.property('message')
+						.to.equal('missing required field');
+				})
+		});
+
 		it('should create multiple users using bulk create', () => {
-			return users.bulkCreate(bulkUsers).then(res => res)
+			return users.bulkCreate(bulkUsers)
+				.then(res => res)
 				.then(result => {
 					expect(result.length).to.equal(3)
 				})
@@ -335,4 +351,36 @@ describe('Dummy Data Model', () => {
 			})
 		})
 	});
+
+	describe('Message', () => {
+		it('should validate the type of required and unique field', () => {
+			const messages2 = new DataModel('message2', {}, {});
+			expect(messages2).to.deep.equal({
+				typeError: 'argument2 and argument3 must be of type array',
+			});
+		});
+		it('should create bulk model with required fields', () => {
+			const message = [
+				{
+					message: 'Hello world!'
+				}
+			];
+			return messages.bulkCreate(message)
+				.then(res => {
+					expect(res.length).to.equal(1);
+					expect(res[0]).to.have
+						.property('message').to.equal('Hello world!')
+				});
+		});
+		it('should create bulk model with required fields', () => {
+			const message = { message: 'Hello world!' };
+			return messages.create(message)
+				.then(res => {
+					expect(res).to.have.property('message')
+						.to.equal('Hello world!')
+				});
+		});
+	})
 });
+
+console.timeEnd('timeChecked')
