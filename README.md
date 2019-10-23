@@ -197,4 +197,4 @@ To create new record with the bulkCreate method, simple pass an array of your re
 [npm data-modela](https://www.npmjs.com/package/data-modela)
 
 ## Author
-- Tutu Godfrey<godfrey_tutu@yahool.com>
+- Tutu Godfrey <godfrey_tutu@yahool.com>
