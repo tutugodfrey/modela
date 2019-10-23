@@ -193,8 +193,22 @@ To create new record with the bulkCreate method, simple pass an array of your re
 { message: 'Successfully cleared users' }
 ```
 
+#### Specifying conditional search with __where__ and __type__
+The __where__ conditional search can be used with `find`, `findAll`, `update` and `delete` as shown below.
+
+model.findAll({
+  where: {
+    propsToSearch1: 'value'
+    propsToSearch2: 'value2'
+  },
+  type: "or" || "and"
+})
+
+- `and` is the default if type is not specified. This return result where all the props match.
+- `or` return result where any of the props match.
+
 ## Links
 [npm data-modela](https://www.npmjs.com/package/data-modela)
 
 ## Author
-- Tutu Godfrey<godfrey_tutu@yahool.com>
+- Tutu Godfrey <godfrey_tutu@yahool.com>

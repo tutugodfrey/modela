@@ -26,7 +26,7 @@ function update(conditions, propsToUpdate) {
       if (conditions.where.id) {
         return model.id === conditions.where.id
       }
-      const checkFail = propMatchFail(conditions.where, model);
+      const checkFail = propMatchFail(conditions.where, model, conditions.type);
       if (!checkFail) return true;
     });
     if (!modelsFound.length) {

@@ -293,15 +293,44 @@ describe('Dummy Data Model', () => {
 			});
 		});
 
-		it('should return an empty if no matching condition is found', () => {
+		it('should return an empty if all conditions does not match', () => {
 			return users.findAll({
 				where: {
 					address: 'somewhere in the world a',
-				}
+					email: 'jane_doe@somebody.com',
+				},
 			})
 			.then((allUsers) => {
 				expect(allUsers).to.be.an('array');
 				expect(allUsers.length).to.equal(0);
+			});
+		});
+
+		it('should return empty array non of the fields match', () => {
+			return users.findAll({
+				where: {
+					address: 'somewhere in the world a',
+					email: 'janne_doe@somebody.com',
+				},
+				type: 'or',
+			})
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.equal(0);
+			});
+		});
+
+		it('should return models matching any of the field', () => {
+			return users.findAll({
+				where: {
+					address: 'somewhere in the world a',
+					email: 'jane_doe@somebody.com',
+				},
+				type: 'or',
+			})
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.equal(1);
 			});
 		});
 	});

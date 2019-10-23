@@ -1,6 +1,6 @@
 {
   "name": "data-modela",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "description": "an application that uses sequelize methods to work with dummy-data when building appliication",
   "main": "./lib/main/index.js",
   "scripts": {

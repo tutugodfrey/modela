@@ -14,8 +14,9 @@ function findAll(condition = 'all') {
 
     // array of objects that meet the condition
     const models = this.model.filter((model) => {
-      const mismatch = propMatchFail(condition.where, model);
+      const mismatch = propMatchFail(condition.where, model, condition.type);
       if (!mismatch) {
+        // a match was found
         return model;
       };
     });

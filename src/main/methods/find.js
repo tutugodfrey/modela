@@ -11,7 +11,7 @@ function find(condition) {
       reject({ message: `missing object propertiy 'where' to find model` });
     };
     this.model.find((model) => {
-      const mismatch = propMatchFail(condition.where, model);
+      const mismatch = propMatchFail(condition.where, model, condition.type);
       if (!mismatch) {
         resolve(model);
       };

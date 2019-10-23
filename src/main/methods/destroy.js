@@ -11,7 +11,7 @@ function destroy(condition) {
 		*/
 		const result = new Promise((resolve, reject)  => {
 			this.model.forEach((model, index) => {
-				const mismatch = propMatchFail(condition.where, model)
+				const mismatch = propMatchFail(condition.where, model, condition.type)
 				if(!mismatch) {
 					this.model.splice(index, 1)
 					resolve({ message: `${this.singleModel} has been deleted` });
