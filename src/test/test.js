@@ -345,6 +345,45 @@ describe('Dummy Data Model', () => {
 				expect(newUser2.address).to.equal(user2DataToUpdate.address);
 			});
 		});
+
+		it('should not update model that does not have matching group condition', () => {
+			return users.update({
+				where: {
+					id: createdUser2.id,
+					email: user1.email,
+					name: user1.name,
+				},
+				type: 'or',
+				groups: [['id', 'name'], ['id', 'email']]
+			}, user2DataToUpdate)
+			.then((newUser2) => {
+				expect(newUser2.name).to.equal('undefined');
+			})
+			.catch(error => {
+				expect(error)
+					.to.have.property('message')
+					.to.equal('user not found');
+			});
+		});
+
+		it('should update model that matches a group condition', () => {
+			return users.update({
+				where: {
+					id: createdUser2.id,
+					email: user1.email,
+					name: user2.name,
+				},
+				type: 'or',
+				groups: [['id', 'name'], ['id', 'email']]
+			}, user2DataToUpdate)
+			.then((newUser2) => {
+				expect(newUser2.id).to.equal(createdUser2.id);
+				expect(newUser2.name).to.equal(createdUser2.name);
+				expect(newUser2.email).to.equal(createdUser2.email);
+				expect(newUser2.address).to.not.equal(user2.address);
+				expect(newUser2.address).to.equal(user2DataToUpdate.address);
+			});
+		});
 	});
 
 	describe('destroy', () => {

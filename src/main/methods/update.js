@@ -20,7 +20,6 @@ function update(conditions, propsToUpdate) {
 
     const props = Object.keys(propsToUpdate);
     let modelsFound = this.model.filter((model) => {
-
       // if only id is specified
       if (Object.keys(conditions.where).length === 1 && conditions.where.id) {
         return model.id === conditions.where.id
@@ -28,9 +27,11 @@ function update(conditions, propsToUpdate) {
       const checkFail = propMatchFail(conditions.where, model, conditions.type, conditions.groups);
       if (!checkFail) return true;
     });
+
     if (!modelsFound.length) {
       reject({ message: `${this.singleModel} not found` })
     }
+
     const updatedModels = modelsFound.map((model) => {
       props.forEach((property) => {
         model[property] = propsToUpdate[property]
