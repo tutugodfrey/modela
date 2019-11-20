@@ -8,7 +8,6 @@ function update(conditions, propsToUpdate) {
     which means that before call update you must use the finder methods to 
     get the particular object.
   */
-  
   const result = new Promise((resolve, reject) => {
     if (!conditions || !conditions.where) {
       reject({ message:
@@ -22,11 +21,11 @@ function update(conditions, propsToUpdate) {
     const props = Object.keys(propsToUpdate);
     let modelsFound = this.model.filter((model) => {
 
-      // use id as the primary condition to check
-      if (conditions.where.id) {
+      // if only id is specified
+      if (Object.keys(conditions.where).length === 1 && conditions.where.id) {
         return model.id === conditions.where.id
       }
-      const checkFail = propMatchFail(conditions.where, model, conditions.type);
+      const checkFail = propMatchFail(conditions.where, model, conditions.type, conditions.groups);
       if (!checkFail) return true;
     });
     if (!modelsFound.length) {
