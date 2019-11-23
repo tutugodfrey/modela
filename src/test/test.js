@@ -1,61 +1,23 @@
 
 import chai from 'chai';
 import DataModel from '../main/DummyDataModel';
+import { testData } from './helpers';
+
 console.time('timeChecked');
 const { expect } = chai;
 const users = new DataModel('users', ['name', 'email'], ['name']);
 const messages = new DataModel('messages');
-
-const user1 = {
-	name: 'jane doe',
-	email: 'jane_doe@somebody.com',
-	address: 'somewhere in the world',
-}
-const user2 = {
-	name: 'alice',
-	email: 'alice@somebody.com',
-	address: 'lives in another planet',
-}
-
-const userWithoutEmail ={
-	name: 'alice',
-	noEmail: 'alice@somebody.com',
-	address: 'lives in another planet',
-}
-
-const bulkUsers = [
-	{
-		name: 'brain',
-		email: 'brain@email.com',
-		address: 'lives in pluto',
-	},
-	{
-		name: 'walter',
-		email: 'walter@email.com',
-		address: 'lives in mars',
-	},
-	{
-		name: 'ryan',
-		email: 'ryan@email.com',
-		address: 'lives in neptune',
-	},
-]
-const createdUser2 = {};
+const {
+	user1,
+	user2,
+	bulkUsers,
+	user1DataToUpdate,
+	user2DataToUpdate,
+	wrongdUserDetails,
+} = testData;
 const createdUser1 = {};
-const wrongdUser1 = {
-	id: 10,
-	name: 'alice',
-	email: 'alice@somebody.com',
-	address: 'lives in another planet',
-}
-const userToUpdate1 = {
-	name: 'alice bob',
-	address: 'now living in planet earth',
-}
+const createdUser2 = {};
 
-const userToUpdate2 = {
-	address: 'has moved to jupiter',
-}
 describe('Dummy Data Model', () => {
 	describe('DataModel', () => {
 		it('should export a function', () => {
@@ -76,51 +38,70 @@ describe('Dummy Data Model', () => {
 		it('user model should be an array', () => {
 			expect(users.model).to.be.an('array');
 		})
+
+		it('should not create without required field', () => {
+			const user = { ...user1 };
+			delete user.email;
+			return users.create(user)
+			.then(user => {
+				expect(user.name).to.equal('undefined')
+			})
+			.catch((error) => {
+				expect(error).to.eql({ message: `missing required field email` });
+			});
+		});
+
 		it('should create a new user', () => {
-			return users.create(user1)
+			const user = { ...user1 };
+			return users.create(user)
 			.then((user) => {
 				Object.assign(createdUser1, user);
 				expect(user.id).to.equal(1);
-				expect(user.name).to.equal('jane doe');
-				expect(user.email).to.equal('jane_doe@somebody.com');
-				expect(user.address).to.equal('somewhere in the world');
+				expect(user.name).to.equal(user1.name);
+				expect(user.email).to.equal(user1.email);
+				expect(user.address).to.equal(user1.address);
 				expect(user).to.have.property('createdAt');
 				expect(user).to.have.property('updatedAt')
 			})
 		});
 
 		it('should create a another user', () => {
-			return users.create(user2)
+			const user = { ...user2 };
+			return users.create(user)
 			.then((user) => {
 				Object.assign(createdUser2, user);
 				expect(user.id).to.equal(2);
-				expect(user.name).to.equal('alice');
-				expect(user.email).to.equal('alice@somebody.com');
-				expect(user.address).to.equal('lives in another planet');
+				expect(user.name).to.equal(user2.name);
+				expect(user.email).to.equal(user2.email);
+				expect(user.address).to.equal(user2.address);
 				expect(user).to.have.property('createdAt');
 				expect(user).to.have.property('updatedAt')
 			});
 		});
 		it('should not create a model with unique key constriant', () => {
-			return users.create(user1)
+			const user = { ...user1 };
+			return users.create(user)
+			.then(user => {
+				expect(user.name).to.equal('undefined')
+			})
 			.catch((error) => {
-				expect(error).to.eql({ message: `duplicate entry for unique key "name" with value "${user1.name}"` });
+				expect(error).to.eql({ 
+					message: `duplicate entry for unique key "name" with value "${user1.name}"`,
+				});
 			});
 		});
+	});
 
-		it('should not create a model if a required field is not present', () => {
-			return users.create(userWithoutEmail)
-			.catch((error) => {
-				expect(error).to.eql({ message: `missing required field email` });
-			});
-		});
-
+	describe('Bulk Create method', () => {
 		it('should not create multiple users if any user without a required field', () => {
 			const bulkUsersObj = bulkUsers.map(user => {
-				return {...user };
+				return { ...user };
 			});
 			delete bulkUsersObj[0].name;
 			return users.bulkCreate(bulkUsersObj)
+				.then(user => {
+					expect(user[0].name).to.equal('undefined');
+				})
 				.catch(error => {
 					expect(error).to.be.an('array')
 					expect(error[0]).to.have.property('message')
@@ -129,150 +110,124 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should create multiple users using bulk create', () => {
-			return users.bulkCreate(bulkUsers)
+			const bulkUsersObj = bulkUsers.map(user => {
+				return { ...user };
+			});
+			return users.bulkCreate(bulkUsersObj)
 				.then(res => res)
 				.then(result => {
-					expect(result.length).to.equal(3)
-				})
-		});
-
-		it('lenght of model should increase', () => {
-			expect(users.model.length).to.equal(5);
-		});
-	});
-
-	describe('update method', () => {
-		it('should return error no params if no params are pass in', () => {
-			return users.update()
-			.catch(err => {
-				expect(err).to.have.property('message')
-				expect(err.message).to.equal(
-					'require argument at position 1 to specify update condition'
-				)
-			})
-		})
-		it('should return error no params if no params are pass in', () => {
-			return users.update(
-				{ where: {}},
-			)
-			.catch(err => {
-				expect(err).to.have.property('message')
-				expect(err.message).to.equal(
-					'require argument 2 of type object. only one argument supplied!'
-				)
-			})
-		})
-		it('should not update a wrong model', () => {
-			return users.update({
-				where: {
-					id: wrongdUser1.id,
-				}
-			}, userToUpdate1)
-			.catch((error) => {
-				expect(error).to.eql({ message: `user not found` })
-			})
-		});
-
-		it('should update a model', () => {
-			return users.update({
-				where: {
-					id: createdUser2.id
-				}
-			}, userToUpdate1)
-			.then((newUser2) => {
-				expect(newUser2.id).to.equal(2);
-				expect(newUser2.name).to.equal('alice bob');
-				expect(newUser2.email).to.equal('alice@somebody.com');
-				expect(newUser2.address).to.equal('now living in planet earth');
-				expect(newUser2.updatedAt).to.not.equal(createdUser2.updatedAt)
-			});
-		});
-
-		it('should update a model with condition other than id specified', () => {
-			return users.update({
-				where: {
-					email: createdUser2.email,
-					name: 'alice bob',
-				}
-			}, userToUpdate2)
-			.then((newUser2) => {
-				expect(newUser2.id).to.equal(2);
-				expect(newUser2.name).to.equal('alice bob');
-				expect(newUser2.email).to.equal('alice@somebody.com');
-				expect(newUser2.address).to.equal('has moved to jupiter');
-			});
+					expect(result.length).to.equal(3);
+				});
 		});
 	});
 
 	describe('findById', () => {
-		it('should return the model with the given id', () => {
-			return users.findById(1)
-			.then((user) => {
-				expect(user.id).to.equal(1);
-				expect(user.name).to.equal('jane doe');
-				expect(user.email).to.equal('jane_doe@somebody.com');
-				expect(user.address).to.equal('somewhere in the world');
-			});
+		it('should return not found if model does not exist', () => {
+			return users.findById(wrongdUserDetails.id)
+				.then(user => {
+					expect(user.name).to.equal('undefined');
+				})
+				.catch((error) => {
+					expect(error).to.eql({ error: 'user not found' });
+				});
 		});
-
-		it('should return not found if model with given id is not not found', () => {
-			return users.findById(10)
-			.then((user) => {
-				expect(user.id).to.equal(1);
-				expect(user.name).to.equal('jane doe');
-				expect(user.email).to.equal('jane_doe@somebody.com');
-				expect(user.address).to.equal('somewhere in the world');
-			})
-			.catch((error) => {
-				expect(error).to.eql({ error: 'user not found' });
-			});
+		it('should return the model with the given id', () => {
+			return users.findById(createdUser1.id)
+				.then((user) => {
+					expect(user.id).to.equal(1);
+					expect(user.name).to.equal(user1.name);
+					expect(user.email).to.equal(user1.email);
+					expect(user.address).to.equal(user1.address);
+				});
 		});
 	});
 
 	describe('find', () => {
 		it('should return an error message if no where condition is specified', () => {
 			return users.find()
-			.catch((error) => {
-				expect(error).to.eql({ message: `missing object propertiy 'where' to find model`})
-			})
-		});
-
-		it('should find a model that meet the given conditions', () => {
-			return users.find({
-				where: {
-					name: 'alice bob',
-				}
-			})
-			.then((user) => {
-				expect(user.id).to.equal(2);
-				expect(user.name).to.equal('alice bob');
-				expect(user.email).to.equal('alice@somebody.com');
-				expect(user.address).to.equal('has moved to jupiter');
-			})
-		});
-
-		it('should only return a model that meet all conditions', () => {
-			return users.find({
-				where: {
-					name: 'alice bob',
-					id: 4,
-				}
-			})
-			.then((user) => {
-				expect(user).to.eql({
-					id: 2,
-					email: 'alice@somebody.com',
-					name: 'alice bob',
-					address: 'now living in planet earth',
+				.then(user => {
+					expect(user.name).to.equal('undefined');
+				})
+				.catch((error) => {
+					expect(error).to.eql({
+						message: `missing object propertiy 'where' to find model`,
+					});
 				});
+		});
+
+		it('should not return a model if all attributes does not match', () => {
+			return users.find({
+				where: {
+					name: createdUser1.name,
+					id: createdUser2.id,
+				}
+			})
+			.then(user => {
+				expect(user.name).to.equal('undefined')
 			})
 			.catch((error) => {
 				expect(error).to.eql({ message: 'user not found' });
 			});
 		});
+
+		it('should find a model that meet the given conditions', () => {
+			return users.find({
+				where: {
+					name: createdUser2.name,
+				}
+			})
+			.then((user) => {
+				expect(user.id).to.equal(createdUser2.id);
+				expect(user.name).to.equal(createdUser2.name);
+				expect(user.email).to.equal(createdUser2.email);
+				expect(user.address).to.equal(createdUser2.address);
+			})
+		});
+
+		it('should find a model using multiple attributes', () => {
+			return users.find({
+				where: {
+					address: createdUser1.address,
+					name: createdUser1.name,
+				}
+			})
+			.then((user) => {
+				expect(user.id).to.equal(createdUser1.id);
+				expect(user.name).to.equal(createdUser1.name);
+				expect(user.email).to.equal(createdUser1.email);
+				expect(user.address).to.equal(createdUser1.address);
+			})
+		});
 	});
 
 	describe('findAll', () => {
+		it('should return an empty if all conditions does not match', () => {
+			return users.findAll({
+				where: {
+					address: user1.address,
+					email: user2.email,
+				},
+			})
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.equal(0);
+			});
+		});
+
+		it('should return empty array non of the fields match', () => {
+			return users.findAll({
+				where: {
+					address: wrongdUserDetails.address,
+					email: wrongdUserDetails.email,
+				},
+				type: 'or',
+			})
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.equal(0);
+			});
+		});
+
 		it('should return all models if no condition is specified', () => {
 			return users.findAll()
 			.then((allUsers) => {
@@ -293,44 +248,101 @@ describe('Dummy Data Model', () => {
 			});
 		});
 
-		it('should return an empty if all conditions does not match', () => {
+		it('should return models matching any of the field', () => {
 			return users.findAll({
 				where: {
-					address: 'somewhere in the world a',
-					email: 'jane_doe@somebody.com',
+					address: createdUser2.address,
+					email: createdUser2.email,
 				},
 			})
 			.then((allUsers) => {
 				expect(allUsers).to.be.an('array');
-				expect(allUsers.length).to.equal(0);
-			});
-		});
-
-		it('should return empty array non of the fields match', () => {
-			return users.findAll({
-				where: {
-					address: 'somewhere in the world a',
-					email: 'janne_doe@somebody.com',
-				},
-				type: 'or',
-			})
-			.then((allUsers) => {
-				expect(allUsers).to.be.an('array');
-				expect(allUsers.length).to.equal(0);
+				expect(allUsers.length).to.greaterThan(0);
+				expect(allUsers[0]).to.have.property('name');
+				expect(allUsers[0]).to.have.property('email');
 			});
 		});
 
 		it('should return models matching any of the field', () => {
 			return users.findAll({
 				where: {
-					address: 'somewhere in the world a',
-					email: 'jane_doe@somebody.com',
+					address: wrongdUserDetails.address,
+					email: createdUser2.email,
 				},
 				type: 'or',
 			})
 			.then((allUsers) => {
 				expect(allUsers).to.be.an('array');
-				expect(allUsers.length).to.equal(1);
+				expect(allUsers.length).to.greaterThan(0);
+				expect(allUsers[0]).to.have.property('name');
+				expect(allUsers[0]).to.have.property('email');
+			});
+		});
+	});
+
+	describe('update method', () => {
+		it('should not update if no params are pass in', () => {
+			return users.update()
+			.catch(err => {
+				expect(err).to.have.property('message')
+				expect(err.message).to.equal(
+					'require argument at position 1 to specify update condition'
+				);
+			});
+		});
+
+		it('should return error no params if no params are pass in', () => {
+			return users.update(
+				{ where: {}},
+			)
+			.catch(err => {
+				expect(err).to.have.property('message')
+				expect(err.message).to.equal(
+					'require argument 2 of type object. only one argument supplied!'
+				);
+			});
+		});
+
+		it('should not update a model that does not exist', () => {
+			return users.update({
+				where: {
+					id: wrongdUserDetails.id,
+				}
+			}, user1DataToUpdate)
+			.catch((error) => {
+				expect(error).to.eql({ message: `user not found` })
+			})
+		});
+
+		it('should update a model', () => {
+			return users.update({
+				where: {
+					id: createdUser1.id
+				}
+			}, user1DataToUpdate)
+			.then((newUser1) => {
+				expect(newUser1.id).to.equal(createdUser1.id);
+				expect(newUser1.name).to.equal(user1DataToUpdate.name);
+				expect(newUser1.email).to.equal(user1.email);
+				expect(newUser1.address).to.not.equal(user1.address);
+				expect(newUser1.address).to.equal(user1DataToUpdate.address);
+				expect(newUser1.updatedAt).to.not.equal(createdUser1.updatedAt);
+			});
+		});
+
+		it('should update a model with condition other than id specified', () => {
+			return users.update({
+				where: {
+					email: user2.email,
+					name: user2.name,
+				}
+			}, user2DataToUpdate)
+			.then((newUser2) => {
+				expect(newUser2.id).to.equal(createdUser2.id);
+				expect(newUser2.name).to.equal(createdUser2.name);
+				expect(newUser2.email).to.equal(createdUser2.email);
+				expect(newUser2.address).to.not.equal(user2.address);
+				expect(newUser2.address).to.equal(user2DataToUpdate.address);
 			});
 		});
 	});
