@@ -1,48 +1,36 @@
 export default {
-  propMatchFail: (condition, model, matchType='and', groups=[]) => {
+  confirmPropMatch: (condition, model, matchType='and', groups=[]) => {
     const props = Object.keys(condition);
-    if (!groups.length) {
-      if (matchType === 'and') {
-        return props.find((prop) => {
-          if (condition[prop] !== model[prop]) {
-            // return the prop that fail the search
-            return prop;
-          }
+    if (groups.length && matchType === 'or') {
+      const groupsPassingState = {};
+      groups.forEach((groupProps, index) => {
+        groupsPassingState[index] = !groupProps.find((prop) => {
+          if (Array.isArray(condition[prop])) return condition[prop].includes(model[prop]);
+          return condition[prop] !== model[prop];
         });
-      }
+      });
+      return Object.keys(groupsPassingState).map(key => groupsPassingState[key]).includes(true);   
+    } else {
       if (matchType === 'or') {
         const result = props.find((prop) => {
-          if (condition[prop] === model[prop]) {
-            return props;
+          if (Array.isArray(condition[prop]))
+            return (condition[prop].includes(model[prop]));
+          return (condition[prop] === model[prop]);
+        });
+
+        if (result) return true;
+        return false;
+      } else {
+        const finalResult = [];
+        props.find((prop) => {
+          if (Array.isArray(condition[prop])) {
+            finalResult.push(condition[prop].includes(model[prop]));
+          } else {
+            finalResult.push(condition[prop] === model[prop]);
           }
         });
-        if (result) {
-          // indicative that there is a match
-          return undefined;
-        }
-      }
 
-      // return the model that does not match the search
-      return model;
-    } else if (groups.length && matchType === 'or') {
-      let groupPropsPassing = '';
-      const failingGroups = {};
-      const failingFields = [];
-      groups.map((groupProps, index) => {
-        failingGroups[index] = false;
-        groupPropsPassing = groupProps.find((prop) => {
-          if (condition[prop] !== model[prop]) {
-            // return the prop that fail the search
-            failingGroups[index] = true;
-            failingFields.push(props);
-            return prop;
-          }
-        });
-        return groupPropsPassing;
-      });
-
-      if (Object.keys(failingGroups).map(key => failingGroups[key]).indexOf(false === -1)) {
-        return failingFields;
+        return !finalResult.includes(false);
       }
     }
   },

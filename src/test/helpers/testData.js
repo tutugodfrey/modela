@@ -9,6 +9,11 @@ export default {
     email: 'alice@somebody.com',
     address: 'lives in another planet',
   },
+  user3: {
+    name: 'rick',
+    email: 'rick@somebody.com',
+    address: 'lives in another planet',
+  },
   bulkUsers: [
     {
       name: 'brain',
