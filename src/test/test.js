@@ -10,6 +10,7 @@ const messages = new DataModel('messages');
 const {
 	user1,
 	user2,
+	user3, // user3 and user2 has same address
 	bulkUsers,
 	user1DataToUpdate,
 	user2DataToUpdate,
@@ -17,6 +18,8 @@ const {
 } = testData;
 const createdUser1 = {};
 const createdUser2 = {};
+const createdUser3 = {};
+const createdBulkUsers = [];
 
 describe('Dummy Data Model', () => {
 	describe('DataModel', () => {
@@ -78,6 +81,21 @@ describe('Dummy Data Model', () => {
 				expect(user).to.have.property('updatedAt')
 			});
 		});
+
+		it('should create a another user', () => {
+			const user = { ...user3 };
+			return users.create(user)
+			.then((user) => {
+				Object.assign(createdUser3, user);
+				expect(user.id).to.equal(3);
+				expect(user.name).to.equal(user3.name);
+				expect(user.email).to.equal(user3.email);
+				expect(user.address).to.equal(user3.address);
+				expect(user).to.have.property('createdAt');
+				expect(user).to.have.property('updatedAt')
+			});
+		});
+	
 		it('should not create a model with unique key constriant', () => {
 			const user = { ...user1 };
 			return users.create(user)
@@ -117,6 +135,7 @@ describe('Dummy Data Model', () => {
 				.then(res => res)
 				.then(result => {
 					expect(result.length).to.equal(3);
+					Object.assign(createdBulkUsers, result);
 				});
 		});
 	});
@@ -198,6 +217,20 @@ describe('Dummy Data Model', () => {
 				expect(user.address).to.equal(createdUser1.address);
 			})
 		});
+
+		it('should find a model using multiple attributes', () => {
+			return users.find({
+				where: {
+					name: [createdUser1.name, createdUser2.name],
+				}
+			})
+			.then((user) => {
+				expect(user.id).to.equal(createdUser1.id);
+				expect(user.name).to.equal(createdUser1.name);
+				expect(user.email).to.equal(createdUser1.email);
+				expect(user.address).to.equal(createdUser1.address);
+			})
+		});
 	});
 
 	describe('findAll', () => {
@@ -232,7 +265,7 @@ describe('Dummy Data Model', () => {
 			return users.findAll()
 			.then((allUsers) => {
 				expect(allUsers).to.be.an('array');
-				expect(allUsers.length).to.equal(5);
+				expect(allUsers.length).to.equal(6);
 			});
 		});
 
@@ -270,6 +303,57 @@ describe('Dummy Data Model', () => {
 					email: createdUser2.email,
 				},
 				type: 'or',
+			})
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.greaterThan(0);
+				expect(allUsers[0]).to.have.property('name');
+				expect(allUsers[0]).to.have.property('email');
+			});
+		});
+
+		it('should return models matching fields based on their groupings', () => {
+			return users.findAll({
+				where: {
+					address: createdUser2.address,
+					email: createdUser2.email,
+					name: createdUser3.name,
+				},
+				type: 'or',
+				groups: [['address', 'name'], ['address', 'email']],
+			})
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.greaterThan(0);
+				expect(allUsers[0]).to.have.property('name');
+				expect(allUsers[0]).to.have.property('email');
+			});
+		});
+
+		it('should return models with fields matching multiple value and or type search', () => {
+			return users.findAll({
+				where: {
+					address: wrongdUserDetails.address,
+					email: [createdUser2.email, createdUser1.email, createdBulkUsers[0].email ],
+				},
+				type: 'or',
+			})
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.greaterThan(0);
+				expect(allUsers[0]).to.have.property('name');
+				expect(allUsers[0]).to.have.property('email');
+			});
+		});
+
+		it('should return models matching for type or, and groups with multiple values of keys', () => {
+			return users.findAll({
+				where: {
+					address: wrongdUserDetails.address,
+					email: [createdUser2.email, createdUser1.email, createdBulkUsers[0].email ],
+				},
+				type: 'or',
+				groups: [['email'], ['address']]
 			})
 			.then((allUsers) => {
 				expect(allUsers).to.be.an('array');
@@ -398,7 +482,7 @@ describe('Dummy Data Model', () => {
 			});
 		});
 
-		it('should  not delete a model that does not meets the specified condition', () => {
+		it('should not delete a model that does not meets the specified condition', () => {
 			return users.destroy({
 				where: {
 					id: 5,
@@ -413,7 +497,7 @@ describe('Dummy Data Model', () => {
 	describe('Clear', () => {
 		it('should get available users', () => {
 			return users.findAll().then(result => {
-				expect(result.length).to.equal(3);
+				expect(result.length).to.equal(4);
 			})
 		});
 

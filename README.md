@@ -29,6 +29,7 @@ initialize your model instance
 #### Creating a new model
 
 #### Creating a single model
+
 ```
 !(function() {
   return  users
@@ -42,6 +43,7 @@ initialize your model instance
 ```
 
 #### returns
+
 ```
 { name: 'Johb doe',
   email: 'johndoe@email.com',
@@ -50,6 +52,7 @@ initialize your model instance
 ```
 
 #### Create another record
+
 ```
 !(function() {
   return users.create({
@@ -60,7 +63,9 @@ initialize your model instance
   .then(res => console.log(res))
 }());
 ```
+
 #### Returns
+
 ```
 { name: 'Janet doe',
   email: 'Janet@email.com',
@@ -69,6 +74,7 @@ initialize your model instance
 ```
 
 #### Creating record with bulkCreate
+
 To create new record with the bulkCreate method, simple pass an array of your record to the bulkCreate call.
 ```
 !(function() {
@@ -85,6 +91,7 @@ To create new record with the bulkCreate method, simple pass an array of your re
 ## Finding models
 
 #### Find by Id
+
 ```
 !(function() {
   return users
@@ -95,6 +102,7 @@ To create new record with the bulkCreate method, simple pass an array of your re
 }());
 ```
 #### Returns
+
 ```
 { name: 'Johb doe',
   email: 'johndoe@email.com',
@@ -103,6 +111,7 @@ To create new record with the bulkCreate method, simple pass an array of your re
 ```
 
 #### FindAll
+
 ```
 !(function() {
   return users
@@ -112,7 +121,8 @@ To create new record with the bulkCreate method, simple pass an array of your re
   })
 }());
 ```
-#### Returns 
+#### Returns
+
 ```[ { name: 'Johb doe',
     email: 'johndoe@email.com',
     username: 'johndoe',
@@ -124,6 +134,7 @@ To create new record with the bulkCreate method, simple pass an array of your re
 ```
 
 #### Find by find values
+
 ```
 !(function() {
   return users
@@ -133,7 +144,8 @@ To create new record with the bulkCreate method, simple pass an array of your re
   })
 }());
 ```
-#### Returns 
+#### Returns
+
 ```
 { name: 'Johb doe',
   email: 'johndoe@email.com',
@@ -142,6 +154,7 @@ To create new record with the bulkCreate method, simple pass an array of your re
 ```
 
 #### Updating a model
+
 ```
 !(function() {
   return users
@@ -158,6 +171,7 @@ To create new record with the bulkCreate method, simple pass an array of your re
 }())
 ```
 #### Returns
+
 ```
 { name: 'Janet doe',
   email: 'Janet@email.com',
@@ -193,8 +207,9 @@ To create new record with the bulkCreate method, simple pass an array of your re
 { message: 'Successfully cleared users' }
 ```
 
-#### Specifying conditional search with __where__ and __type__
-The __where__ conditional search can be used with `find`, `findAll`, `update` and `delete` as shown below.
+## Specifying conditional search with __where__ and __type__
+
+The __where__ conditional search can be used with `find`, `findAll`, `update` and `delete` as shown below. Although the samples below is demonstrated using the findAll method, It works the same way for the others `find`, `update`, and `delete`.
 
 model.findAll({
   where: {
@@ -206,6 +221,41 @@ model.findAll({
 
 - `and` is the default if type is not specified. This return result where all the props match.
 - `or` return result where any of the props match.
+
+#### Grouping search keys
+
+It is possible to group the keys to search for by specifying the groups parameter in the search condition as demonstrated below.
+In the sample below, if the `or` type condition is specified along with the groups, the search return models that match any of the given groups. If the `and` type condition is specify, the search return model that match all the groups.
+
+```
+
+model.findAll({
+  where: {
+    propsToSearch1: 'value',
+    propsToSearch2: 'value2',
+    propsToSearch3: 'value3',
+  },
+  type: "or" || "and",
+  groups: [[propsToSearch1, propsToSearch2], [propsToSearch1, propsToSearch3]],
+});
+
+```
+## Searching for keys that match multiple values
+
+You can search for a key that match multiple values by passing an array of values to match instead of passing a single value for the key. The sample below demonstrate this
+
+```
+model.findAll({
+  where: {
+    propsToSearch1: 'value',
+    propsToSearch2: ['prop2value1', 'prop2value2', 'prop2value3' ]
+  },
+  type: "or" || "and",
+})
+
+```
+In this example your search will return models that where `propsToSearch2` has values that match any of `prop2value1`, `prop2value2` and `prop2value3`.
+
 
 ## Links
 [npm data-modela](https://www.npmjs.com/package/data-modela)
