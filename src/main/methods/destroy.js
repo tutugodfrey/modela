@@ -10,14 +10,23 @@ function destroy(condition) {
 			be deleted
 		*/
 		const result = new Promise((resolve, reject)  => {
-			this.model.forEach((model, index) => {
-				const findMatchProp = confirmPropMatch(condition.where, model, condition.type)
-				if(findMatchProp) {
-					this.model.splice(index, 1)
-					resolve({ message: `${this.singleModel} has been deleted` });
-				}
-			});
-			reject({ message: `${this.singleModel} not found, not action taken` });
+			if (this.using_db) {
+				const queryString = this.deleteQuery(this.modelName, condition);
+				this.db_connection.query(queryString)
+					.then(res => {
+						resolve({ message: `${this.singleModel} has been deleted` });
+					})
+					.catch(err => reject(err));
+			} else {
+				this.model.forEach((model, index) => {
+					const findMatchProp = confirmPropMatch(condition.where, model, condition.type)
+					if(findMatchProp) {
+						this.model.splice(index, 1)
+						resolve({ message: `${this.singleModel} has been deleted` });
+					}
+				});
+				reject({ message: `${this.singleModel} not found, not action taken` });
+			}
 		});
 
 		return result;

@@ -1,5 +1,8 @@
 node_modules
-lib
+build/
 testfile.js
+lib
 coverage
 .nyc_output
+.vscode/
+.env

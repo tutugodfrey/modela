@@ -16,30 +16,52 @@ function update(conditions, propsToUpdate) {
     if (!propsToUpdate || (typeof propsToUpdate !== 'object'))
       reject({ message:
         'require argument 2 of type object. only one argument supplied!' });
-
-    const props = Object.keys(propsToUpdate);
-    let modelsFound = this.model.filter((model) => {
-      // if only id is specified
-      if (Object.keys(conditions.where).length === 1 && conditions.where.id) 
-        return model.id === conditions.where.id;
-      const findMatchProps = confirmPropMatch(conditions.where, model, conditions.type, conditions.groups);
-      if (findMatchProps) return true;
-    });
-
-    if (!modelsFound.length) reject({ message: `${this.singleModel} not found` });
-
-    const updatedModels = modelsFound.map((model) => {
-      props.forEach((property) => {
-        model[property] = propsToUpdate[property]
+    
+    if (this.using_db) {
+      propsToUpdate.updatedAt = 'now()';
+      const queryString = this.getQuery(this.modelName, conditions, propsToUpdate);
+      this.db_connection.query(queryString)
+        .then(res => {
+          return res.rows[0]
+        })
+        .then((user) => {
+          const queryString = this.updateQuery(this.modelName, conditions, propsToUpdate);
+          this.db_connection.query(queryString)
+          .then(res => {
+            if (!res.rows.length) {
+              return reject({ message: `${this.singleModel} not found` });
+            }
+            return resolve(res.rows[0])
+          })
+        })
+        .catch(err => {
+          return reject(err)
+        });
+    } else {
+      const props = Object.keys(propsToUpdate);
+      let modelsFound = this.model.filter((model) => {
+        // if only id is specified
+        if (Object.keys(conditions.where).length === 1 && conditions.where.id) 
+          return model.id === conditions.where.id;
+        const findMatchProps = confirmPropMatch(conditions.where, model, conditions.type, conditions.groups);
+        if (findMatchProps) return true;
       });
-      model.updatedAt = new Date();
-      return model;
-    });
-    // return a single object
-    if (updatedModels.length === 1) resolve(updatedModels[0]);
 
-    // return an array of the modified models
-    resolve(updatedModels);
+      if (!modelsFound.length) reject({ message: `${this.singleModel} not found` });
+
+      const updatedModels = modelsFound.map((model) => {
+        props.forEach((property) => {
+          model[property] = propsToUpdate[property]
+        });
+        model.updatedAt = new Date();
+        return model;
+      });
+      // return a single object
+      if (updatedModels.length === 1) resolve(updatedModels[0]);
+
+      // return an array of the modified models
+      resolve(updatedModels);
+    }
   });
   return result;
 }
