@@ -10,6 +10,7 @@ import {
 	updateQuery,
 	deleteQuery,
 	getQuery,
+	rawQuery,
 } from './queryTypes';
 
 import bulkCreate, {createBulkItem, createBulkItemWithDB } from './methods/bulkCreate';
@@ -48,6 +49,7 @@ const DummyDataModel = class {
 		this.getQuery = getQuery.bind(this);
 		this.updateQuery = updateQuery.bind(this);
 		this.deleteQuery = deleteQuery.bind(this);
+		this.rawQuery = rawQuery.bind(this);
 	}
 }
 export default DummyDataModel;
