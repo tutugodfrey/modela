@@ -7,7 +7,7 @@ console.time('timeChecked');
 const { expect } = chai;
 const users = new DataModel('users', ['name', 'email'], ['name']);
 const messages = new DataModel('messages');
-if (process.env.USE_DB) {
+if (parseInt(process.env.USE_DB)) {
 	const connection = connect(process.env.DATABASE_URL, [ users, messages ]);
 }
 const {
@@ -557,6 +557,34 @@ describe('Dummy Data Model', () => {
 				});
 		})
 	})
+
+	if (parseInt(process.env.USE_DB)) {
+		let createdMessage = {}
+		describe('Testing rawQuery func', () => {
+			it('should create a message', () => {
+				const message = 'good day everyone';
+				const queryString = `INSERT INTO 
+					messages ("message", "createdAt", "updatedAt")
+					VALUES('${message}', 'now()', 'now()') returning *;`;
+				return messages.rawQuery(queryString)
+					.then(res => {
+						expect(res[0]).to.have.property('id');
+						expect(res[0]).to.have.property('message').to.equal(message)
+						Object.assign(createdMessage, res[0])
+					});
+			});
+
+			it('should delete message with id from table', () => {
+				const queryString = `DELETE FROM messages WHERE id = ${createdMessage.id} returning *`;
+				return messages.rawQuery(queryString)
+					.then(res => {
+						expect(res[0])
+							.to.have.property('id')
+							.to.equal(createdMessage.id);
+					});
+			});
+		});
+	}
 });
 
 console.timeEnd('timeChecked')
