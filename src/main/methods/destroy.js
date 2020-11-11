@@ -14,7 +14,10 @@ function destroy(condition) {
 				const queryString = this.deleteQuery(this.modelName, condition);
 				this.db_connection.query(queryString)
 					.then(res => {
-						resolve({ message: `${this.singleModel} has been deleted` });
+						if (res.rowCount)
+							return resolve({ message: `${this.singleModel} has been deleted` });
+
+						return reject({ message: `${this.singleModel} not found, not action taken` });
 					})
 					.catch(err => reject(err));
 			} else {
@@ -22,10 +25,10 @@ function destroy(condition) {
 					const findMatchProp = confirmPropMatch(condition.where, model, condition.type)
 					if(findMatchProp) {
 						this.model.splice(index, 1)
-						resolve({ message: `${this.singleModel} has been deleted` });
+						return resolve({ message: `${this.singleModel} has been deleted` });
 					}
 				});
-				reject({ message: `${this.singleModel} not found, not action taken` });
+				return reject({ message: `${this.singleModel} not found, not action taken` });
 			}
 		});
 

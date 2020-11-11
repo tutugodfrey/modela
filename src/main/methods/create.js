@@ -84,7 +84,7 @@ function createModelWithDB(modelToCreate, resolve, reject) {
       return resolve(res.rows[0]);
     })
     .catch(err => {
-      if (err.detail.includes('already exists')) {
+      if (err.detail && err.detail.includes('already exists')) {
         const key = err.detail.split('=')[0].split('(')[1].split(')')[0];
         const value = err.detail.split('=')[1].split(')')[0].split('(')[1];
         return reject({ message: `${this.singleModel} with ${key} = ${value} already exists` });
