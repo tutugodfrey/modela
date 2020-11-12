@@ -1,7 +1,13 @@
-const updateQuery = (modelName, conditions, newProps) => {
-  // console.log(newProps)
+import functs from '../helpers/functs';
+
+const { addReturnString } = functs;
+const updateQuery = (modelName, conditions, newProps, returnFields=[]) => {
   if (typeof newProps !== 'object' || typeof conditions !== 'object') {
     return { message: 'type error! expecting an object' };
+  }
+
+  if (!Array.isArray(returnFields)) {
+    throw new TypeError('Expected an array of fields to return');
   }
   let queryString;
   let groupCondition;
@@ -48,10 +54,12 @@ const updateQuery = (modelName, conditions, newProps) => {
   });
 
   if (groupCondition && groupString) {
-    queryString = `${queryString} ${propString} WHERE ${groupString} returning *`;
+    queryString = `${queryString} ${propString} WHERE ${groupString}`;
   } else {
-    queryString = `${queryString} ${propString} WHERE ${whereString} returning *`;
+    queryString = `${queryString} ${propString} WHERE ${whereString}`;
   }
+  queryString = addReturnString(queryString, returnFields)
+
   if (process.env.NODE_ENV !== 'production') {
     /* eslint-disable no-console */
     console.log(queryString);

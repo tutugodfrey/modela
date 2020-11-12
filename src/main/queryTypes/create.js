@@ -1,6 +1,12 @@
-const createQuery = (modelName, condition) => {
+import functs from '../helpers/functs';
+
+const { addReturnString } = functs;
+const createQuery = (modelName, condition, returnFields=[]) => {
   if (!condition) {
     return { message: 'type error! expecting an object' };
+  }
+  if (!Array.isArray(returnFields)) {
+    throw new TypeError('Expected an array of fields to return');
   }
   const keys = Object.keys(condition);
   let queryString = `INSERT INTO ${modelName}`;
@@ -23,7 +29,7 @@ const createQuery = (modelName, condition) => {
     }
   });
   valueString = `${valueString})`;
-  queryString = `${queryString} ${keyString} ${valueString} returning *`;
+  queryString = addReturnString(`${queryString} ${keyString} ${valueString}`, returnFields)
 
   if (process.env.NODE_ENV !== 'production') {
     /* eslint-disable no-console */

@@ -1,12 +1,18 @@
-	// public interface to create a single model
-function create(modelToCreate) {
-  // create a new model
+import functs from '../helpers/functs';
+
+const { getFieldsToReturn } = functs;
+
+// public interface to create a single model
+function create(modelToCreate, returnFields=[]) {
+  if (!Array.isArray(returnFields)) {
+    throw new TypeError('Expected an array of fields to return');
+  }
   const result = new Promise((resolve, reject) => {
     if (this.requiredFields.length === 0) {
       if (this.using_db) {
-        return this.createModelWithDB(modelToCreate, resolve, reject);
+        return this.createModelWithDB(modelToCreate, returnFields, resolve, reject);
       } else {
-        this.createModel(modelToCreate, resolve, reject);
+        return this.createModel(modelToCreate, returnFields, resolve, reject);
       }
     } else {
       let allFieldsPassed = true;
@@ -18,12 +24,12 @@ function create(modelToCreate) {
         }
       });
       if (!allFieldsPassed) {
-        reject({ message: `missing required field ${requiredFieldsCollection}` });
+        return reject({ message: `missing required field ${requiredFieldsCollection}` });
       } else {
         if (this.using_db) {
-          return this.createModelWithDB(modelToCreate, resolve, reject);
+          return this.createModelWithDB(modelToCreate, returnFields, resolve, reject);
         } else {
-          this.createModel(modelToCreate, resolve, reject);
+          return this.createModel(modelToCreate, returnFields, resolve, reject);
         }
       }
     }
@@ -34,13 +40,14 @@ function create(modelToCreate) {
 // private interface for creating model
 // check for unique keys
 // then create a new model 
-function createModel(modelToCreate, resolve, reject) {
+function createModel(modelToCreate, returnFields, resolve, reject) {
   if (!this.model.length) {
     modelToCreate.id = 1;
     modelToCreate.createdAt = new Date();
     modelToCreate.updatedAt = new Date();
     this.model.push(modelToCreate);
-    return resolve(modelToCreate);
+    // return resolve(modelToCreate);
+    return resolve(getFieldsToReturn(modelToCreate, returnFields))
   } else {
     const lastModel = this.model[this.model.length - 1];
     const lastModelId = lastModel.id;
@@ -51,7 +58,7 @@ function createModel(modelToCreate, resolve, reject) {
       modelToCreate.createdAt = new Date();
       modelToCreate.updatedAt = new Date();
       this.model.push(modelToCreate);
-      return resolve(modelToCreate);
+      return resolve(getFieldsToReturn(modelToCreate, returnFields))
     } else {
       let foundDuplicate = false;
       this.model.forEach((model) => {
@@ -69,16 +76,16 @@ function createModel(modelToCreate, resolve, reject) {
         modelToCreate.createdAt = new Date();
         modelToCreate.updatedAt = new Date();
         this.model.push(modelToCreate);
-        return resolve(modelToCreate);
+        return resolve(getFieldsToReturn(modelToCreate, returnFields));
       }
     }
   }
 }
 
-function createModelWithDB(modelToCreate, resolve, reject) {
+function createModelWithDB(modelToCreate, returnFields, resolve, reject) {
   modelToCreate.createdAt = 'now()';
   modelToCreate.updatedAt = 'now()';
-  const queryString = this.createQuery(this.modelName, modelToCreate);
+  const queryString = this.createQuery(this.modelName, modelToCreate, returnFields);
   this.db_connection.query(queryString)
     .then(res => {
       return resolve(res.rows[0]);

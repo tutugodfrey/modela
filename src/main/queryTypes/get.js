@@ -1,14 +1,23 @@
-const getQuery = (modelName, condition) => {
+import functs from '../helpers/functs';
+
+const { addReturnString } = functs;
+const getQuery = (modelName, condition, returnFields=[]) => {
   const typeOfCondition = (typeof condition);
   if (typeOfCondition !== 'string' && typeOfCondition !== 'object' && typeOfCondition !== 'number') {
     return { message: 'type error!' };
   }
 
-  let queryString;
+  let queryString = '';
+  let returnString = '';
+  if (returnFields.length){
+    returnString = addReturnString('', returnFields).substr(11);
+  } else {
+    returnString = '*';
+  }
   if (condition === 'all') {
-    queryString = `SELECT * FROM ${modelName}`;
+    queryString = `SELECT ${returnString} FROM ${modelName}`;
   } else if (typeof condition === 'number') {
-    queryString = `SELECT * FROM ${modelName} WHERE "id" = ${condition}`;
+    queryString = `SELECT ${returnString} FROM ${modelName} WHERE "id" = ${condition}`;
   } else {
     /* eslint-disable prefer-destructuring */
     let type;
@@ -18,7 +27,7 @@ const getQuery = (modelName, condition) => {
       type = condition.type.toUpperCase();
     }
     const keys = Object.keys(condition.where);
-    queryString = `SELECT * FROM ${modelName}`;
+    queryString = `SELECT ${returnString} FROM ${modelName}`;
     keys.forEach((key) => {
       if (Array.isArray(condition.where[key])) {
         let str = '';

@@ -1,13 +1,16 @@
-import helpers from './helpers';
+import functs from '../helpers/functs';
 
-const { confirmPropMatch } = helpers;
-function update(conditions, propsToUpdate) {
+const { confirmPropMatch, getFieldsToReturn  } = functs;
+function update(conditions, propsToUpdate, returnFields=[]) {
   /* 
     propsToUpdate contain the new properties to replace the old ones
     this method should be called on the particular object to update.
     which means that before call update you must use the finder methods to 
     get the particular object.
   */
+  if (!Array.isArray(returnFields)) {
+    throw new TypeError('Expected an array of fields to return');
+  }
   const result = new Promise((resolve, reject) => {
     if (!conditions || !conditions.where)
       reject({ message:
@@ -25,7 +28,7 @@ function update(conditions, propsToUpdate) {
           return res.rows[0]
         })
         .then((user) => {
-          const queryString = this.updateQuery(this.modelName, conditions, propsToUpdate);
+          const queryString = this.updateQuery(this.modelName, conditions, propsToUpdate, returnFields);
           this.db_connection.query(queryString)
           .then(res => {
             if (!res.rows.length) {
@@ -54,7 +57,7 @@ function update(conditions, propsToUpdate) {
           model[property] = propsToUpdate[property]
         });
         model.updatedAt = new Date();
-        return model;
+        return resolve(getFieldsToReturn(model, returnFields))
       });
       // return a single object
       if (updatedModels.length === 1) resolve(updatedModels[0]);
