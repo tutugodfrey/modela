@@ -1,4 +1,7 @@
-const deleteQuery = (modelName, condition) => {
+import functs from '../helpers/functs';
+
+const { addReturnString } = functs;
+const deleteQuery = (modelName, condition, returnFields=[]) => {
   const typeOfCondition = (typeof condition);
   if (typeOfCondition !== 'object') {
     return { message: 'type error! expecting an object' };
@@ -17,7 +20,8 @@ const deleteQuery = (modelName, condition) => {
       }
     });
   }
-  queryString = `${queryString} returning *`;
+  queryString = addReturnString(queryString, returnFields);
+
   if (process.env.NODE_ENV !== 'production') {
     /* eslint-disable no-console */
     console.log(queryString);

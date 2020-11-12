@@ -85,17 +85,17 @@ describe('Dummy Data Model', () => {
 			});
 		});
 
-		it('should create a another user', () => {
+		it('should create a another user and return specified fields', () => {
 			const user = { ...user3 };
-			return users.create(user)
+			return users.create(user, ['id', 'name', 'email', 'address'])
 			.then((user) => {
 				Object.assign(createdUser3, user);
 				expect(user).to.have.property('id');
 				expect(user.name).to.equal(user3.name);
 				expect(user.email).to.equal(user3.email);
 				expect(user.address).to.equal(user3.address);
-				expect(user).to.have.property('createdAt');
-				expect(user).to.have.property('updatedAt')
+				expect(user).to.not.have.property('createdAt');
+				expect(user).to.not.have.property('updatedAt')
 			});
 		});
 	
@@ -135,7 +135,7 @@ describe('Dummy Data Model', () => {
 				return { ...user };
 			});
 			return users.bulkCreate(bulkUsersObj)
-				.then(res => res)
+				.then(res =>  res)
 				.then(result => {
 					expect(result.length).to.equal(3);
 					Object.assign(createdBulkUsers, result);
@@ -160,6 +160,16 @@ describe('Dummy Data Model', () => {
 					expect(user.name).to.equal(user1.name);
 					expect(user.email).to.equal(user1.email);
 					expect(user.address).to.equal(user1.address);
+				});
+		});
+
+		it('should return specified fields for model with given id', () => {
+			return users.findById(createdUser1.id, ['id', 'name', 'email'])
+				.then((user) => {
+					expect(user.id).to.equal(createdUser1.id);
+					expect(user.name).to.equal(user1.name);
+					expect(user.email).to.equal(user1.email);
+					expect(user).to.not.have.property('address');
 				});
 		});
 	});
@@ -231,6 +241,21 @@ describe('Dummy Data Model', () => {
 				expect(user.id).to.equal(createdUser1.id);
 				expect(user.name).to.equal(createdUser1.name);
 				expect(user.email).to.equal(createdUser1.email);
+				expect(user.address).to.equal(createdUser1.address);
+			})
+		});
+
+		it('should return specified fields for model with matching attributes', () => {
+			return users.find({
+				where: {
+					name: [createdUser1.name, createdUser2.name],
+				}
+			},
+			['id', 'name', 'address'])
+			.then((user) => {
+				expect(user.id).to.equal(createdUser1.id);
+				expect(user.name).to.equal(createdUser1.name);
+				expect(user).to.not.have.property('email');
 				expect(user.address).to.equal(createdUser1.address);
 			})
 		});
@@ -365,6 +390,26 @@ describe('Dummy Data Model', () => {
 				expect(allUsers[0]).to.have.property('email');
 			});
 		});
+
+		it('should return specified field for matching models', () => {
+			return users.findAll({
+				where: {
+					address: wrongdUserDetails.address,
+					email: [createdUser2.email, createdUser1.email, createdBulkUsers[0].email ],
+				},
+				type: 'or',
+				groups: [['email'], ['address']]
+			},
+			['id', 'name', 'createdAt', 'updatedAt'])
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.greaterThan(0);
+				expect(allUsers[0]).to.have.property('name');
+				expect(allUsers[0]).to.have.property('createdAt');
+				expect(allUsers[0]).to.have.property('updatedAt');
+				expect(allUsers[0]).to.not.have.property('email');
+			});
+		});
 	});
 
 	describe('update method', () => {
@@ -407,13 +452,14 @@ describe('Dummy Data Model', () => {
 					id: createdUser1.id
 				}
 			}, user1DataToUpdate)
-			.then((newUser1) => {
-				expect(newUser1.id).to.equal(createdUser1.id);
-				expect(newUser1.name).to.equal(user1DataToUpdate.name);
-				expect(newUser1.email).to.equal(user1.email);
-				expect(newUser1.address).to.not.equal(user1.address);
-				expect(newUser1.address).to.equal(user1DataToUpdate.address);
-				expect(newUser1.updatedAt).to.not.equal(createdUser1.updatedAt);
+			.then((updatedUser1) => {
+				expect(updatedUser1.id).to.equal(createdUser1.id);
+				expect(updatedUser1.name).to.equal(user1DataToUpdate.name);
+				expect(updatedUser1.email).to.equal(user1.email);
+				expect(updatedUser1.address).to.not.equal(user1.address);
+				expect(updatedUser1.address).to.equal(user1DataToUpdate.address);
+				expect(updatedUser1.updatedAt).to.not.equal(createdUser1.updatedAt);
+				Object.assign(createdUser1, updatedUser1);
 			});
 		});
 
@@ -462,13 +508,17 @@ describe('Dummy Data Model', () => {
 				},
 				type: 'or',
 				groups: [['id', 'name'], ['id', 'email']]
-			}, user2DataToUpdate)
+			},
+			user2DataToUpdate,
+			['id', 'name', 'email', 'address'])
 			.then((newUser2) => {
 				expect(newUser2.id).to.equal(createdUser2.id);
 				expect(newUser2.name).to.equal(createdUser2.name);
 				expect(newUser2.email).to.equal(createdUser2.email);
 				expect(newUser2.address).to.not.equal(user2.address);
 				expect(newUser2.address).to.equal(user2DataToUpdate.address);
+				expect(newUser2).to.not.have.property('createdAt')
+				expect(newUser2).to.not.have.property('updatedAt')
 			});
 		});
 	});
@@ -479,9 +529,15 @@ describe('Dummy Data Model', () => {
 				where: {
 					id: createdUser1.id,
 				}
-			})
-			.then((message) => {
-				expect(message).to.eql({ message: 'user has been deleted' });
+			},
+			['id', 'name', 'createdAt', 'updatedAt'],
+			)
+			.then((res) => {
+				expect(res).to.have.property('message').to.eql('user has been deleted');
+				expect(res).to.have.property('id').to.equal(createdUser1.id);
+				expect(res).to.have.property('name').to.equal(createdUser1.name);
+				expect(res).to.have.property('createdAt').to.eql(createdUser1.createdAt);
+				expect(res).to.have.property('updatedAt').to.eql(createdUser1.updatedAt);
 			});
 		});
 
@@ -561,8 +617,8 @@ describe('Dummy Data Model', () => {
 	if (parseInt(process.env.USE_DB)) {
 		let createdMessage = {}
 		describe('Testing rawQuery func', () => {
+			const message = 'good day everyone';
 			it('should create a message', () => {
-				const message = 'good day everyone';
 				const queryString = `INSERT INTO 
 					messages ("message", "createdAt", "updatedAt")
 					VALUES('${message}', 'now()', 'now()') returning *;`;
@@ -575,12 +631,14 @@ describe('Dummy Data Model', () => {
 			});
 
 			it('should delete message with id from table', () => {
-				const queryString = `DELETE FROM messages WHERE id = ${createdMessage.id} returning *`;
+				const queryString = `DELETE FROM messages WHERE id = ${createdMessage.id} returning id, "message", "createdAt"`;
 				return messages.rawQuery(queryString)
 					.then(res => {
 						expect(res[0])
 							.to.have.property('id')
 							.to.equal(createdMessage.id);
+						expect(res[0]).to.have.property('message').to.equal(message);
+						expect(res[0]).to.have.property('createdAt');
 					});
 			});
 		});

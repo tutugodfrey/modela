@@ -1,14 +1,17 @@
-function bulkCreate(modelsToCreate) {
+function bulkCreate(modelsToCreate, returnFields=[]) {
   // create a new model
   let createdModels = [];
   const failingObj = [];
+  if (!Array.isArray(returnFields)) {
+    throw new TypeError('Expected an array of fields to return');
+  }
     if (!this.requiredFields.length) {
       if (this.using_db) {
-        return this.createBulkItemWithDB(modelsToCreate, createdModels);
+        return this.createBulkItemWithDB(modelsToCreate, createdModels, returnFields);
       } else {
         const result = new Promise((resolve, reject) => {
           modelsToCreate.forEach((modelToCreate) => {
-            this.createBulkItem(modelToCreate)
+            this.createBulkItem(modelToCreate, returnFields)
               .then(response => {
                 return createdModels.push(response);
               });
@@ -30,10 +33,10 @@ function bulkCreate(modelsToCreate) {
         failingObj.push({ message: 'missing required field' });
       } else {
         if (this.using_db) {
-          return this.createBulkItemWithDB(modelsToCreate, createdModels);
+          return this.createBulkItemWithDB(modelsToCreate, createdModels, returnFields);
         } else {
           modelsToCreate.forEach((modelToCreate) => {
-            this.createBulkItem(modelToCreate)
+            this.createBulkItem(modelToCreate, returnFields,)
               .then(response => {
                 return createdModels.push(response);
               });
@@ -58,18 +61,18 @@ function bulkCreate(modelsToCreate) {
 
 // send each item to createModel 
 // and resolve result as a promise
-function createBulkItem(modelToCreate) {
+function createBulkItem(modelToCreate, returnFields) {
   const result =  new Promise((resolve, reject) => {
-    this.createModel(modelToCreate, resolve, reject);
+    this.createModel(modelToCreate, returnFields, resolve, reject);
   });
 	return result;
 }
 
-function createBulkItemWithDB(modelsToCreate, createdModels) {
+function createBulkItemWithDB(modelsToCreate, createdModels, returnFields=[]) {
   const queryStrings = modelsToCreate.map(modelToCreate => {
     modelToCreate.createdAt = 'now()';
     modelToCreate.updatedAt = 'now()';
-    return this.createQuery(this.modelName, modelToCreate);
+    return this.createQuery(this.modelName, modelToCreate, returnFields);
   });
   const result = queryStrings.map(queryString => {
     const newModel = new Promise((resolve, reject) => {

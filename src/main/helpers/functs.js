@@ -34,4 +34,17 @@ export default {
       }
     }
   },
+  getFieldsToReturn: (model, returnFields=[]) => {
+    if (!returnFields.length) return model;
+    const modelToReturn = {}
+    returnFields.forEach(field => model[field]? modelToReturn[field] = model[field]: null);
+    return modelToReturn;
+  },
+  addReturnString: (queryString, returnFields) => {
+    let returnString = '';
+    if (!returnFields.length) return `${queryString} returning *`;
+    returnFields.forEach(field => returnString = `${returnString} "${field}",`);
+    returnString = returnString.substr(0, returnString.length - 1)
+    return `${queryString} returning ${returnString.trim()}`;
+  },
 }
