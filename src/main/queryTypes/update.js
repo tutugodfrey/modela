@@ -31,7 +31,6 @@ const updateQuery = (modelName, conditions, newProps, returnFields=[]) => {
       groupString = `${groupString} ${groupStr})`;
     });
   }
-  console.log('condition', whereCondition, groupCondition, groupString)
   const whereKeys = Object.keys(whereCondition);
   const newPropsKeys = Object.keys(newProps);
   queryString = `UPDATE ${modelName} SET`;

@@ -5,8 +5,19 @@ import { testData } from './helpers';
 
 console.time('timeChecked');
 const { expect } = chai;
-const users = new DataModel('users', ['name', 'email'], ['name']);
-const messages = new DataModel('messages');
+const users = new DataModel('users', {
+	name: {
+		required: true,
+		unique: true
+	},
+	email: {
+		required: true
+	},
+	address: {}
+}, ['name', 'email'], ['name']);
+const messages = new DataModel('messages', {
+	message: {}
+});
 if (parseInt(process.env.USE_DB)) {
 	const connection = connect(process.env.DATABASE_URL, [ users, messages ]);
 }
@@ -22,6 +33,7 @@ const {
 const createdUser1 = {};
 const createdUser2 = {};
 const createdUser3 = {};
+const createdMessage1 = {};
 const createdBulkUsers = [];
 
 describe('Dummy Data Model', () => {
@@ -553,35 +565,14 @@ describe('Dummy Data Model', () => {
 		});
 	});
 
-	describe('Clear', () => {
-		it('should get available users', () => {
-			return users.findAll().then(result => {
-				expect(result.length).to.equal(4);
-			})
-		});
-
-		it('should clear the model users', () => {
-			return users.clear().then(res => {
-				expect(res)
-					.to.have.property('message')
-					.to.equal('Successful cleared users')
-			});
-		});
-
-		it('should return 0 users', () => {
-			return users.findAll().then(result => {
-				expect(result.length).to.equal(0);
-			})
-		})
-	});
-
 	describe('Message', () => {
 		it('should validate the type of required and unique field', () => {
-			const messages2 = new DataModel('message2', {}, {});
+			const messages2 = new DataModel('message2', []);
 			expect(messages2).to.deep.equal({
-				typeError: 'argument2 and argument3 must be of type array',
+				typeError: 'expected argument 2 (schema) to be an object',
 			});
 		});
+
 		it('should create bulk model with required fields', () => {
 			const message = [
 				{
@@ -603,16 +594,71 @@ describe('Dummy Data Model', () => {
 						.to.equal('Hello world!')
 				});
 		});
+	});
 
-		it('should clear the table', () => {
+	describe('Missing Schema Prop Test', () => {
+		it('should validate schema property when creating models', () => {
+			const messages3 = new DataModel('message3', { message: {} });
+			return messages3.create({
+				message: 'hello',
+				recipient: 'John',
+			})
+			.catch(err => {
+				expect(err).to.have.property('message').to.equal('recipient is not defined in schema for message3')
+			});
+		});
+
+		it('should validate schema properties when updating models', () => {
+			return messages.update({
+				where: {
+					id: createdMessage1.id
+				}
+			}, {
+				message: 'Hello world updated',
+				recipient: 'john'
+			})
+			.catch(err => {
+				expect(err).to.have.property('message').to.equal('recipient is not defined in schema for messages')
+			})
+		});
+	});
+
+	describe('Test Clear Method', () => {
+		it('should get available users', () => {
+			return users.findAll().then(result => {
+				expect(result.length).to.equal(4);
+			})
+		});
+
+		it('should clear the model users', () => {
+			return users.clear().then(res => {
+				expect(res)
+					.to.have.property('message')
+					.to.equal('Successful cleared users')
+			});
+		});
+
+		it('should return 0 users', () => {
+			return users.findAll().then(result => {
+				expect(result.length).to.equal(0);
+			})
+		});
+
+		it('should clear messages', () => {
 			return messages.clear()
 				.then(res => {
 					expect(res)
 						.to.have.property('message')
 						.to.equal('Successful cleared messages');
 				});
-		})
-	})
+		});
+
+		it('should return 0 users', () => {
+			return messages.findAll().then(result => {
+				expect(result.length).to.equal(0);
+			});
+		});
+	});
 
 	if (parseInt(process.env.USE_DB)) {
 		let createdMessage = {}

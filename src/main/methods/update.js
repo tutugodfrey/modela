@@ -8,17 +8,28 @@ function update(conditions, propsToUpdate, returnFields=[]) {
     which means that before call update you must use the finder methods to 
     get the particular object.
   */
+
   if (!Array.isArray(returnFields)) {
     throw new TypeError('Expected an array of fields to return');
   }
   const result = new Promise((resolve, reject) => {
     if (!conditions || !conditions.where)
-      reject({ message:
+      return reject({ message:
         'require argument at position 1 to specify update condition' });
 
-    if (!propsToUpdate || (typeof propsToUpdate !== 'object'))
-      reject({ message:
+    if (!propsToUpdate || (Object.prototype.toString.call(propsToUpdate) !== '[object Object]'))
+      return reject({ message:
         'require argument 2 of type object. only one argument supplied!' });
+
+    const missingSchemaProp = propsToUpdate && Object.keys(propsToUpdate).find(field => {
+      if (!['id', 'updatedAt', 'createdAt'].includes(field)) {
+        return !this.allowedFields.includes(field);
+      }
+    });
+    if (missingSchemaProp) {
+      reject({ message: `${missingSchemaProp} is not defined in schema for ${this.modelName}`});
+    }
+      
     
     if (this.using_db) {
       propsToUpdate.updatedAt = 'now()';
