@@ -13,7 +13,7 @@ const createQuery = (modelName, condition, returnFields=[]) => {
   let keyString = '(';
   keys.forEach((key) => {
     if (keyString === '(') {
-      keyString = `${keyString} "${key}"`;
+      keyString = `${keyString}"${key}"`;
     } else {
       keyString = `${keyString}, "${key}"`;
     }
@@ -23,7 +23,7 @@ const createQuery = (modelName, condition, returnFields=[]) => {
   let valueString = '(';
   keys.forEach((key) => {
     if (valueString === '(') {
-      valueString = `${valueString} '${condition[key]}'`;
+      valueString = `${valueString}'${condition[key]}'`;
     } else {
       valueString = `${valueString}, '${condition[key]}'`;
     }

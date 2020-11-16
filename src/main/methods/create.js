@@ -4,10 +4,18 @@ const { getFieldsToReturn } = functs;
 
 // public interface to create a single model
 function create(modelToCreate, returnFields=[]) {
-  if (!Array.isArray(returnFields)) {
-    throw new TypeError('Expected an array of fields to return');
-  }
   const result = new Promise((resolve, reject) => {
+    const missingSchemaProp = Object.keys(modelToCreate).find(field => {
+      return !this.allowedFields.includes(field);
+    });
+    if (missingSchemaProp) {  
+      reject({ message: `${missingSchemaProp} is not defined in schema for ${this.modelName}` });
+    }
+
+    if (!Array.isArray(returnFields)) {
+      reject({ message: 'Expected an array of fields to return' });
+    }
+
     if (this.requiredFields.length === 0) {
       if (this.using_db) {
         return this.createModelWithDB(modelToCreate, returnFields, resolve, reject);
