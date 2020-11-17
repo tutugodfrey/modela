@@ -1,14 +1,22 @@
 import functs from '../helpers/functs';
 
 const { addReturnString } = functs;
-const createQuery = (modelName, condition, returnFields=[]) => {
-  if (!condition) {
+const createQuery = (modelName, modelToCreate, returnFields=[]) => {
+  if (!modelToCreate) {
     return { message: 'type error! expecting an object' };
   }
   if (!Array.isArray(returnFields)) {
     throw new TypeError('Expected an array of fields to return');
   }
-  const keys = Object.keys(condition);
+  let keys = [];
+  let arrayOfModels = []
+  if (Array.isArray(modelToCreate)) {
+    keys = Object.keys(modelToCreate[0])
+    arrayOfModels = [ ...modelToCreate ];
+  } else {
+    keys = Object.keys(modelToCreate);
+    arrayOfModels.push(modelToCreate);
+  }
   let queryString = `INSERT INTO ${modelName}`;
   let keyString = '(';
   keys.forEach((key) => {
@@ -19,16 +27,25 @@ const createQuery = (modelName, condition, returnFields=[]) => {
     }
   });
   keyString = `${keyString}) VALUES`;
+  let valueString = '';
 
-  let valueString = '(';
-  keys.forEach((key) => {
-    if (valueString === '(') {
-      valueString = `${valueString}'${condition[key]}'`;
+  arrayOfModels.forEach(item => {
+    let itemValueString = '(';
+    keys.forEach((key) => {
+      if (itemValueString === '(') {
+        itemValueString = `${itemValueString}'${item[key]}'`;
+      } else {
+        itemValueString = `${itemValueString}, '${item[key]}'`;
+      }
+    });
+    itemValueString = `${itemValueString})`;
+    if (valueString) {
+      valueString = `${valueString}, ${itemValueString}`
     } else {
-      valueString = `${valueString}, '${condition[key]}'`;
+      valueString = `${itemValueString}`
     }
   });
-  valueString = `${valueString})`;
+
   queryString = addReturnString(`${queryString} ${keyString} ${valueString}`, returnFields)
 
   if (process.env.NODE_ENV !== 'production') {

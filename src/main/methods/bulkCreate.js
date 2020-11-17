@@ -7,7 +7,7 @@ function bulkCreate(modelsToCreate, returnFields=[]) {
   }
     if (!this.requiredFields.length) {
       if (this.using_db) {
-        return this.createBulkItemWithDB(modelsToCreate, createdModels, returnFields);
+        return this.createBulkItemWithDB(modelsToCreate, returnFields);
       } else {
         const result = new Promise((resolve, reject) => {
           modelsToCreate.forEach((modelToCreate) => {
@@ -33,7 +33,7 @@ function bulkCreate(modelsToCreate, returnFields=[]) {
         failingObj.push({ message: 'missing required field' });
       } else {
         if (this.using_db) {
-          return this.createBulkItemWithDB(modelsToCreate, createdModels, returnFields);
+          return this.createBulkItemWithDB(modelsToCreate, returnFields);
         } else {
           modelsToCreate.forEach((modelToCreate) => {
             this.createBulkItem(modelToCreate, returnFields,)
@@ -68,22 +68,21 @@ function createBulkItem(modelToCreate, returnFields) {
 	return result;
 }
 
-function createBulkItemWithDB(modelsToCreate, createdModels, returnFields=[]) {
-  const queryStrings = modelsToCreate.map(modelToCreate => {
-    modelToCreate.createdAt = 'now()';
-    modelToCreate.updatedAt = 'now()';
-    return this.createQuery(this.modelName, modelToCreate, returnFields);
+function createBulkItemWithDB(modelsToCreate, returnFields=[]) {
+  modelsToCreate.forEach((modelToCreate, index)=> {
+    modelsToCreate[index].createdAt = 'now()';
+    modelsToCreate[index].updatedAt = 'now()';
   });
-  const result = queryStrings.map(queryString => {
-    const newModel = new Promise((resolve, reject) => {
-      this.db_connection.query(queryString)
-        .then(res => resolve(res.rows[0]))
-        .catch(error => reject(error.details));
-    });
-    return newModel;
+  const queryString = this.createQuery(this.modelName, modelsToCreate, returnFields);
+  const newModel = new Promise((resolve, reject) => {
+    this.db_connection.query(queryString)
+      .then(res => {
+        return resolve(res.rows)
+      })
+      .catch(error => reject(error.details));
   });
-  return Promise.all(result)
-  .then(allCreatedModel => createdModels.concat(allCreatedModel));
+  return newModel;
+
 }
 
 export default bulkCreate;
