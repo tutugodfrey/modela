@@ -1,5 +1,5 @@
-import DummyDataModel from './DummyDataModel';
+import DataModela from './DataModela';
 import { connect } from './connection';
 
-export default DummyDataModel;
+export default DataModela;
 export { connect };

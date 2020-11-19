@@ -1,11 +1,11 @@
 import chai from 'chai';
-import DataModel from '../main/DummyDataModel';
+import DataModela from '../main/DataModela';
 import { connect } from '../main/connection';
 import { testData } from './helpers';
 
 console.time('timeChecked');
 const { expect } = chai;
-const users = new DataModel('users', {
+const users = new DataModela('users', {
 	name: {
 		required: true,
 		unique: true
@@ -17,7 +17,7 @@ const users = new DataModel('users', {
 });
 
 // use to test datatype checking
-const todos = new DataModel('todos', {
+const todos = new DataModela('todos', {
 	userId: {
 		dataType: 'number',
 	},
@@ -43,7 +43,7 @@ const todos = new DataModel('todos', {
 	updatedAt: {}
 });
 
-const messages = new DataModel('messages', {
+const messages = new DataModela('messages', {
 	message: {}
 });
 if (parseInt(process.env.USE_DB)) {
@@ -65,9 +65,9 @@ const createdMessage1 = {};
 const createdBulkUsers = [];
 
 describe('Dummy Data Model', () => {
-	describe('DataModel', () => {
+	describe('DataModela', () => {
 		it('should export a function', () => {
-			expect(DataModel).to.be.a('function');
+			expect(DataModela).to.be.a('function');
 		})
 	});
 
@@ -75,7 +75,7 @@ describe('Dummy Data Model', () => {
 
 		it('should throw an error if unsupported datatype is provided', () => {
 			try {
-				const users2 = new DataModel('users', {
+				const users2 = new DataModela('users', {
 					name: {
 						dataType: 'list',
 						required: true,
@@ -97,8 +97,8 @@ describe('Dummy Data Model', () => {
 		it('should export a function', () => {
 			expect(users).to.be.a('object');
 		});
-		it('should be an instance of DataModel', () => {
-			expect(users).to.be.an.instanceOf(DataModel);
+		it('should be an instance of DataModela', () => {
+			expect(users).to.be.an.instanceOf(DataModela);
 		})
 	});
 
@@ -617,7 +617,7 @@ describe('Dummy Data Model', () => {
 
 	describe('Message', () => {
 		it('should validate the type of required and unique field', () => {
-			const messages2 = new DataModel('message2', []);
+			const messages2 = new DataModela('message2', []);
 			expect(messages2).to.deep.equal({
 				typeError: 'expected argument 2 (schema) to be an object',
 			});
@@ -648,7 +648,7 @@ describe('Dummy Data Model', () => {
 
 	describe('Missing Schema Prop Test', () => {
 		it('should validate schema property when creating models', () => {
-			const messages3 = new DataModel('message3', { message: {} });
+			const messages3 = new DataModela('message3', { message: {} });
 			return messages3.create({
 				message: 'hello',
 				recipient: 'John',
