@@ -12,6 +12,15 @@ function create(modelToCreate, returnFields=[]) {
       reject({ message: `${missingSchemaProp} is not defined in schema for ${this.modelName}` });
     }
 
+    // add default value for missing fields with default values specified in schema
+    this.allowedFields.forEach(field => {
+      if (!Object.keys(modelToCreate).includes(field)) {
+        if (this.schema[field].defaultValue !== undefined) {
+          modelToCreate[field] = this.schema[field].defaultValue;
+        };
+      };
+    });
+
     const datatypeChecking = checkDatatype(this.allowedFields, this.schema, modelToCreate);
     if (datatypeChecking[0]) {
       return reject({ message: datatypeChecking[1] });
@@ -21,29 +30,25 @@ function create(modelToCreate, returnFields=[]) {
       reject({ message: 'Expected an array of fields to return' });
     }
 
-    if (this.requiredFields.length === 0) {
+    if (!this.requiredFields.length) {
       if (this.using_db) {
         return this.createModelWithDB(modelToCreate, returnFields, resolve, reject);
       } else {
         return this.createModel(modelToCreate, returnFields, resolve, reject);
       }
     } else {
-      let allFieldsPassed = true;
-      const requiredFieldsCollection = [];
-      this.requiredFields.forEach((required) => {
-        if (modelToCreate[required] === undefined) {
-          requiredFieldsCollection.push(required);
-          allFieldsPassed = false;
-        }
+      // check default value for missing required fields else return missing fields
+      const missingRequiredField = this.requiredFields.find(field => {
+        return !Object.keys(modelToCreate).includes(field);
       });
-      if (!allFieldsPassed) {
-        return reject({ message: `missing required field ${requiredFieldsCollection}` });
+      if (missingRequiredField) {  
+        return reject({ message: `missing required field ${missingRequiredField}` });
+      }
+
+      if (this.using_db) {
+        return this.createModelWithDB(modelToCreate, returnFields, resolve, reject);
       } else {
-        if (this.using_db) {
-          return this.createModelWithDB(modelToCreate, returnFields, resolve, reject);
-        } else {
-          return this.createModel(modelToCreate, returnFields, resolve, reject);
-        }
+        return this.createModel(modelToCreate, returnFields, resolve, reject);
       }
     }
   });
