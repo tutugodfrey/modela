@@ -15,7 +15,7 @@ import {
 
 import bulkCreate, {createBulkItem, createBulkItemWithDB } from './methods/bulkCreate';
 
-const DummyDataModel = class {
+const DataModela = class {
 	constructor(modelName, schema = {}) {
 		if (Object.prototype.toString.call(schema) !== '[object Object]') {
       return { typeError: 'expected argument 2 (schema) to be an object' };
@@ -76,4 +76,4 @@ const DummyDataModel = class {
 		}
 	}
 }
-export default DummyDataModel;
+export default DataModela;
