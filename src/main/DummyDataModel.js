@@ -33,6 +33,7 @@ const DummyDataModel = class {
 		this.uniqueKeys = [];
 		this.requiredFields = [];
 		this.model = [];
+		this.supportedDataTypes = ['string', 'number', 'boolean', 'array', 'date']
 		this.create = create.bind(this);
 		this.createModel = createModel.bind(this);
 		this.createModelWithDB = createModelWithDB.bind(this);
@@ -54,12 +55,25 @@ const DummyDataModel = class {
 		this.rawQuery = rawQuery.bind(this);
 
 		this.allowedFields.forEach(field => {
-			if (schema[field].required) return this.requiredFields.push(field);
+			if (this.schema[field].required) return this.requiredFields.push(field);
 		});
 
 		this.allowedFields.forEach(field => {
-			if (schema[field].unique) return this.uniqueKeys.push(field);
+			if (this.schema[field].unique) return this.uniqueKeys.push(field);
 		});
+
+		const unsupportedTypeField = this.allowedFields.find(field => {
+			if (this.schema[field].dataType) {
+				return !this.supportedDataTypes.includes(this.schema[field].dataType);
+			}
+		});
+
+		if (unsupportedTypeField) {
+			throw ({ 
+				message: `dataType ${this.schema[unsupportedTypeField].dataType} in ${unsupportedTypeField} is not supported`,
+				supportedDataTypes: this.supportedDataTypes,
+			});
+		}
 	}
 }
 export default DummyDataModel;
