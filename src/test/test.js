@@ -33,6 +33,7 @@ const todos = new DataModel('todos', {
 	completed: {
 		dataType: 'boolean',
 		required: true,
+		defaultValue: false,
 	},
 	deadline: {},
 	links: {
@@ -722,14 +723,30 @@ describe('Dummy Data Model', () => {
 				title: 'first activity for day',
 				userId: 12,
 				description: 'description of the task to be completed',
-				completed: false,
+				completed: true,
+				deadline: new Date(1605788451842).toISOString(),
+			})
+			.then(res => {
+				expect(res).to.have.property('id');
+				expect(res).to.have.property('links').to.be.an('array');
+				expect(res).to.have.property('completed').to.equal(true);
+			});
+		});
+
+		it('should create model and update missing fields with default values', () => {
+			return todos.create({
+				links: [ 'link1', 'link2' ],
+				title: 'todo 2',
+				userId: 12,
+				description: 'description of the task to be completed',
+				// completed: false,
 				deadline: new Date(1605788451842).toISOString(),
 			})
 			.then(res => {
 				expect(res).to.have.property('id');
 				expect(res).to.have.property('links').to.be.an('array');
 				expect(res).to.have.property('completed').to.equal(false);
-			})
+			});
 		});
 
 		it('should get todos matching search criteria', () => {
@@ -742,7 +759,7 @@ describe('Dummy Data Model', () => {
 				expect(res).to.be.an('array').to.have.length(1)
 				expect(res[0]).to.have.property('id');
 				expect(res[0]).to.have.property('links').to.be.an('array');
-				expect(res[0]).to.have.property('completed').to.equal(false);
+				expect(res[0]).to.have.property('completed').to.equal(true);
 			});
 		});
 	});
