@@ -33,9 +33,17 @@ const createQuery = (modelName, modelToCreate, returnFields=[]) => {
     let itemValueString = '(';
     keys.forEach((key) => {
       if (itemValueString === '(') {
-        itemValueString = `${itemValueString}'${item[key]}'`;
+        if (Array.isArray(item[key])) {
+          itemValueString = `${itemValueString}ARRAY [${item[key].map(value => `'${value}'`)}]`;
+        } else {
+          itemValueString = `${itemValueString}'${item[key]}'`;
+        }
       } else {
-        itemValueString = `${itemValueString}, '${item[key]}'`;
+        if (Array.isArray(item[key])) {
+          itemValueString = `${itemValueString}, ARRAY [${item[key].map(value => `'${value}'`)}]`;
+        } else {
+          itemValueString = `${itemValueString}, '${item[key]}'`;
+        }
       }
     });
     itemValueString = `${itemValueString})`;

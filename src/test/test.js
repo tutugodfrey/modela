@@ -14,12 +14,39 @@ const users = new DataModel('users', {
 		required: true
 	},
 	address: {}
-}, ['name', 'email'], ['name']);
+});
+
+// use to test datatype checking
+const todos = new DataModel('todos', {
+	userId: {
+		dataType: 'number',
+	},
+	title: {
+		dataType: 'string',
+		required: true,
+		unique: true
+	},
+	description: {
+		dataType: 'string',
+		required: true
+	},
+	completed: {
+		dataType: 'boolean',
+		required: true,
+	},
+	deadline: {},
+	links: {
+		dataType: 'array',
+	},
+	createdAt: {},
+	updatedAt: {}
+});
+
 const messages = new DataModel('messages', {
 	message: {}
 });
 if (parseInt(process.env.USE_DB)) {
-	const connection = connect(process.env.DATABASE_URL, [ users, messages ]);
+	const connection = connect(process.env.DATABASE_URL, [ users, messages, todos ]);
 }
 const {
 	user1,
@@ -41,6 +68,28 @@ describe('Dummy Data Model', () => {
 		it('should export a function', () => {
 			expect(DataModel).to.be.a('function');
 		})
+	});
+
+	describe('DataType Checking Tests', () => {
+
+		it('should throw an error if unsupported datatype is provided', () => {
+			try {
+				const users2 = new DataModel('users', {
+					name: {
+						dataType: 'list',
+						required: true,
+						unique: true
+					},
+					email: {
+						required: true
+					},
+					address: {}
+				});
+				} catch (err) {
+					expect(err).to.have.property('message').to.equal('dataType list in name is not supported');
+					expect(err).to.have.property('supportedDataTypes').to.be.an('array');
+				}
+		});
 	});
 
 	describe('Users', () => {
@@ -623,6 +672,81 @@ describe('Dummy Data Model', () => {
 		});
 	});
 
+	describe('DataType Validation Test', () => {
+		it('should fails on description datatype validation', () => {
+			return todos.create({
+				title: 'first activity for day',
+				userId: 12,
+				description: 123,
+				completed: false,
+				deadline: Date.now(),
+				links: ['link1', 'link2'],
+			})
+			.catch(err => {
+				expect(err)
+					.to.have.property('message')
+					.to.equal('Expected input of type string for description');
+			});
+		});
+
+		it('should fails on links field datatype validation', () => {
+			return todos.create({
+				title: 'first activity for day',
+				userId: 12,
+				description: 'description of the task to be completed',
+				completed: false,
+				deadline: Date.now(),
+				links: '[link1, link2]',
+			})
+			.catch(err => {
+				expect(err)
+					.to.have.property('message')
+					.to.equal('Expected input of type array for links');
+			});
+		});
+
+		it('should fails if a wrong data type is provided', () => {
+			return todos.findAll({
+				where: {
+					title: 'first activity for day',
+				},
+			})
+			.then(res => {
+				expect(res).to.be.an('array').to.have.length(0)
+			});
+		});
+
+		it('should create model if fields datatype match schema datatype', () => {
+			return todos.create({
+				links: [ 'link1', 'link2' ],
+				title: 'first activity for day',
+				userId: 12,
+				description: 'description of the task to be completed',
+				completed: false,
+				deadline: new Date(1605788451842).toISOString(),
+			})
+			.then(res => {
+				expect(res).to.have.property('id');
+				expect(res).to.have.property('links').to.be.an('array');
+				expect(res).to.have.property('completed').to.equal(false);
+			})
+		});
+
+		it('should get todos matching search criteria', () => {
+			return todos.findAll({
+				where: {
+					title: 'first activity for day',
+				},
+			})
+			.then(res => {
+				expect(res).to.be.an('array').to.have.length(1)
+				expect(res[0]).to.have.property('id');
+				expect(res[0]).to.have.property('links').to.be.an('array');
+				expect(res[0]).to.have.property('completed').to.equal(false);
+			});
+		});
+	});
+
 	describe('Test Clear Method', () => {
 		it('should get available users', () => {
 			return users.findAll().then(result => {
@@ -634,7 +758,7 @@ describe('Dummy Data Model', () => {
 			return users.clear().then(res => {
 				expect(res)
 					.to.have.property('message')
-					.to.equal('Successful cleared users')
+					.to.equal('Successfully cleared users')
 			});
 		});
 
@@ -649,12 +773,24 @@ describe('Dummy Data Model', () => {
 				.then(res => {
 					expect(res)
 						.to.have.property('message')
-						.to.equal('Successful cleared messages');
+						.to.equal('Successfully cleared messages');
 				});
 		});
 
 		it('should return 0 users', () => {
 			return messages.findAll().then(result => {
+				expect(result.length).to.equal(0);
+			});
+		});
+
+		it('should clear todos', () => {
+			return todos.clear().then(res => {
+				expect(res).to.have.property('message').to.equal('Successfully cleared todos')
+			});
+		});
+
+		it('should return 0 users', () => {
+			return todos.findAll().then(result => {
 				expect(result.length).to.equal(0);
 			});
 		});

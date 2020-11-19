@@ -1,6 +1,6 @@
 import functs from '../helpers/functs';
 
-const { getFieldsToReturn } = functs;
+const { getFieldsToReturn, checkDatatype } = functs;
 
 // public interface to create a single model
 function create(modelToCreate, returnFields=[]) {
@@ -10,6 +10,11 @@ function create(modelToCreate, returnFields=[]) {
     });
     if (missingSchemaProp) {  
       reject({ message: `${missingSchemaProp} is not defined in schema for ${this.modelName}` });
+    }
+
+    const datatypeChecking = checkDatatype(this.allowedFields, this.schema, modelToCreate);
+    if (datatypeChecking[0]) {
+      return reject({ message: datatypeChecking[1] });
     }
 
     if (!Array.isArray(returnFields)) {
@@ -26,7 +31,7 @@ function create(modelToCreate, returnFields=[]) {
       let allFieldsPassed = true;
       const requiredFieldsCollection = [];
       this.requiredFields.forEach((required) => {
-        if (!modelToCreate[required]) {
+        if (modelToCreate[required] === undefined) {
           requiredFieldsCollection.push(required);
           allFieldsPassed = false;
         }
@@ -49,12 +54,11 @@ function create(modelToCreate, returnFields=[]) {
 // check for unique keys
 // then create a new model 
 function createModel(modelToCreate, returnFields, resolve, reject) {
+  modelToCreate.createdAt = new Date();
+  modelToCreate.updatedAt = new Date();
   if (!this.model.length) {
     modelToCreate.id = 1;
-    modelToCreate.createdAt = new Date();
-    modelToCreate.updatedAt = new Date();
     this.model.push(modelToCreate);
-    // return resolve(modelToCreate);
     return resolve(getFieldsToReturn(modelToCreate, returnFields))
   } else {
     const lastModel = this.model[this.model.length - 1];
@@ -63,8 +67,6 @@ function createModel(modelToCreate, returnFields, resolve, reject) {
     // verify uniqueKeys
     if (!this.uniqueKeys.length) {
       modelToCreate.id = lastModelId + 1;
-      modelToCreate.createdAt = new Date();
-      modelToCreate.updatedAt = new Date();
       this.model.push(modelToCreate);
       return resolve(getFieldsToReturn(modelToCreate, returnFields))
     } else {
@@ -81,8 +83,6 @@ function createModel(modelToCreate, returnFields, resolve, reject) {
       });
       if (!foundDuplicate) {
         modelToCreate.id = lastModelId + 1;
-        modelToCreate.createdAt = new Date();
-        modelToCreate.updatedAt = new Date();
         this.model.push(modelToCreate);
         return resolve(getFieldsToReturn(modelToCreate, returnFields));
       }

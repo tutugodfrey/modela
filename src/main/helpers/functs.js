@@ -47,4 +47,28 @@ export default {
     returnString = returnString.substr(0, returnString.length - 1)
     return `${queryString} returning ${returnString.trim()}`;
   },
+  checkDatatype: (allowedFields, schema, modelToCreate) => {
+    let datatypeValidationMessage = '';
+    const datatypeField = allowedFields.find(field => {
+      if (schema[field].dataType) {
+        if (typeof modelToCreate[field] === 'object') {
+          let type = '';
+          if (Object.prototype.toString.call(modelToCreate[field]) === '[object Array]') {
+            type = 'array';
+          }
+
+          if (type !== schema[field].dataType) {
+            datatypeValidationMessage = `Expected input of type ${schema[field].dataType} for ${field}`;
+            return true;
+          }
+        } else {
+          if (typeof modelToCreate[field] !== schema[field].dataType) {
+            datatypeValidationMessage = `Expected input of type ${schema[field].dataType} for ${field}`;
+            return true;
+          }
+        }
+      }
+    });
+    return [datatypeField, datatypeValidationMessage]
+  }
 }
