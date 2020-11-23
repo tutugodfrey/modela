@@ -11,6 +11,7 @@ import {
 	deleteQuery,
 	getQuery,
 	rawQuery,
+	createTableQuery
 } from './queryTypes';
 
 import bulkCreate, {createBulkItem, createBulkItemWithDB } from './methods/bulkCreate';
@@ -33,7 +34,7 @@ const DataModela = class {
 		this.uniqueKeys = [];
 		this.requiredFields = [];
 		this.model = [];
-		this.supportedDataTypes = ['string', 'number', 'boolean', 'array', 'date']
+		this.supportedDataTypes = ['string', 'number', 'boolean', 'array', 'time', 'date', 'timestamp', 'timestamptz']
 		this.create = create.bind(this);
 		this.createModel = createModel.bind(this);
 		this.createModelWithDB = createModelWithDB.bind(this);
@@ -53,6 +54,7 @@ const DataModela = class {
 		this.updateQuery = updateQuery.bind(this);
 		this.deleteQuery = deleteQuery.bind(this);
 		this.rawQuery = rawQuery.bind(this);
+		this.createTableQuery = createTableQuery.bind(this)
 
 		this.allowedFields.forEach(field => {
 			if (this.schema[field].required) return this.requiredFields.push(field);

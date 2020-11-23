@@ -6,6 +6,7 @@ import { testData } from './helpers';
 console.time('timeChecked');
 const { expect } = chai;
 const users = new DataModela('users', {
+	id: {},
 	name: {
 		required: true,
 		unique: true
@@ -13,11 +14,18 @@ const users = new DataModela('users', {
 	email: {
 		required: true
 	},
-	address: {}
+	address: {},
+	createdAt: {
+		dataType: 'timestamp',
+	},
+	updatedAt: {
+		dataType: 'timestamp',
+	}
 });
 
 // use to test datatype checking
 const todos = new DataModela('todos', {
+	id: {},
 	userId: {
 		dataType: 'number',
 	},
@@ -35,16 +43,31 @@ const todos = new DataModela('todos', {
 		required: true,
 		defaultValue: false,
 	},
-	deadline: {},
+	deadline: {
+		dataType: 'timestamptz',
+	},
 	links: {
 		dataType: 'array',
+		arrayOfType: 'char',
+		charLength: `30`
 	},
-	createdAt: {},
-	updatedAt: {}
+	createdAt: {
+		dataType: 'timestamp'
+	},
+	updatedAt: {
+		dataType: 'timestamp'
+	}
 });
 
 const messages = new DataModela('messages', {
-	message: {}
+	id: {},
+	message: {},
+	createdAt: {
+		dataType: 'timestamp',
+	},
+	updatedAt: {
+		dataType: 'timestamp',
+	}
 });
 if (parseInt(process.env.USE_DB)) {
 	const connection = connect(process.env.DATABASE_URL, [ users, messages, todos ]);
@@ -623,7 +646,7 @@ describe('Dummy Data Model', () => {
 			});
 		});
 
-		it('should create bulk model with required fields', () => {
+		it('should create bulk message model with required fields', () => {
 			const message = [
 				{
 					message: 'Hello world!!!'
@@ -636,7 +659,7 @@ describe('Dummy Data Model', () => {
 						.property('message').to.equal('Hello world!!!')
 				})
 		});
-		it('should create bulk model with required fields', () => {
+		it('should create message model with required fields', () => {
 			const message = { message: 'Hello world!' };
 			return messages.create(message)
 				.then(res => {
@@ -680,7 +703,8 @@ describe('Dummy Data Model', () => {
 				userId: 12,
 				description: 123,
 				completed: false,
-				deadline: Date.now(),
+				// deadline: new Date(Date.now()).toISOString(),
+				deadline: new Date(1605788451842).toISOString(),
 				links: ['link1', 'link2'],
 			})
 			.catch(err => {
@@ -696,8 +720,9 @@ describe('Dummy Data Model', () => {
 				userId: 12,
 				description: 'description of the task to be completed',
 				completed: false,
-				deadline: Date.now(),
-				links: '[link1, link2]',
+				// deadline: Date.now(),
+				deadline: new Date(1605788451842).toISOString(),
+				links: '[ link1, link2 ]',
 			})
 			.catch(err => {
 				expect(err)
@@ -706,14 +731,19 @@ describe('Dummy Data Model', () => {
 			});
 		});
 
-		it('should fails if a wrong data type is provided', () => {
+		it('should return a not exist message if table does not exist', () => {
 			return todos.findAll({
 				where: {
 					title: 'first activity for day',
 				},
 			})
 			.then(res => {
+				// active when using in-memory data or if database table already exist
 				expect(res).to.be.an('array').to.have.length(0)
+			})
+			.catch(err => {
+				// active when using db and db table does not exist
+				expect(err).to.have.property('message').to.equal('table todos does not exist')
 			});
 		});
 
@@ -724,7 +754,7 @@ describe('Dummy Data Model', () => {
 				userId: 12,
 				description: 'description of the task to be completed',
 				completed: true,
-				deadline: new Date(1605788451842).toISOString(),
+				deadline: new Date(Date.now()).toISOString(),
 			})
 			.then(res => {
 				expect(res).to.have.property('id');
