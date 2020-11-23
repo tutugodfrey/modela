@@ -3,3 +3,4 @@ export { default as updateQuery } from './update';
 export { default as getQuery } from './get';
 export { default as deleteQuery } from './delete';
 export { default as rawQuery } from './rawQuery';
+export { default as createTableQuery } from './createTable';

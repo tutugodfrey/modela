@@ -58,13 +58,25 @@ export default {
           }
 
           if (type !== schema[field].dataType) {
-            datatypeValidationMessage = `Expected input of type ${schema[field].dataType} for ${field}`;
-            return true;
+            if (field !== 'createdAt' || field !== 'updatedAt') {
+              datatypeValidationMessage = `Expected input of type ${schema[field].dataType} for ${field}`;
+              return true;
+            }
           }
         } else {
           if (typeof modelToCreate[field] !== schema[field].dataType) {
-            datatypeValidationMessage = `Expected input of type ${schema[field].dataType} for ${field}`;
-            return true;
+            if (field === 'createdAt' || field === 'updatedAt') {
+              // in case these fields are specified in schema but not in model creation
+              // pass;
+            }  else if (schema[field].dataType === 'timestamp' || schema[field].dataType === 'timestamptz') {
+              if (new Date(modelToCreate[field]) === 'Invalid Date') {
+                datatypeValidationMessage = `Expected input of type ${schema[field].dataType} for ${field}`;
+                return true;
+              }
+            } else {
+              datatypeValidationMessage = `Expected input of type ${schema[field].dataType} for ${field}`;
+              return true;
+            }
           }
         }
       }

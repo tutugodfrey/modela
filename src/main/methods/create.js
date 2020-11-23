@@ -30,6 +30,14 @@ function create(modelToCreate, returnFields=[]) {
       reject({ message: 'Expected an array of fields to return' });
     }
 
+    if (this.schema.createdAt && modelToCreate.createdAt === undefined) {
+      modelToCreate.createdAt = new Date().toISOString();
+    }
+
+    if (this.schema.updatedAt && modelToCreate.updatedAt === undefined) {
+      modelToCreate.updatedAt = new Date().toISOString();
+    }
+
     if (!this.requiredFields.length) {
       if (this.using_db) {
         return this.createModelWithDB(modelToCreate, returnFields, resolve, reject);
@@ -59,19 +67,21 @@ function create(modelToCreate, returnFields=[]) {
 // check for unique keys
 // then create a new model 
 function createModel(modelToCreate, returnFields, resolve, reject) {
-  modelToCreate.createdAt = new Date();
-  modelToCreate.updatedAt = new Date();
   if (!this.model.length) {
-    modelToCreate.id = 1;
+    if (this.schema.id && modelToCreate.id === undefined) {
+      modelToCreate.id = 1;
+    }
     this.model.push(modelToCreate);
     return resolve(getFieldsToReturn(modelToCreate, returnFields))
   } else {
-    const lastModel = this.model[this.model.length - 1];
-    const lastModelId = lastModel.id;
+    if (this.schema.id && modelToCreate.id === undefined) {
+      const lastModel = this.model[this.model.length - 1];
+      const lastModelId = lastModel.id;
+      modelToCreate.id = lastModelId + 1;
+    }
 
     // verify uniqueKeys
     if (!this.uniqueKeys.length) {
-      modelToCreate.id = lastModelId + 1;
       this.model.push(modelToCreate);
       return resolve(getFieldsToReturn(modelToCreate, returnFields))
     } else {
@@ -87,7 +97,6 @@ function createModel(modelToCreate, returnFields, resolve, reject) {
         });
       });
       if (!foundDuplicate) {
-        modelToCreate.id = lastModelId + 1;
         this.model.push(modelToCreate);
         return resolve(getFieldsToReturn(modelToCreate, returnFields));
       }
@@ -96,11 +105,12 @@ function createModel(modelToCreate, returnFields, resolve, reject) {
 }
 
 function createModelWithDB(modelToCreate, returnFields, resolve, reject) {
-  modelToCreate.createdAt = 'now()';
-  modelToCreate.updatedAt = 'now()';
   const queryString = this.createQuery(this.modelName, modelToCreate, returnFields);
-  this.db_connection.query(queryString)
+  return this.db_connection.query(queryString)
     .then(res => {
+      if (Array.isArray(modelToCreate)) {
+        return resolve(res.rows);
+      }
       return resolve(res.rows[0]);
     })
     .catch(err => {
@@ -109,7 +119,22 @@ function createModelWithDB(modelToCreate, returnFields, resolve, reject) {
         const value = err.detail.split('=')[1].split(')')[0].split('(')[1];
         return reject({ message: `${this.singleModel} with ${key} = ${value} already exists` });
       }
+      if (err.code === '42P01') {
+        const createTableQuery = this.createTableQuery();
+        console.log(createTableQuery)
+         return this.db_connection.query(createTableQuery).then(tableResult => {
+           return this.db_connection.query(queryString).then(res => {
+            if (Array.isArray(modelToCreate)) {
+              return resolve(res.rows);
+            }
+            return resolve(res.rows[0]);
+           })
+         })
+      }
       return reject(err.detail);
+    })
+    .catch(err => {
+      return reject(err);
     });
 };
 

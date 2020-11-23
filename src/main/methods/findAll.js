@@ -13,12 +13,15 @@ function findAll(condition = 'all', returnFields=[]) {
   const result = new Promise((resolve, reject)  => {
     if (this.using_db) {
       const queryString = this.getQuery(this.modelName, condition, returnFields);
-      this.db_connection.query(queryString)
+      return this.db_connection.query(queryString)
         .then(res => {
-          resolve(res.rows)
+          return resolve(res.rows)
         })
         .catch(err => {
-          reject(err)
+          if (err.code === '42P01') {
+            return reject({ message: `table ${this.modelName} does not exist`})
+          }
+          return reject(err)
         });
     } else {
     if (condition === 'all') resolve(this.model);
