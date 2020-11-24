@@ -73,6 +73,8 @@ export default {
                 datatypeValidationMessage = `Expected input of type ${schema[field].dataType} for ${field}`;
                 return true;
               }
+            } else if (schema[field].dataType === 'varchar' || schema[field].dataType === 'char') {
+              // pass
             } else {
               datatypeValidationMessage = `Expected input of type ${schema[field].dataType} for ${field}`;
               return true;

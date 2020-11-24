@@ -1,7 +1,7 @@
 import functs from '../helpers/functs';
 
 const { confirmPropMatch, getFieldsToReturn  } = functs;
-function update(conditions, propsToUpdate, returnFields=[]) {
+function update(propsToUpdate, conditions, returnFields=[]) {
   /* 
     propsToUpdate contain the new properties to replace the old ones
     this method should be called on the particular object to update.
@@ -13,13 +13,13 @@ function update(conditions, propsToUpdate, returnFields=[]) {
     throw new TypeError('Expected an array of fields to return');
   }
   const result = new Promise((resolve, reject) => {
+    if (!propsToUpdate || (Object.prototype.toString.call(propsToUpdate) !== '[object Object]'))
+    return reject({ message:
+      'require argument 1 of type object. only one argument supplied!' });
+
     if (!conditions || !conditions.where)
       return reject({ message:
-        'require argument at position 1 to specify update condition' });
-
-    if (!propsToUpdate || (Object.prototype.toString.call(propsToUpdate) !== '[object Object]'))
-      return reject({ message:
-        'require argument 2 of type object. only one argument supplied!' });
+        'require argument at position 2 to specify update condition' });
 
     const missingSchemaProp = propsToUpdate && Object.keys(propsToUpdate).find(field => {
       if (!['id', 'updatedAt', 'createdAt'].includes(field)) {

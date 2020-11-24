@@ -503,40 +503,47 @@ describe('Dummy Data Model', () => {
 			.catch(err => {
 				expect(err).to.have.property('message')
 				expect(err.message).to.equal(
-					'require argument at position 1 to specify update condition'
+					'require argument 1 of type object. only one argument supplied!'
 				);
 			});
 		});
 
 		it('should return error no params if no params are pass in', () => {
 			return users.update(
-				{ where: {}},
+				user1DataToUpdate,
+				// { where: {}},
 			)
 			.catch(err => {
 				expect(err).to.have.property('message')
 				expect(err.message).to.equal(
-					'require argument 2 of type object. only one argument supplied!'
+					'require argument at position 2 to specify update condition',
 				);
 			});
 		});
 
 		it('should not update a model that does not exist', () => {
-			return users.update({
-				where: {
-					id: wrongdUserDetails.id,
+			return users.update(
+				user1DataToUpdate,
+				{
+					where: {
+						id: wrongdUserDetails.id,
+					},
 				}
-			}, user1DataToUpdate)
+			)
 			.catch((error) => {
 				expect(error).to.eql({ message: `user not found` })
 			})
 		});
 
 		it('should update a model', () => {
-			return users.update({
-				where: {
-					id: createdUser1.id
+			return users.update(
+				user1DataToUpdate,
+				{
+					where: {
+						id: createdUser1.id,
+					},
 				}
-			}, user1DataToUpdate)
+			)
 			.then((updatedUser1) => {
 				expect(updatedUser1.id).to.equal(createdUser1.id);
 				expect(updatedUser1.name).to.equal(user1DataToUpdate.name);
@@ -549,12 +556,15 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should update a model with condition other than id specified', () => {
-			return users.update({
-				where: {
-					email: user2.email,
-					name: user2.name,
+			return users.update(
+				user2DataToUpdate,
+				{
+					where: {
+						email: user2.email,
+						name: user2.name,
+					}
 				}
-			}, user2DataToUpdate)
+			)
 			.then((newUser2) => {
 				expect(newUser2.id).to.equal(createdUser2.id);
 				expect(newUser2.name).to.equal(createdUser2.name);
@@ -565,15 +575,18 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should not update model that does not have matching group condition', () => {
-			return users.update({
-				where: {
-					id: createdUser2.id,
-					email: user1.email,
-					name: user1.name,
-				},
-				type: 'or',
-				groups: [['id', 'name'], ['id', 'email']]
-			}, user2DataToUpdate)
+			return users.update(
+				user2DataToUpdate,
+				{
+					where: {
+						id: createdUser2.id,
+						email: user1.email,
+						name: user1.name,
+					},
+					type: 'or',
+					groups: [['id', 'name'], ['id', 'email']]
+				}
+			)
 			.then((newUser2) => {
 				expect(newUser2.name).to.equal('undefined');
 			})
@@ -585,17 +598,19 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should update model that matches a group condition', () => {
-			return users.update({
-				where: {
-					id: createdUser2.id,
-					email: user1.email,
-					name: user2.name,
+			return users.update(
+				user2DataToUpdate,
+				{
+					where: {
+						id: createdUser2.id,
+						email: user1.email,
+						name: user2.name,
+					},
+					type: 'or',
+					groups: [['id', 'name'], ['id', 'email']]
 				},
-				type: 'or',
-				groups: [['id', 'name'], ['id', 'email']]
-			},
-			user2DataToUpdate,
-			['id', 'name', 'email', 'address'])
+				['id', 'name', 'email', 'address'],
+			)
 			.then((newUser2) => {
 				expect(newUser2.id).to.equal(createdUser2.id);
 				expect(newUser2.name).to.equal(createdUser2.name);
@@ -682,14 +697,17 @@ describe('Dummy Data Model', () => {
 		});
 
 		it('should validate schema properties when updating models', () => {
-			return messages.update({
-				where: {
-					id: createdMessage1.id
+			return messages.update(
+				{
+					message: 'Hello world updated',
+					recipient: 'john'
+				},
+				{
+					where: {
+						id: createdMessage1.id
+					}
 				}
-			}, {
-				message: 'Hello world updated',
-				recipient: 'john'
-			})
+			)
 			.catch(err => {
 				expect(err).to.have.property('message').to.equal('recipient is not defined in schema for messages')
 			})

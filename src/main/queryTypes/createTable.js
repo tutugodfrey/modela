@@ -1,5 +1,4 @@
 function createTableQuery() {
-
   const fields = this.allowedFields;
   const schema = this.schema;
   const typeMapping = {
