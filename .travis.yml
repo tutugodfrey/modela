@@ -1,12 +1,16 @@
 language: node_js
 node_js:
-  - "6.10.3"
+  - "10.16.3"
 # add codeclimate report token
 env:
   global:
     - CC_TEST_REPORTER_ID=c30efe4967139073721ba0e5ae6a97c511c3bc53ce11144c0c2030bae9655c75
 
+services:
+  - postgresql
+
 before_script:
+  -  psql -c 'create database datamodela;' -U postgres
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
