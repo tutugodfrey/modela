@@ -1,6 +1,6 @@
 import functs from '../helpers/functs';
 
-const { getFieldsToReturn, checkDatatype } = functs;
+const { getFieldsToReturn, checkDatatype, updateTimestamp } = functs;
 
 // public interface to create a single model
 function create(modelToCreate, returnFields=[]) {
@@ -28,14 +28,6 @@ function create(modelToCreate, returnFields=[]) {
 
     if (!Array.isArray(returnFields)) {
       reject({ message: 'Expected an array of fields to return' });
-    }
-
-    if (this.schema.createdAt && modelToCreate.createdAt === undefined) {
-      modelToCreate.createdAt = new Date().toISOString();
-    }
-
-    if (this.schema.updatedAt && modelToCreate.updatedAt === undefined) {
-      modelToCreate.updatedAt = new Date().toISOString();
     }
 
     if (!this.requiredFields.length) {
@@ -67,6 +59,7 @@ function create(modelToCreate, returnFields=[]) {
 // check for unique keys
 // then create a new model 
 function createModel(modelToCreate, returnFields, resolve, reject) {
+  updateTimestamp.call(this, modelToCreate); // update createdAt and updatedAt
   if (!this.model.length) {
     if (this.schema.id && modelToCreate.id === undefined) {
       modelToCreate.id = 1;
@@ -105,6 +98,14 @@ function createModel(modelToCreate, returnFields, resolve, reject) {
 }
 
 function createModelWithDB(modelToCreate, returnFields, resolve, reject) {
+  if (Array.isArray(modelToCreate)) {
+    modelToCreate.forEach((_modelToCreate)=> {
+      updateTimestamp.call(this, _modelToCreate); // update createdAt and updatedAt
+    });
+  } else {
+    updateTimestamp.call(this, modelToCreate);
+  }
+
   const queryString = this.createQuery(this.modelName, modelToCreate, returnFields);
   return this.db_connection.query(queryString)
     .then(res => {

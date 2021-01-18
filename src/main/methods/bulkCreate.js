@@ -68,21 +68,12 @@ function createBulkItem(modelToCreate, returnFields) {
 	return result;
 }
 
+// will attempt to eliminate this function in future
 function createBulkItemWithDB(modelsToCreate, returnFields=[]) {
-  modelsToCreate.forEach((modelToCreate)=> {
-    if (this.schema.createdAt && modelToCreate.createdAt === undefined) {
-      modelToCreate.createdAt = new Date().toISOString();
-    }
-
-    if (this.schema.updatedAt && modelToCreate.updatedAt === undefined) {
-      modelToCreate.updatedAt = new Date().toISOString();
-    }
-  });
   const newModel = new Promise((resolve, reject) => {
     return this.createModelWithDB(modelsToCreate, returnFields, resolve, reject);
   });
   return newModel;
-
 }
 
 export default bulkCreate;

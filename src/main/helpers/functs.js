@@ -84,5 +84,15 @@ export default {
       }
     });
     return [datatypeField, datatypeValidationMessage]
-  }
+  },
+  updateTimestamp: function (model) {
+    if (this.schema.createdAt && model.createdAt === undefined) {
+      model.createdAt = new Date().toISOString();
+    }
+
+    if (this.schema.updatedAt && model.updatedAt === undefined) {
+      model.updatedAt = new Date().toISOString();
+    }
+    return model;
+  },
 }
