@@ -152,7 +152,7 @@ describe('Dummy Data Model', () => {
 				expect(user.email).to.equal(user1.email);
 				expect(user.address).to.equal(user1.address);
 				expect(user).to.have.property('createdAt');
-				expect(user).to.have.property('updatedAt')
+				expect(user).to.have.property('updatedAt');
 			})
 		});
 
@@ -223,6 +223,12 @@ describe('Dummy Data Model', () => {
 				.then(res =>  res)
 				.then(result => {
 					expect(result.length).to.equal(3);
+					expect(result[0]).to.have.property('id');
+					expect(result[0]).to.have.property('name');
+					expect(result[0]).to.have.property('email');
+					expect(result[0]).to.have.property('address');
+					expect(result[0]).to.have.property('updatedAt');
+					expect(result[0]).to.have.property('createdAt');
 					Object.assign(createdBulkUsers, result);
 				});
 		});
