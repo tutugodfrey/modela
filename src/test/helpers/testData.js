@@ -38,6 +38,9 @@ export default {
   user2DataToUpdate: {
     address: 'has moved to jupiter',
   },
+  user2DataToUpdate2: {
+    address: 'has relocated to pluto',
+  },
   wrongdUserDetails: {
     id: 1000,
     name: 'randomname',

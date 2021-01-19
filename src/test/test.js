@@ -79,6 +79,7 @@ const {
 	bulkUsers,
 	user1DataToUpdate,
 	user2DataToUpdate,
+	user2DataToUpdate2,
 	wrongdUserDetails,
 } = testData;
 const createdUser1 = {};
@@ -670,6 +671,27 @@ describe('Dummy Data Model', () => {
 				expect(newUser2.email).to.equal(createdUser2.email);
 				expect(newUser2.address).to.not.equal(user2.address);
 				expect(newUser2.address).to.equal(user2DataToUpdate.address);
+			});
+		});
+
+		it('should use type:or to update model where two or conditions are specified', () => {
+			return users.update(
+				user2DataToUpdate2,
+				{
+					where: {
+						email: user2.email,
+						name: user2.username,
+					},
+					type: 'or',
+				}
+			)
+			.then((newUser2) => {
+				expect(newUser2.id).to.equal(createdUser2.id);
+				expect(newUser2.name).to.equal(createdUser2.name);
+				expect(newUser2.email).to.equal(createdUser2.email);
+				expect(newUser2.address).to.not.equal(user2.address);
+				expect(newUser2.address).to.not.equal(user2DataToUpdate.address);
+				expect(newUser2.address).to.equal(user2DataToUpdate2.address);
 			});
 		});
 

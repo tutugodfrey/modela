@@ -12,13 +12,17 @@ const updateQuery = (modelName, conditions, newProps, returnFields=[]) => {
   let queryString;
   let groupCondition;
   let groupString = '';
-  const type = conditions.type;
+  let whereString = '';
+  let propString = '';
   const whereCondition = conditions.where;
-  if (conditions.groups && type === 'or') {
+  const whereKeys = Object.keys(whereCondition);
+  const newPropsKeys = Object.keys(newProps);
+  const type = conditions.type ? conditions.type.toUpperCase() : 'AND';
+  if (conditions.groups && type === 'OR') {
     groupCondition = conditions.groups;
     groupCondition.forEach(group => {
       if (groupString) {
-        groupString = `${groupString} OR`;
+        groupString = `${groupString} ${type}`;
       }
       let groupStr = '';
       group.forEach(field => {
@@ -31,10 +35,8 @@ const updateQuery = (modelName, conditions, newProps, returnFields=[]) => {
       groupString = `${groupString} ${groupStr})`;
     });
   }
-  const whereKeys = Object.keys(whereCondition);
-  const newPropsKeys = Object.keys(newProps);
+
   queryString = `UPDATE ${modelName} SET`;
-  let propString = '';
   newPropsKeys.forEach((prop) => {
     if (propString === '') {
       propString = `${propString}"${prop}" = '${newProps[prop]}'`;
@@ -43,14 +45,15 @@ const updateQuery = (modelName, conditions, newProps, returnFields=[]) => {
     }
   });
 
-  let whereString = '';
-  whereKeys.forEach((prop) => {
-    if (!whereString) {
-      whereString = `${whereString}"${prop}" = '${whereCondition[prop]}'`;
-    } else {
-      whereString = `${whereString} AND "${prop}" = '${whereCondition[prop]}'`;
-    }
-  });
+  if (!groupString) {
+    whereKeys.forEach((prop) => {
+      if (!whereString) {
+        whereString = `${whereString}"${prop}" = '${whereCondition[prop]}'`;
+      } else {
+        whereString = `${whereString} ${type} "${prop}" = '${whereCondition[prop]}'`;
+      }
+    });
+  }
 
   if (groupCondition && groupString) {
     queryString = `${queryString} ${propString} WHERE ${groupString}`;
