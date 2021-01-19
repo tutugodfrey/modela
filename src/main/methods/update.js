@@ -34,13 +34,13 @@ function update(propsToUpdate, conditions, returnFields=[]) {
     if (this.using_db) {
       propsToUpdate.updatedAt = 'now()';
       const queryString = this.getQuery(this.modelName, conditions, propsToUpdate);
-      this.db_connection.query(queryString)
+      this.dbConnection.query(queryString)
         .then(res => {
           return res.rows[0]
         })
         .then((user) => {
           const queryString = this.updateQuery(this.modelName, conditions, propsToUpdate, returnFields);
-          this.db_connection.query(queryString)
+          this.dbConnection.query(queryString)
           .then(res => {
             if (!res.rows.length) {
               return reject({ message: `${this.singleModel} not found` });

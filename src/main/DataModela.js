@@ -23,7 +23,7 @@ const DataModela = class {
 		}
 		this.using_db = 0;
 		if (parseInt(process.env.USE_DB) === 1) {
-			this.db_connection = null;
+			this.dbConnection = null;
 			this.using_db = 1;
 		};
 

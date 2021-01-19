@@ -30,7 +30,7 @@ function findAll(condition = 'all', returnFields=[]) {
 
     if (this.using_db) {
       const queryString = this.getQuery(this.modelName, condition, returnFields);
-      return this.db_connection.query(queryString)
+      return this.dbConnection.query(queryString)
         .then(res => {
           return resolve(res.rows)
         })

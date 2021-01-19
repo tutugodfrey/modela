@@ -13,7 +13,7 @@ const connect = (connectionString, models=[]) => {
   }
 
   if (models.length) {
-    models.forEach(model => model.db_connection = pool);
+    models.forEach(model => model.dbConnection = pool);
   }
   return pool;
 }

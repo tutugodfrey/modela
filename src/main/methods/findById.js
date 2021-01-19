@@ -9,7 +9,7 @@ function findById(id, returnFields=[]) {
   const result = new Promise((resolve, reject) => {
     if (this.using_db) {
       const queryString = this.getQuery(this.modelName, id, returnFields);
-      this.db_connection.query(queryString)
+      this.dbConnection.query(queryString)
         .then(res => {
           if (!res.rows.length) {
             reject({ message: `${this.singleModel} not found` })
