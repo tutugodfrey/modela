@@ -353,6 +353,107 @@ describe('Dummy Data Model', () => {
 	});
 
 	describe('findAll', () => {
+		it('should fail if condition is not all or {}', () => {
+			return users.findAll([{
+				where: {
+					address: user1.address,
+					email: user2.email,
+				},
+			}])
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.equal(0);
+			})
+			.catch(err => {
+				expect(err.message)
+				.to.have.equal(
+					'Expected an object with key \'where\' or the string \'all\' at position 1',
+				);
+			});
+		});
+
+		it('should fail if condition is not all and is does not have an {} wih where key', () => {
+			return users.findAll({})
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.equal(0);
+			})
+			.catch(err => {
+				expect(err.message)
+					.to.have.equal(
+						'Expected an object with key \'where\' or the string \'all\' at position 1',
+					);
+			});
+		});
+
+		it('should fail for where condition without properties', () => {
+			return users.findAll({ where: {}})
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.equal(0);
+			})
+			.catch(err => {
+				expect(err.message)
+					.to.have.equal(
+						'Expected an object with key \'where\' or the string \'all\' at position 1',
+					);
+			});
+		});
+
+		it('should fail if return fields is not an array, case 1', () => {
+			return users.findAll('all', {})
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.equal(0);
+			})
+			.catch(err => {
+				expect(err.message).to.equal('Expected an array of fields to return');
+			});
+		});
+
+		it('should fail if return fields is not an array, case 2', () => {
+			return users.findAll({
+				where: {
+					username: user1.username,
+				}
+			}, {})
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.equal(0);
+			})
+			.catch(err => {
+				expect(err.message).to.equal('Expected an array of fields to return');
+			});
+		});
+
+		it('should return all models if no condition is specified', () => {
+			return users.findAll()
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.equal(6);
+				expect(allUsers[0]).to.have.property('id');
+				expect(allUsers[0]).to.have.property('address');
+				expect(allUsers[0]).to.have.property('name');
+				expect(allUsers[0]).to.have.property('email');
+				expect(allUsers[0]).to.have.property('createdAt');
+				expect(allUsers[0]).to.have.property('updatedAt');
+			});
+		});
+
+		it('should return all models if no condition is specified', () => {
+			return users.findAll('all', ['name', 'email', 'createdAt', 'updatedAt'])
+			.then((allUsers) => {
+				expect(allUsers).to.be.an('array');
+				expect(allUsers.length).to.equal(6);
+				expect(allUsers[0]).to.have.property('name');
+				expect(allUsers[0]).to.have.property('email');
+				expect(allUsers[0]).to.have.property('createdAt');
+				expect(allUsers[0]).to.have.property('updatedAt');
+				expect(allUsers[0]).to.not.have.property('id');
+				expect(allUsers[0]).to.not.have.property('address');
+			});
+		});
+
 		it('should return an empty if all conditions does not match', () => {
 			return users.findAll({
 				where: {
@@ -377,14 +478,6 @@ describe('Dummy Data Model', () => {
 			.then((allUsers) => {
 				expect(allUsers).to.be.an('array');
 				expect(allUsers.length).to.equal(0);
-			});
-		});
-
-		it('should return all models if no condition is specified', () => {
-			return users.findAll()
-			.then((allUsers) => {
-				expect(allUsers).to.be.an('array');
-				expect(allUsers.length).to.equal(6);
 			});
 		});
 
