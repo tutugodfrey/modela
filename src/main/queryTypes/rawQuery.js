@@ -1,7 +1,7 @@
 function rawQuery(queryString) {
   if (!queryString) return 'Please provide a query string'
   const result = new Promise((resolve, reject) => {
-    this.db_connection.query(queryString)
+    this.dbConnection.query(queryString)
       .then((res) => {
         return resolve(res.rows);
       })

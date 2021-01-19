@@ -107,7 +107,7 @@ function createModelWithDB(modelToCreate, returnFields, resolve, reject) {
   }
 
   const queryString = this.createQuery(this.modelName, modelToCreate, returnFields);
-  return this.db_connection.query(queryString)
+  return this.dbConnection.query(queryString)
     .then(res => {
       if (Array.isArray(modelToCreate)) {
         return resolve(res.rows);
@@ -123,8 +123,8 @@ function createModelWithDB(modelToCreate, returnFields, resolve, reject) {
       if (err.code === '42P01') {
         const createTableQuery = this.createTableQuery();
         console.log(createTableQuery)
-         return this.db_connection.query(createTableQuery).then(tableResult => {
-           return this.db_connection.query(queryString).then(res => {
+         return this.dbConnection.query(createTableQuery).then(tableResult => {
+           return this.dbConnection.query(queryString).then(res => {
             if (Array.isArray(modelToCreate)) {
               return resolve(res.rows);
             }

@@ -15,7 +15,7 @@ function find(condition, returnFields=[]) {
       reject({ message: `missing object propertiy 'where' to find model` });
     if (this.using_db) {
       const queryString = this.getQuery(this.modelName, condition, returnFields);
-      this.db_connection.query(queryString)
+      this.dbConnection.query(queryString)
         .then(res => {
           if (!res.rows.length) {
             reject({ message: `${this.singleModel} not found` });
