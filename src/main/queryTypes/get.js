@@ -1,63 +1,30 @@
 import functs from '../helpers/functs';
 
-const { addReturnString } = functs;
-const getQuery = (modelName, condition, returnFields=[]) => {
-  const typeOfCondition = (typeof condition);
+const { addReturnString, generateWhereString, generateGroupString } = functs;
+const getQuery = (modelName, conditions, returnFields=[]) => {
+  const typeOfCondition = (typeof conditions);
   if (typeOfCondition !== 'string' && typeOfCondition !== 'object' && typeOfCondition !== 'number') {
     return { message: 'type error!' };
   }
 
-  let queryString = '';
-  let returnString = '';
-  if (returnFields.length){
-    returnString = addReturnString('', returnFields).substr(11);
-  } else {
-    returnString = '*';
+  function log (queryString) {
+     /* eslint-disable no-console */
+    process.env.NODE_ENV === 'production' ? null : console.log(queryString);
+    return queryString;
   }
-  if (condition === 'all') {
-    queryString = `SELECT ${returnString} FROM ${modelName}`;
-  } else if (typeof condition === 'number') {
-    queryString = `SELECT ${returnString} FROM ${modelName} WHERE "id" = ${condition}`;
-  } else {
-    /* eslint-disable prefer-destructuring */
-    let type;
-    if (!condition.type) {
-      type = 'AND';
-    } else {
-      type = condition.type.toUpperCase();
-    }
-    const keys = Object.keys(condition.where);
-    queryString = `SELECT ${returnString} FROM ${modelName}`;
-    keys.forEach((key) => {
-      if (Array.isArray(condition.where[key])) {
-        let str = '';
-        const matchValue = condition.where[key]
-        matchValue.forEach(value => {
-          if (!str) {
-            str = `${str} "${key}" = '${value}'`
-          } else {
-            str = `${str} OR "${key}" = '${value}'`
-          }
-        });
-        if (queryString.indexOf('WHERE') === -1) {
-          queryString = `${queryString} WHERE ${str}`
-        } else {
-          queryString = `${queryString} ${type} ${str}`
-        }
-      } else if (queryString.indexOf('WHERE') === -1) {
-        queryString = `${queryString} WHERE "${key}" = '${condition.where[key]}'`;
-      } else {
-        queryString = `${queryString} ${type} "${key}" = '${condition.where[key]}'`;
-      }
-    });
-  }
-  if (process.env.NODE_ENV !== 'production') {
-    /* eslint-disable no-console */
-    console.log(queryString);
-  }
-  return queryString;
 
-  // return 'select all from users where username = \'john\'';
+  const returnString = returnFields.length ?
+    addReturnString('', returnFields).substr(11) : '*';
+  let queryString = `SELECT ${returnString} FROM ${modelName}`;
+  if (conditions === 'all') return log(queryString);
+  if (typeof conditions === 'number') return log(`${queryString} WHERE "id" = ${conditions}`);
+
+  /* eslint-disable prefer-destructuring */
+  const type = conditions.type ? conditions.type.toUpperCase() : 'AND';
+  const whereString = generateWhereString(conditions, type);
+  const groupString = conditions.groups ? generateGroupString(conditions, type) : null;
+  queryString = groupString !== null ? `${queryString} WHERE ${groupString}` : `${queryString} WHERE ${whereString}`;
+  return log(queryString);
 }
 
 export default getQuery;

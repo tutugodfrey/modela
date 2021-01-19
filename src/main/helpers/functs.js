@@ -95,4 +95,76 @@ export default {
     }
     return model;
   },
+  generateGroupString: (conditions, type) => {
+    let groupString = '';
+    const groupCondition = conditions.groups;
+    const whereCondition = conditions.where;
+    groupCondition.forEach(group => {
+      if (groupString) {
+        groupString = `${groupString} ${type}`;
+      }
+      let groupStr = '';
+      group.forEach(prop => {
+        if (Array.isArray(whereCondition[prop])) {
+          let str = '';
+          const matchValue = whereCondition[prop]
+          matchValue.forEach(value => {
+            if (!str) {
+              str = `(${str} "${prop}" = '${value}'`;
+            } else {
+              str = `${str} OR "${prop}" = '${value}'`;
+            }
+          });
+          groupStr = groupStr ? `${groupStr} ${type} ${str}` : `${str}`;
+        } else if (!groupStr) {
+          groupStr = `("${prop}" = '${whereCondition[prop]}'`;
+        } else {
+          groupStr = `${groupStr} AND "${prop}" = '${whereCondition[prop]}'`;
+        }
+      });
+      groupString = `${groupString} ${groupStr})`;
+    });
+    return groupString;
+  },
+  generateWhereString: (conditions, type) => {
+    let whereString = '';
+    const whereCondition = conditions.where;
+    const whereKeys = Object.keys(whereCondition);
+    whereKeys.forEach((prop) => {
+
+      if (Array.isArray(whereCondition[prop])) {
+        let str = '';
+        const matchValue = whereCondition[prop]
+        matchValue.forEach(value => {
+          if (!str) {
+            str = `${str} "${prop}" = '${value}'`;
+          } else {
+            str = `${str} OR "${prop}" = '${value}'`;
+          }
+        });
+        whereString = whereString ? `${whereString} ${type} ${str}` : `${str}`;
+      } else if (!whereString) {
+        whereString = `${whereString}"${prop}" = '${whereCondition[prop]}'`;
+      } else {
+        whereString = `${whereString} ${type} "${prop}" = '${whereCondition[prop]}'`;
+      }
+    });
+
+    return whereString;
+  },
+  generatePropString: (modelName, newProps,) => {
+    let queryString;
+    let propString = '';
+    const newPropsKeys = Object.keys(newProps);
+    queryString = `UPDATE ${modelName} SET`;
+    newPropsKeys.forEach((prop) => {
+      if (propString === '') {
+        propString = `${propString}"${prop}" = '${newProps[prop]}'`;
+      } else {
+        propString = `${propString}, "${prop}" = '${newProps[prop]}'`;
+      }
+    });
+    queryString = `${queryString} ${propString}`;
+    return queryString;
+  }
 }

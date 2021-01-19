@@ -38,19 +38,17 @@ function update(propsToUpdate, conditions, returnFields=[]) {
         .then(res => {
           return res.rows[0]
         })
-        .then((user) => {
-          const queryString = this.updateQuery(this.modelName, conditions, propsToUpdate, returnFields);
-          this.dbConnection.query(queryString)
-          .then(res => {
-            if (!res.rows.length) {
-              return reject({ message: `${this.singleModel} not found` });
-            }
-            return resolve(res.rows[0])
-          })
+        .then((user) => this.updateQuery(
+          this.modelName, conditions, propsToUpdate, returnFields
+        ))
+        .then(queryString => this.dbConnection.query(queryString))
+        .then(res => {
+          if (!res.rows.length) {
+            return reject({ message: `${this.singleModel} not found` });
+          }
+          return resolve(res.rows[0])
         })
-        .catch(err => {
-          return reject(err)
-        });
+        .catch(err => reject(err));
     } else {
       const props = Object.keys(propsToUpdate);
       let modelsFound = this.model.filter((model) => {
