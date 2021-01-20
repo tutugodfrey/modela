@@ -267,16 +267,43 @@ describe('Dummy Data Model', () => {
 	});
 
 	describe('find', () => {
-		it('should return an error message if no where condition is specified', () => {
+		it('should return an error message if condition is not specified', () => {
 			return users.find()
 				.then(user => {
 					expect(user.name).to.equal('undefined');
 				})
 				.catch((error) => {
 					expect(error).to.eql({
-						message: `missing object propertiy 'where' to find model`,
+						message: `Missing object property 'where' to find model`,
 					});
 				});
+		});
+
+		it('should return an error message if where condition is not specified', () => {
+			return users.find({})
+				.then(user => {
+					expect(user.name).to.equal('undefined');
+				})
+				.catch((error) => {
+					expect(error).to.eql({
+						message: `Missing object property 'where' to find model`,
+					});
+				});
+		});
+
+		it('should return an error message if returnFields is not an array', () => {
+			return users.find({
+				where: {
+					name: createdUser1.name,
+					id: createdUser2.id,
+				}
+			}, {})
+			.then(user => {
+				expect(user.name).to.equal('undefined')
+			})
+			.catch((error) => {
+				expect(error).to.eql({ message: 'Expected an array of fields to return' });
+			});
 		});
 
 		it('should not return a model if all attributes does not match', () => {
@@ -320,6 +347,22 @@ describe('Dummy Data Model', () => {
 				expect(user.name).to.equal(createdUser1.name);
 				expect(user.email).to.equal(createdUser1.email);
 				expect(user.address).to.equal(createdUser1.address);
+			})
+		});
+
+		it('should find a model using multiple attributes with "or" type', () => {
+			return users.find({
+				where: {
+					address: createdUser1.address,
+					name: createdUser2.name,
+				},
+				type: 'or',
+			})
+			.then((user) => {
+				expect([ createdUser1.id, createdUser2.id]).to.include(user.id);
+				expect([ createdUser1.name, createdUser2.name]).to.include(user.name);
+				expect([ createdUser1.email, createdUser2.email]).to.include(user.email);
+				expect([ createdUser1.address, createdUser2.address]).to.include(user.address);
 			})
 		});
 
