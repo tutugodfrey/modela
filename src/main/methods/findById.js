@@ -2,11 +2,11 @@ import functs from '../helpers/functs';
 
 const { getFieldsToReturn } = functs;
 function findById(id, returnFields=[]) {
-  if (!Array.isArray(returnFields)) {
-    throw new TypeError('Expected an array of fields to return');
-  }
-
   const result = new Promise((resolve, reject) => {
+    if (!id) reject({ message: 'Expected argument 1 to be id of model to search' });
+    if (!Array.isArray(returnFields))
+      reject({ message: 'Expected an array of fields to return' });
+
     if (this.using_db) {
       const queryString = this.getQuery(this.modelName, id, returnFields);
       this.dbConnection.query(queryString)
