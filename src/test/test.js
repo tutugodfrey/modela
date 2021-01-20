@@ -237,6 +237,26 @@ describe('Dummy Data Model', () => {
 
 	describe('findById', () => {
 		it('should return not found if model does not exist', () => {
+			return users.findById()
+				.then(user => { /* */ })
+				.catch((error) => {
+					expect(error)
+						.to.have.property('message')
+						.equal('Expected argument 1 to be id of model to search');
+				});
+		});
+
+		it('should return an error message if return fields is not an array', () => {
+			return users.findById(wrongdUserDetails.id, {})
+				.then(user => { /*  */ })
+				.catch((error) => {
+					expect(error)
+						.to.have.property('message')
+						.equal('Expected an array of fields to return');
+				});
+		});
+
+		it('should return not found if model does not exist', () => {
 			return users.findById(wrongdUserDetails.id)
 				.then(user => {
 					expect(user.name).to.equal('undefined');
