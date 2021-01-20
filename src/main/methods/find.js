@@ -6,13 +6,15 @@ function find(condition, returnFields=[]) {
     condition is single object with property where whose value is further
     an object with key => value pair of the properties of the object to find
   */
-  if (!Array.isArray(returnFields)) {
-    throw new TypeError('Expected an array of fields to return');
-  }
-
   const result = new Promise((resolve, reject) => {
-    if (!condition || !condition.where)
-      reject({ message: `missing object propertiy 'where' to find model` });
+    if (!condition || !condition.where) {
+      reject({ message: `Missing object property 'where' to find model` });
+    }
+
+    if (!Array.isArray(returnFields)) {
+      reject({ message: 'Expected an array of fields to return' });
+    }
+
     if (this.using_db) {
       const queryString = this.getQuery(this.modelName, condition, returnFields);
       this.dbConnection.query(queryString)
