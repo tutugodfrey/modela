@@ -1,21 +1,21 @@
 export default {
-  confirmPropMatch: (condition, model, matchType='and', groups=[]) => {
-    const props = Object.keys(condition);
+  confirmPropMatch: (conditions, model, matchType='and', groups=[]) => {
+    const props = Object.keys(conditions);
     if (groups.length && matchType === 'or') {
       const groupsPassingState = {};
       groups.forEach((groupProps, index) => {
         groupsPassingState[index] = !groupProps.find((prop) => {
-          if (Array.isArray(condition[prop])) return condition[prop].includes(model[prop]);
-          return condition[prop] !== model[prop];
+          if (Array.isArray(conditions[prop])) return conditions[prop].includes(model[prop]);
+          return conditions[prop] !== model[prop];
         });
       });
       return Object.keys(groupsPassingState).map(key => groupsPassingState[key]).includes(true);   
     } else {
       if (matchType === 'or') {
         const result = props.find((prop) => {
-          if (Array.isArray(condition[prop]))
-            return (condition[prop].includes(model[prop]));
-          return (condition[prop] === model[prop]);
+          if (Array.isArray(conditions[prop]))
+            return (conditions[prop].includes(model[prop]));
+          return (conditions[prop] === model[prop]);
         });
 
         if (result) return true;
@@ -23,10 +23,10 @@ export default {
       } else {
         const finalResult = [];
         props.find((prop) => {
-          if (Array.isArray(condition[prop])) {
-            finalResult.push(condition[prop].includes(model[prop]));
+          if (Array.isArray(conditions[prop])) {
+            finalResult.push(conditions[prop].includes(model[prop]));
           } else {
-            finalResult.push(condition[prop] === model[prop]);
+            finalResult.push(conditions[prop] === model[prop]);
           }
         });
 

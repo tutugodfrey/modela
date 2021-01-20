@@ -745,6 +745,24 @@ describe('Dummy Data Model', () => {
 	});
 
 	describe('destroy', () => {
+		it('should return an error message if returnFields is not an array', () => {
+			return users.destroy({
+				where: {
+					id: createdUser1.id,
+				}
+			},
+			{},
+			)
+			.then((res) => {
+				//
+			})
+			.catch(err => {
+				expect(err)
+					.to.have.property('message')
+					.to.equal('Expected an array of fields to return');
+			});
+		});
+
 		it('should delete a model that meets the specified condition', () => {
 			return users.destroy({
 				where: {
@@ -770,6 +788,64 @@ describe('Dummy Data Model', () => {
 			})
 			.catch((message) => {
 				expect(message).to.eql({ message: 'user not found, not action taken' });
+			});
+		});
+
+		it('should delete model based on grouping conditions', () => {
+			return users.destroy({
+				where: {
+					id: createdBulkUsers[2].id,
+					name: createdBulkUsers[1].name,
+					email: createdBulkUsers[2].email,
+				},
+				groups: [['id', 'name'], ['id', 'email']],
+				type: 'or',
+			}, ['id', 'name', 'email', 'address'],
+			)
+			.then(res => {
+				expect(res)
+					.to.have.property('id')
+					.to.equal(createdBulkUsers[2].id);
+				expect(res)
+					.to.have.property('name')
+					.to.equal(createdBulkUsers[2].name);
+				expect(res)
+					.to.have.property('email')
+					.to.equal(createdBulkUsers[2].email);
+				expect(res)
+					.to.have.property('address')
+					.to.equal(createdBulkUsers[2].address);
+			})
+			.catch((message) => {
+				// pass
+			});
+		});
+		it('should delete model based on grouping conditions', () => {
+			return users.destroy({
+				where: {
+					id: createdBulkUsers[2].id,
+					name: [createdBulkUsers[0].name, createdBulkUsers[1].name, createdBulkUsers[2].name],
+
+				},
+				type: 'or',
+			}, ['id', 'name', 'email', 'address'],
+			)
+			.then(res => {
+				expect(res)
+					.to.have.property('id')
+					.to.equal(createdBulkUsers[2].id);
+				expect(res)
+					.to.have.property('name')
+					.to.equal(createdBulkUsers[2].name);
+				expect(res)
+					.to.have.property('email')
+					.to.equal(createdBulkUsers[2].email);
+				expect(res)
+					.to.have.property('address')
+					.to.equal(createdBulkUsers[2].address);
+			})
+			.catch((message) => {
+				// pass
 			});
 		});
 	});
@@ -936,7 +1012,7 @@ describe('Dummy Data Model', () => {
 	describe('Test Clear Method', () => {
 		it('should get available users', () => {
 			return users.findAll().then(result => {
-				expect(result.length).to.equal(4);
+				expect(result.length).to.equal(2);
 			})
 		});
 
