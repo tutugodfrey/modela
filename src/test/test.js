@@ -36,7 +36,7 @@ const todos = new DataModela('todos', {
 	},
 	description: {
 		dataType: 'string',
-		required: true
+		defaultValue: 'My latest todo'
 	},
 	completed: {
 		dataType: 'boolean',
@@ -130,6 +130,55 @@ describe('Dummy Data Model', () => {
 		it('user model should be an array', () => {
 			expect(users.model).to.be.an('array');
 		})
+
+		it('should return an error message if modelToCreate is not supplied', () => {
+			const user = { ...user1 };
+			delete user.email;
+			return users.create()
+			.then(user => {
+				expect(user.name).to.equal('undefined')
+			})
+			.catch((error) => {
+				expect(error).to.eql({ message: 'Expected an object to create at position 1' });
+			});
+		});
+
+		it('should return an error message if returnFields is not an array', () => {
+			const user = { ...user1 };
+			delete user.email;
+			return users.create(user, {})
+			.then(user => {
+				expect(user.name).to.equal('undefined')
+			})
+			.catch((error) => {
+				expect(error)
+					.to.have.property('message')
+					.to.equal('Expected an array of fields to return');
+			});
+		});
+
+		it('should return an error message if object to create does not contain properties', () => {
+			const user = { ...user1 };
+			return users.create({})
+			.then(user => {
+				expect(user.name).to.equal('undefined')
+			})
+			.catch((error) => {
+				expect(error)
+					.to.have.property('message')
+					.to.contain('missing required field');
+			});
+		});
+
+		it('should not create if field not specified in schema is supplied', () => {
+			const user = { ...user1 };
+			user.email;
+			user.random = 'random value'
+			return users.create(user)
+			.catch((error) => {
+				expect(error).to.eql({ message: `random is not defined in schema for users` });
+			});
+		});
 
 		it('should not create without required field', () => {
 			const user = { ...user1 };
@@ -1055,6 +1104,25 @@ describe('Dummy Data Model', () => {
 				expect(res).to.have.property('links').to.be.an('array');
 				expect(res).to.have.property('completed').to.equal(false);
 			});
+		});
+
+		it('should use default value for missing un-required fields', () => {
+			return todos.create({
+				title: 'A second todo item',
+				userId: 12,
+				completed: true,
+				deadline: new Date(1605788451842).toISOString(),
+				links: ['link1', 'link2'],
+			})
+			.then(res => {
+				expect(res).to.have.property('id');
+				expect(res)
+					.to.have.property('description')
+					.to.equal(todos.schema.description.defaultValue);
+				expect(res).to.have.property('completed').to.equal(true);
+				expect(res).to.have.property('createdAt');
+				expect(res).to.have.property('updatedAt');
+			})
 		});
 
 		it('should get todos matching search criteria', () => {

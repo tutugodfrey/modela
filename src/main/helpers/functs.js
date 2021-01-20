@@ -172,5 +172,10 @@ export default {
     });
     queryString = `${queryString} ${propString}`;
     return queryString;
-  }
+  },
+  log: function  (queryString) {
+    /* eslint-disable no-console */
+   process.env.NODE_ENV === 'production' ? null : console.log(queryString);
+   return queryString;
+ }
 }
