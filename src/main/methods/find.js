@@ -27,7 +27,7 @@ function find(condition, returnFields=[]) {
         });
     } else {
       this.model.find((model) => {
-        const findMatchProps = confirmPropMatch(condition.where, model, condition.type);
+        const findMatchProps = confirmPropMatch(model, condition);
         if (findMatchProps) return resolve(getFieldsToReturn(model, returnFields));
       });
       reject({ message: `${this.singleModel} not found`});

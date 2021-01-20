@@ -55,7 +55,7 @@ function update(propsToUpdate, conditions, returnFields=[]) {
         // if only id is specified
         if (Object.keys(conditions.where).length === 1 && conditions.where.id) 
           return model.id === conditions.where.id;
-        const findMatchProps = confirmPropMatch(conditions.where, model, conditions.type, conditions.groups);
+        const findMatchProps = confirmPropMatch(model, conditions);
         if (findMatchProps) return true;
       });
 
