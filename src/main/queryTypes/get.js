@@ -1,16 +1,15 @@
 import functs from '../helpers/functs';
 
-const { addReturnString, generateWhereString, generateGroupString } = functs;
+const {
+  log,
+  addReturnString,
+  generateWhereString,
+  generateGroupString,
+} = functs;
 const getQuery = (modelName, conditions, returnFields=[]) => {
   const typeOfCondition = (typeof conditions);
   if (typeOfCondition !== 'string' && typeOfCondition !== 'object' && typeOfCondition !== 'number') {
     return { message: 'type error!' };
-  }
-
-  function log (queryString) {
-     /* eslint-disable no-console */
-    process.env.NODE_ENV === 'production' ? null : console.log(queryString);
-    return queryString;
   }
 
   const returnString = returnFields.length ?

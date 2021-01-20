@@ -54,7 +54,11 @@ function createTableQuery() {
   
         // add default values
         if (schema[field].defaultValue !== undefined) {
-          fieldContraint = `${fieldContraint} DEFAULT ${schema[field].defaultValue}`;
+          if (typeof schema[field].defaultValue === 'string') {
+            fieldContraint = `${fieldContraint} DEFAULT '${schema[field].defaultValue}'`;
+          }  else {
+            fieldContraint = `${fieldContraint} DEFAULT ${schema[field].defaultValue}`;
+          }
         }
         // Add unique constraint
         if (schema[field].unique) {
