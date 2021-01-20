@@ -1,3 +1,6 @@
+import functs from  '../helpers/functs';
+
+const { log } = functs;
 function createTableQuery() {
   const fields = this.allowedFields;
   const schema = this.schema;
@@ -69,7 +72,7 @@ function createTableQuery() {
   });
 
   tableQuery = tableQuery.slice(0, tableQuery.length - 1);
-  return `${tableQuery});`;
+  return log(`${tableQuery});`);
 }
 
 export default createTableQuery;
