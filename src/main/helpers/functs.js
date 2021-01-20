@@ -1,43 +1,49 @@
 export default {
-  confirmPropMatch: (conditions, model, matchType='and', groups=[]) => {
-    const props = Object.keys(conditions);
-    if (groups.length && matchType === 'or') {
+  confirmPropMatch: (model, conditions) => {
+    const whereConditions = conditions.where;
+    const groupConditions = conditions.groups ? conditions.groups : null;
+    const props = Object.keys(whereConditions);
+    const matchType = conditions.type ? conditions.type : 'and';
+    if (groupConditions && groupConditions.length && matchType === 'or') {
       const groupsPassingState = {};
-      groups.forEach((groupProps, index) => {
+      groupConditions.forEach((groupProps, index) => {
         groupsPassingState[index] = !groupProps.find((prop) => {
-          if (Array.isArray(conditions[prop])) return conditions[prop].includes(model[prop]);
-          return conditions[prop] !== model[prop];
+          if (Array.isArray(whereConditions[prop]))
+            return whereConditions[prop].includes(model[prop]);
+          return whereConditions[prop] !== model[prop];
         });
       });
-      return Object.keys(groupsPassingState).map(key => groupsPassingState[key]).includes(true);   
+      return Object.keys(groupsPassingState)
+        .map(key => groupsPassingState[key]).includes(true);   
     } else {
       if (matchType === 'or') {
         const result = props.find((prop) => {
-          if (Array.isArray(conditions[prop]))
-            return (conditions[prop].includes(model[prop]));
-          return (conditions[prop] === model[prop]);
+          if (Array.isArray(whereConditions[prop]))
+            return (whereConditions[prop].includes(model[prop]));
+          return (whereConditions[prop] === model[prop]);
         });
 
         if (result) return true;
         return false;
-      } else {
-        const finalResult = [];
-        props.find((prop) => {
-          if (Array.isArray(conditions[prop])) {
-            finalResult.push(conditions[prop].includes(model[prop]));
-          } else {
-            finalResult.push(conditions[prop] === model[prop]);
-          }
-        });
-
-        return !finalResult.includes(false);
       }
+
+      const finalResult = [];
+      props.find((prop) => {
+        if (Array.isArray(whereConditions[prop])) {
+          finalResult.push(whereConditions[prop].includes(model[prop]));
+        } else {
+          finalResult.push(whereConditions[prop] === model[prop]);
+        }
+      });
+
+      return !finalResult.includes(false);
     }
   },
   getFieldsToReturn: (model, returnFields=[]) => {
     if (!returnFields.length) return model;
     const modelToReturn = {}
-    returnFields.forEach(field => model[field]? modelToReturn[field] = model[field]: null);
+    returnFields.forEach(field => model[field] ?
+        modelToReturn[field] = model[field]: null);
     return modelToReturn;
   },
   addReturnString: (queryString, returnFields) => {

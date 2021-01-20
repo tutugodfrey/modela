@@ -1,9 +1,9 @@
 import functs from '../helpers/functs';
 
 const { getFieldsToReturn, confirmPropMatch } = functs;
-function findAll(condition = 'all', returnFields=[]) {
-  /* return all objects that meet the condition 
-    condition is single object with property where whose value is further
+function findAll(conditions = 'all', returnFields=[]) {
+  /* return all objects that meet the conditions 
+    conditions is single object with property where whose value is further
     an object with key => value pair of the properties of the object to find
   */
 
@@ -13,11 +13,11 @@ function findAll(condition = 'all', returnFields=[]) {
     }
 
     let checkWhereKeys;
-    const checkAll = condition === 'all';
-    const checkWhere = condition.where;
-    const checkObjType = Object.prototype.toString.call(condition) === '[object Object]';
+    const checkAll = conditions === 'all';
+    const checkWhere = conditions.where;
+    const checkObjType = Object.prototype.toString.call(conditions) === '[object Object]';
     if (checkObjType && checkWhere) {
-      checkWhereKeys = Object.keys(condition.where) ? Object.keys(condition.where).length : false;
+      checkWhereKeys = Object.keys(conditions.where) ? Object.keys(conditions.where).length : false;
     }
 
     if ((!checkAll && !checkObjType) ||
@@ -29,7 +29,7 @@ function findAll(condition = 'all', returnFields=[]) {
     }
 
     if (this.using_db) {
-      const queryString = this.getQuery(this.modelName, condition, returnFields);
+      const queryString = this.getQuery(this.modelName, conditions, returnFields);
       return this.dbConnection.query(queryString)
         .then(res => {
           return resolve(res.rows)
@@ -41,7 +41,7 @@ function findAll(condition = 'all', returnFields=[]) {
           return reject(err)
         });
     } else {
-    if (condition === 'all') {
+    if (conditions === 'all') {
       if (!returnFields.length) resolve(this.model);
       const model = this.model.map(model => {
         const model_ = {};
@@ -50,13 +50,9 @@ function findAll(condition = 'all', returnFields=[]) {
       });
       return resolve(model);
     }
-    // array of objects that meet the condition
+    // array of objects that meet the conditions
     const models = this.model.filter((model) => {
-      const findMatchProps = confirmPropMatch(
-        condition.where,
-        model,
-        condition.type,
-        condition.groups);
+      const findMatchProps = confirmPropMatch(model, conditions);
       if (findMatchProps) return model;
     });
     return resolve(models.map(model => {

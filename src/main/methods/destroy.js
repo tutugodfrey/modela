@@ -30,7 +30,7 @@ function destroy(conditions, returnFields=[]) {
 					.catch(err => reject(err));
 			} else {
 				this.model.forEach((model, index) => {
-					const findMatchProp = confirmPropMatch(conditions.where, model, conditions.type, conditions.groups)
+					const findMatchProp = confirmPropMatch(model, conditions)
 					if(findMatchProp) {
 						const deletedModel = this.model.splice(index, 1);
 						if (!returnFields.length) return resolve({ message });
