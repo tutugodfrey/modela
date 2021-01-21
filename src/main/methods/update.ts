@@ -1,7 +1,8 @@
 import functs from '../helpers/functs';
+import { Condition } from '../../main/interfaces';
 
 const { confirmPropMatch, getFieldsToReturn  } = functs;
-function update(propsToUpdate, conditions, returnFields=[]) {
+function update(propsToUpdate: any, conditions: Condition, returnFields=[]) {
   /* 
     propsToUpdate contain the new properties to replace the old ones
     this method should be called on the particular object to update.
@@ -38,7 +39,7 @@ function update(propsToUpdate, conditions, returnFields=[]) {
         .then(res => {
           return res.rows[0]
         })
-        .then((user) => this.updateQuery(
+        .then(( /* user created */ ) => this.updateQuery(
           this.modelName, conditions, propsToUpdate, returnFields
         ))
         .then(queryString => this.dbConnection.query(queryString))
@@ -51,7 +52,7 @@ function update(propsToUpdate, conditions, returnFields=[]) {
         .catch(err => reject(err));
     } else {
       const props = Object.keys(propsToUpdate);
-      let modelsFound = this.model.filter((model) => {
+      let modelsFound = this.model.filter((model: any) => {
         // if only id is specified
         if (Object.keys(conditions.where).length === 1 && conditions.where.id) 
           return model.id === conditions.where.id;
@@ -61,7 +62,7 @@ function update(propsToUpdate, conditions, returnFields=[]) {
 
       if (!modelsFound.length) reject({ message: `${this.singleModel} not found` });
 
-      const updatedModels = modelsFound.map((model) => {
+      const updatedModels = modelsFound.map((model: any) => {
         props.forEach((property) => {
           model[property] = propsToUpdate[property]
         });

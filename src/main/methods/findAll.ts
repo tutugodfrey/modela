@@ -1,7 +1,8 @@
 import functs from '../helpers/functs';
+import { Condition } from '../../main/interfaces';
 
 const { getFieldsToReturn, confirmPropMatch } = functs;
-function findAll(conditions = 'all', returnFields=[]) {
+function findAll(conditions: any = 'all', returnFields=[]) {
   /* return all objects that meet the conditions 
     conditions is single object with property where whose value is further
     an object with key => value pair of the properties of the object to find
@@ -12,9 +13,9 @@ function findAll(conditions = 'all', returnFields=[]) {
       reject({ message: 'Expected an array of fields to return'});
     }
 
-    let checkWhereKeys;
+    let checkWhereKeys: number | boolean;
     const checkAll = conditions === 'all';
-    const checkWhere = conditions.where;
+    const checkWhere = (conditions.where);
     const checkObjType = Object.prototype.toString.call(conditions) === '[object Object]';
     if (checkObjType && checkWhere) {
       checkWhereKeys = Object.keys(conditions.where) ? Object.keys(conditions.where).length : false;
@@ -31,10 +32,10 @@ function findAll(conditions = 'all', returnFields=[]) {
     if (this.using_db) {
       const queryString = this.getQuery(this.modelName, conditions, returnFields);
       return this.dbConnection.query(queryString)
-        .then(res => {
+        .then((res: any) => {
           return resolve(res.rows)
         })
-        .catch(err => {
+        .catch((err: any) => {
           if (err.code === '42P01') {
             return reject({ message: `table ${this.modelName} does not exist`})
           }
@@ -43,7 +44,7 @@ function findAll(conditions = 'all', returnFields=[]) {
     } else {
     if (conditions === 'all') {
       if (!returnFields.length) resolve(this.model);
-      const model = this.model.map(model => {
+      const model = this.model.map((model: any) => {
         const model_ = {};
         returnFields.forEach(field => model[field] ? model_[field] = model[field] : null);
         return model_;
@@ -51,7 +52,7 @@ function findAll(conditions = 'all', returnFields=[]) {
       return resolve(model);
     }
     // array of objects that meet the conditions
-    const models = this.model.filter((model) => {
+    const models = this.model.filter((model: any) => {
       const findMatchProps = confirmPropMatch(model, conditions);
       if (findMatchProps) return model;
     });

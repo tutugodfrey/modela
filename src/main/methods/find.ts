@@ -1,7 +1,8 @@
 import functs from '../helpers/functs';
+import { Condition } from '../../main/interfaces';
 
 const { confirmPropMatch, getFieldsToReturn } = functs;
-function find(condition, returnFields=[]) {
+function find(condition: Condition, returnFields=[]) {
   /* return a single object that meet the condition
     condition is single object with property where whose value is further
     an object with key => value pair of the properties of the object to find
@@ -18,17 +19,17 @@ function find(condition, returnFields=[]) {
     if (this.using_db) {
       const queryString = this.getQuery(this.modelName, condition, returnFields);
       this.dbConnection.query(queryString)
-        .then(res => {
+        .then((res: any) => {
           if (!res.rows.length) {
             reject({ message: `${this.singleModel} not found` });
           }
           resolve(res.rows[0])
         })
-        .catch(err => {
+        .catch((err: any) => {
           reject(err)
         });
     } else {
-      this.model.find((model) => {
+      this.model.find((model: any) => {
         const findMatchProps = confirmPropMatch(model, condition);
         if (findMatchProps) return resolve(getFieldsToReturn(model, returnFields));
       });

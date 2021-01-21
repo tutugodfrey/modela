@@ -1,13 +1,12 @@
 import functs from '../helpers/functs';
 
 const {
-  log,
   getFieldsToReturn,
   checkDatatype,
   updateTimestamp,
 } = functs;
 
-function create(modelToCreate, returnFields=[]) {
+function create(modelToCreate: any, returnFields=[]) {
   const result = new Promise((resolve, reject) => {
     if (!modelToCreate)
       reject({ message: 'Expected an object to create at position 1' });
@@ -56,7 +55,7 @@ function create(modelToCreate, returnFields=[]) {
 // private interface for creating model
 // check for unique keys
 // then create a new model 
-function createModel(modelToCreate, returnFields, resolve, reject) {
+function createModel(modelToCreate: any, returnFields: Array<any>, resolve: Function, reject: Function) {
   updateTimestamp.call(this, modelToCreate); // update createdAt and updatedAt
   if (!this.model.length) {
     if (this.schema.id && modelToCreate.id === undefined) modelToCreate.id = 1;
@@ -76,7 +75,7 @@ function createModel(modelToCreate, returnFields, resolve, reject) {
     }
 
     let foundDuplicate = false;
-    this.model.forEach((model) => {
+    this.model.forEach((model: any) => {
       this.uniqueKeys.forEach((prop) => {
         if (model[prop] === modelToCreate[prop]) {
           foundDuplicate = true;
@@ -94,7 +93,7 @@ function createModel(modelToCreate, returnFields, resolve, reject) {
   }
 }
 
-function createModelWithDB(modelToCreate, returnFields, resolve, reject) {
+function createModelWithDB(modelToCreate: any, returnFields: Array<any>, resolve: Function, reject: Function) {
   if (Array.isArray(modelToCreate)) {
     modelToCreate.forEach((_modelToCreate)=> {
       updateTimestamp.call(this, _modelToCreate); // update createdAt and updatedAt
@@ -105,12 +104,12 @@ function createModelWithDB(modelToCreate, returnFields, resolve, reject) {
 
   const queryString = this.createQuery(this.modelName, modelToCreate, returnFields);
   return this.dbConnection.query(queryString)
-    .then(res => {
+    .then((res: object | any )=> {
       if (Array.isArray(modelToCreate))
         return resolve(res.rows);
       return resolve(res.rows[0]);
     })
-    .catch(err => {
+    .catch((err: any) => {
       if (err.detail && err.detail.includes('already exists')) {
         const key = err.detail.split('=')[0].split('(')[1].split(')')[0];
         const value = err.detail.split('=')[1].split(')')[0].split('(')[1];
@@ -119,10 +118,10 @@ function createModelWithDB(modelToCreate, returnFields, resolve, reject) {
       if (err.code === '42P01') {
         const createTableQuery = this.createTableQuery();
         return this.dbConnection.query(createTableQuery)
-          .then(tableResult => {
+          .then(( /* create table query result */ ) => {
             return this.dbConnection.query(queryString);
           })
-          .then(res => {
+          .then((res: any) => {
             if (Array.isArray(modelToCreate))
               return resolve(res.rows);
             return resolve(res.rows[0]);
@@ -130,7 +129,7 @@ function createModelWithDB(modelToCreate, returnFields, resolve, reject) {
       }
       return reject(err.detail);
     })
-    .catch(err => reject(err))
+    .catch((err: object )=> reject(err))
 };
 
 export {

@@ -1,4 +1,5 @@
 import functs from '../helpers/functs';
+import { Condition } from '../../main/interfaces';
 
 const {
   log,
@@ -6,7 +7,7 @@ const {
   generateWhereString,
   generateGroupString,
 } = functs;
-const getQuery = (modelName, conditions, returnFields=[]) => {
+const getQuery = (modelName: string, conditions: Condition| any, returnFields: Array<any>=[]) => {
   const typeOfCondition = (typeof conditions);
   if (typeOfCondition !== 'string' && typeOfCondition !== 'object' && typeOfCondition !== 'number') {
     return { message: 'type error!' };

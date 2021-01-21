@@ -2,7 +2,7 @@ import functs from  '../helpers/functs';
 
 const { log } = functs;
 function createTableQuery() {
-  const fields = this.allowedFields;
+  const fields: Array<any> = this.allowedFields;
   const schema = this.schema;
   const typeMapping = {
     number: 'INT',
@@ -17,9 +17,9 @@ function createTableQuery() {
   if (schema.id) {
     tableQuery = `${tableQuery} id SERIAL NOT NULL PRIMARY KEY,`;
   }
-  fields.forEach(field => {
+  fields.forEach((field: string) => {
     if (field !== 'id') {
-      let fieldContraint = `"${field}"`
+      let fieldContraint: string = `"${field}"`
       if (schema[field].dataType) {
         if (schema[field].dataType === 'string') {
           fieldContraint = `${fieldContraint} TEXT`;
