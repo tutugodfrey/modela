@@ -1,6 +1,6 @@
 import functs from '../helpers/functs';
 
-const { addReturnString } = functs;
+const { log, addReturnString } = functs;
 const createQuery = (modelName, modelToCreate, returnFields=[]) => {
   if (!modelToCreate) {
     return { message: 'type error! expecting an object' };
@@ -53,14 +53,9 @@ const createQuery = (modelName, modelToCreate, returnFields=[]) => {
       valueString = `${itemValueString}`
     }
   });
-
   queryString = addReturnString(`${queryString} ${keyString} ${valueString}`, returnFields)
 
-  if (process.env.NODE_ENV !== 'production') {
-    /* eslint-disable no-console */
-    console.log(queryString);
-  }
-  return queryString;
+  return log(queryString);
 }
 
 export default createQuery;

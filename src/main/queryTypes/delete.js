@@ -1,6 +1,11 @@
 import functs from '../helpers/functs';
 
-const { addReturnString, generateWhereString, generateGroupString } = functs;
+const {
+  log,
+  addReturnString,
+  generateWhereString,
+  generateGroupString
+} = functs;
 const deleteQuery = (modelName, conditions, returnFields=[]) => {
   const typeOfCondition = (typeof conditions);
   if (typeOfCondition !== 'object') {
@@ -16,9 +21,7 @@ const deleteQuery = (modelName, conditions, returnFields=[]) => {
     `${queryString} WHERE ${whereString}`;
   queryString = addReturnString(queryString, returnFields);
 
-  /* eslint-disable no-console */
-  process.env.NODE_ENV === 'production' ? null :  console.log(queryString); 
-  return queryString;
+  return log(queryString);
 }
 
 export default deleteQuery;

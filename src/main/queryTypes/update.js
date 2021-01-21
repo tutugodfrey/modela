@@ -1,6 +1,7 @@
 import functs from '../helpers/functs';
 
 const {
+  log,
   addReturnString,
   generateGroupString,
   generateWhereString,
@@ -38,12 +39,8 @@ const updateQuery = (modelName, conditions, newProps, returnFields=[]) => {
       }
 
       queryString = addReturnString(queryString, returnFields)
-      if (process.env.NODE_ENV !== 'production') {
-        /* eslint-disable no-console */
-        console.log(queryString);
-      }
 
-      if (queryString) resolve(queryString);
+      if (queryString) resolve(log(queryString));
   });
   return generatedQueryString;
 }

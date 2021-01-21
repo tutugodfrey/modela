@@ -117,7 +117,7 @@ function createModelWithDB(modelToCreate, returnFields, resolve, reject) {
         return reject({ message: `${this.singleModel} with ${key} = ${value} already exists` });
       }
       if (err.code === '42P01') {
-        const createTableQuery = log(this.createTableQuery());
+        const createTableQuery = this.createTableQuery();
         return this.dbConnection.query(createTableQuery)
           .then(tableResult => {
             return this.dbConnection.query(queryString);
