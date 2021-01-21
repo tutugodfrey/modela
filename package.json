@@ -6,8 +6,9 @@
   "scripts": {
     "test:lib": "mocha lib/test/",
     "build": "babel src -s -d lib",
+    "transpile": "tsc",
     "babel:node": "babel-node src/main/createModel",
-    "test": "npm run build && npm run test:lib && export USE_DB=0 && npm run build && npm run test:lib",
+    "test": "npm run transpile; npm run build && npm run test:lib && export USE_DB=0 && npm run build && npm run test:lib",
     "test:local": ". ./.env && npm run build && npm run test:lib && export USE_DB=0 && npm run test:lib",
     "test:local2": "export USE_DB=0 && npm run build && npm run test:lib && . ./.env && npm run test:lib",
     "prepublish": "npm test",
@@ -45,7 +46,8 @@
     "coveralls": "^3.0.1",
     "istanbul": "^0.4.5",
     "mocha": "^4.0.1",
-    "pg": "^8.4.2"
+    "pg": "^8.4.2",
+    "typescript": "^4.1.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",

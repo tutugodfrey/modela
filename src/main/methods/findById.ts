@@ -1,7 +1,7 @@
 import functs from '../helpers/functs';
 
 const { getFieldsToReturn } = functs;
-function findById(id, returnFields=[]) {
+function findById(id: number | string, returnFields=[]) {
   const result = new Promise((resolve, reject) => {
     if (!id) reject({ message: 'Expected argument 1 to be id of model to search' });
     if (!Array.isArray(returnFields))
@@ -16,12 +16,12 @@ function findById(id, returnFields=[]) {
           }
           resolve(res.rows[0])
         })
-        .catch(err => {
+        .catch((err: any) => {
           reject(err)
         });
     } else {
       // return an object with the given id
-      let modelFound =this.model.find((model) => {
+      let modelFound =this.model.find((model: any) => {
         return model.id === id;
       });
 

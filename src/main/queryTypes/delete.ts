@@ -1,4 +1,5 @@
 import functs from '../helpers/functs';
+import { Condition } from '../../main/interfaces';
 
 const {
   log,
@@ -6,7 +7,7 @@ const {
   generateWhereString,
   generateGroupString
 } = functs;
-const deleteQuery = (modelName, conditions, returnFields=[]) => {
+const deleteQuery = (modelName: string, conditions: Condition, returnFields: Array<any>=[]) => {
   const typeOfCondition = (typeof conditions);
   if (typeOfCondition !== 'object') {
     return { message: 'type error! expecting an object' };

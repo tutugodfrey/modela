@@ -1,7 +1,7 @@
 import functs from '../helpers/functs';
 
 const { log, addReturnString } = functs;
-const createQuery = (modelName, modelToCreate, returnFields=[]) => {
+const createQuery = (modelName: string, modelToCreate: any, returnFields=[]) => {
   if (!modelToCreate) {
     return { message: 'type error! expecting an object' };
   }
@@ -34,13 +34,13 @@ const createQuery = (modelName, modelToCreate, returnFields=[]) => {
     keys.forEach((key) => {
       if (itemValueString === '(') {
         if (Array.isArray(item[key])) {
-          itemValueString = `${itemValueString}ARRAY [${item[key].map(value => `'${value}'`)}]`;
+          itemValueString = `${itemValueString}ARRAY [${item[key].map((value: any) => `'${value}'`)}]`;
         } else {
           itemValueString = `${itemValueString}'${item[key]}'`;
         }
       } else {
         if (Array.isArray(item[key])) {
-          itemValueString = `${itemValueString}, ARRAY [${item[key].map(value => `'${value}'`)}]`;
+          itemValueString = `${itemValueString}, ARRAY [${item[key].map((value: any) => `'${value}'`)}]`;
         } else {
           itemValueString = `${itemValueString}, '${item[key]}'`;
         }

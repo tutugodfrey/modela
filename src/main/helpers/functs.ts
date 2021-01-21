@@ -1,5 +1,11 @@
+interface Condition {
+  where: object;
+  groups?: Array<Array<any>>;
+  type?: string;
+}
+
 export default {
-  confirmPropMatch: (model, conditions) => {
+  confirmPropMatch: (model: object, conditions: Condition) => {
     const whereConditions = conditions.where;
     const groupConditions = conditions.groups ? conditions.groups : null;
     const props = Object.keys(whereConditions);
@@ -39,21 +45,21 @@ export default {
       return !finalResult.includes(false);
     }
   },
-  getFieldsToReturn: (model, returnFields=[]) => {
+  getFieldsToReturn: (model: object, returnFields=[]) => {
     if (!returnFields.length) return model;
     const modelToReturn = {}
     returnFields.forEach(field => model[field] ?
         modelToReturn[field] = model[field]: null);
     return modelToReturn;
   },
-  addReturnString: (queryString, returnFields) => {
+  addReturnString: (queryString: string, returnFields: Array<string>) => {
     let returnString = '';
     if (!returnFields.length) return `${queryString} returning *`;
     returnFields.forEach(field => returnString = `${returnString} "${field}",`);
     returnString = returnString.substr(0, returnString.length - 1)
     return `${queryString} returning ${returnString.trim()}`;
   },
-  checkDatatype: (allowedFields, schema, modelToCreate) => {
+  checkDatatype: (allowedFields: Array<string>, schema: object, modelToCreate: object) => {
     let datatypeValidationMessage = '';
     const datatypeField = allowedFields.find(field => {
       if (schema[field].dataType) {
@@ -91,7 +97,7 @@ export default {
     });
     return [datatypeField, datatypeValidationMessage]
   },
-  updateTimestamp: function (model) {
+  updateTimestamp: function (model: any) {
     if (this.schema.createdAt && model.createdAt === undefined) {
       model.createdAt = new Date().toISOString();
     }
@@ -101,7 +107,7 @@ export default {
     }
     return model;
   },
-  generateGroupString: (conditions, type) => {
+  generateGroupString: (conditions: Condition, type: string) => {
     let groupString = '';
     const groupCondition = conditions.groups;
     const whereCondition = conditions.where;
@@ -132,7 +138,7 @@ export default {
     });
     return groupString;
   },
-  generateWhereString: (conditions, type) => {
+  generateWhereString: (conditions: Condition, type: string) => {
     let whereString = '';
     const whereCondition = conditions.where;
     const whereKeys = Object.keys(whereCondition);
@@ -158,8 +164,8 @@ export default {
 
     return whereString;
   },
-  generatePropString: (modelName, newProps,) => {
-    let queryString;
+  generatePropString: (modelName: string, newProps: object) => {
+    let queryString: string;
     let propString = '';
     const newPropsKeys = Object.keys(newProps);
     queryString = `UPDATE ${modelName} SET`;
@@ -173,7 +179,7 @@ export default {
     queryString = `${queryString} ${propString}`;
     return queryString;
   },
-  log: function  (queryString) {
+  log: function  (queryString: string) {
     /* eslint-disable no-console */
    process.env.NODE_ENV === 'production' ? null : console.log(queryString);
    return queryString;

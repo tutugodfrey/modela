@@ -1,0 +1,14 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": false,
+    "preserveConstEnums": false,
+    "sourceMap": false,
+    "strict": true,
+    // "outDir": "lib"
+  },
+  "include": ["src/main/**/*"],
+  "exclude": ["node_modules", "src/test"]
+}

@@ -1,4 +1,4 @@
-function bulkCreate(modelsToCreate, returnFields=[]) {
+function bulkCreate(modelsToCreate: any, returnFields: Array<any>=[]) {
   // create a new model
   let createdModels = [];
   const failingObj = [];
@@ -10,7 +10,7 @@ function bulkCreate(modelsToCreate, returnFields=[]) {
       return this.createBulkItemWithDB(modelsToCreate, returnFields);
     } else {
       const result = new Promise((resolve, reject) => {
-        modelsToCreate.forEach((modelToCreate) => {
+        modelsToCreate.forEach((modelToCreate: any) => {
           this.createBulkItem(modelToCreate, returnFields)
             .then(response => {
               return createdModels.push(response);
@@ -23,9 +23,9 @@ function bulkCreate(modelsToCreate, returnFields=[]) {
   }
 
   if (this.requiredFields.length) {
-    const requiredFieldsChecked = modelsToCreate.filter((modelToCreate) => {
-      return this.requiredFields.filter((required) => {
-        return !modelToCreate[required];
+    const requiredFieldsChecked = modelsToCreate.filter((modelToCreate: any) => {
+      return this.requiredFields.filter((field: string) => {
+        return !modelToCreate[field];
       }).length;
     });
 
@@ -35,9 +35,9 @@ function bulkCreate(modelsToCreate, returnFields=[]) {
       if (this.using_db) {
         return this.createBulkItemWithDB(modelsToCreate, returnFields);
       } else {
-        modelsToCreate.forEach((modelToCreate) => {
+        modelsToCreate.forEach((modelToCreate: any) => {
           this.createBulkItem(modelToCreate, returnFields)
-            .then(response => {
+            .then((response: any) => {
               return createdModels.push(response);
             });
         });
@@ -61,7 +61,7 @@ function bulkCreate(modelsToCreate, returnFields=[]) {
 
 // send each item to createModel 
 // and resolve result as a promise
-function createBulkItem(modelToCreate, returnFields) {
+function createBulkItem(modelToCreate: any, returnFields: Array<any>) {
   const result =  new Promise((resolve, reject) => {
     this.createModel(modelToCreate, returnFields, resolve, reject);
   });
@@ -69,7 +69,7 @@ function createBulkItem(modelToCreate, returnFields) {
 }
 
 // will attempt to eliminate this function in future
-function createBulkItemWithDB(modelsToCreate, returnFields=[]) {
+function createBulkItemWithDB(modelsToCreate: any, returnFields: Array<any>) {
   const newModel = new Promise((resolve, reject) => {
     return this.createModelWithDB(modelsToCreate, returnFields, resolve, reject);
   });

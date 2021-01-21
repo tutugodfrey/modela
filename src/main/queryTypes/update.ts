@@ -1,4 +1,5 @@
 import functs from '../helpers/functs';
+import { Condition } from '../../main/interfaces';
 
 const {
   log,
@@ -10,7 +11,7 @@ const {
 
 
 
-const updateQuery = (modelName, conditions, newProps, returnFields=[]) => {
+const updateQuery = (modelName: string, conditions: Condition, newProps: object, returnFields: Array<any>=[]) => {
   if (typeof newProps !== 'object' || typeof conditions !== 'object') {
     return { message: 'type error! expecting an object' };
   }
@@ -18,9 +19,9 @@ const updateQuery = (modelName, conditions, newProps, returnFields=[]) => {
   if (!Array.isArray(returnFields)) {
     throw new TypeError('Expected an array of fields to return');
   }
-  let queryString;
-  let groupString = '';
-  let whereString = '';
+  let queryString: string;
+  let groupString: string = '';
+  let whereString: string = '';
   const type = conditions.type ? conditions.type.toUpperCase() : 'AND';
   if (conditions.groups && type === 'OR') {
     groupString = generateGroupString(conditions, type);
