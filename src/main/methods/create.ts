@@ -27,8 +27,12 @@ function create(modelToCreate: any, returnFields=[]) {
       const missingRequiredField = requiredFields
         .find(field => !Object.keys(modelToCreate).includes(field));
       if (missingRequiredField) {
-        if (this.schema[missingRequiredField].defaultValue === undefined)
-          return reject({ message: `missing required field ${missingRequiredField}` });
+        const schema_ = this.schema[missingRequiredField];
+        // required fields not having & will not have value later.
+        if (schema_.defaultValue === undefined &&
+          missingRequiredField !== 'createdAt' &&
+          missingRequiredField !== 'updatedAt'
+        ) return reject({ message: `missing required field ${missingRequiredField}` });
         modelToCreate[missingRequiredField] = this.schema[missingRequiredField].defaultValue;
       }
     }
