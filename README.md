@@ -730,4 +730,4 @@ In this case search will match models where `propsToSearch2` has values that mat
 
 ## Author
 
-- Tutu Godfrey <godfrey_tutu@yahool.com>
+- Tutu Godfrey <godfrey_tutu@yahoo.com>

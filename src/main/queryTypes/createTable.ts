@@ -13,7 +13,7 @@ function createTableQuery() {
     time: 'TIME',
     date: 'DATE',
   }
-  let tableQuery = `CREATE TABLE IF NOT EXISTS ${this.modelName} (`;
+  let tableQuery: string = `CREATE TABLE IF NOT EXISTS ${this.modelName} (`;
   if (schema.id) {
     tableQuery = `${tableQuery} id SERIAL NOT NULL PRIMARY KEY,`;
   }

@@ -1,7 +1,7 @@
 function bulkCreate(modelsToCreate: any, returnFields: Array<any>=[]) {
   // create a new model
-  let createdModels = [];
-  const failingObj = [];
+  let createdModels: Array<object> = [];
+  const failingObj: Array<object> = [];
   if (!Array.isArray(returnFields)) {
     throw new TypeError('Expected an array of fields to return');
   }
