@@ -8,8 +8,8 @@ const createQuery = (modelName: string, modelToCreate: any, returnFields=[]) => 
   if (!Array.isArray(returnFields)) {
     throw new TypeError('Expected an array of fields to return');
   }
-  let keys = [];
-  let arrayOfModels = []
+  let keys: Array<string> = [];
+  let arrayOfModels: Array<object> = []
   if (Array.isArray(modelToCreate)) {
     keys = Object.keys(modelToCreate[0])
     arrayOfModels = [ ...modelToCreate ];
@@ -17,8 +17,8 @@ const createQuery = (modelName: string, modelToCreate: any, returnFields=[]) => 
     keys = Object.keys(modelToCreate);
     arrayOfModels.push(modelToCreate);
   }
-  let queryString = `INSERT INTO ${modelName}`;
-  let keyString = '(';
+  let queryString: string = `INSERT INTO ${modelName}`;
+  let keyString: string = '(';
   keys.forEach((key) => {
     if (keyString === '(') {
       keyString = `${keyString}"${key}"`;
@@ -27,10 +27,10 @@ const createQuery = (modelName: string, modelToCreate: any, returnFields=[]) => 
     }
   });
   keyString = `${keyString}) VALUES`;
-  let valueString = '';
+  let valueString: string = '';
 
   arrayOfModels.forEach(item => {
-    let itemValueString = '(';
+    let itemValueString: string = '(';
     keys.forEach((key) => {
       if (itemValueString === '(') {
         if (Array.isArray(item[key])) {
