@@ -6,12 +6,14 @@ const {
   addReturnString,
   generateGroupString,
   generateWhereString,
-  generatePropString
+  generatePropString,
+  escapeConditions,
+  prepareDataForStorage,
 } = functs;
 
 
 
-const updateQuery = (modelName: string, conditions: Condition, newProps: object, returnFields: Array<any>=[]) => {
+function updateQuery(modelName: string, conditions: Condition, newProps: object, returnFields: Array<any>=[]) {
   if (typeof newProps !== 'object' || typeof conditions !== 'object') {
     return { message: 'type error! expecting an object' };
   }
@@ -23,15 +25,16 @@ const updateQuery = (modelName: string, conditions: Condition, newProps: object,
   let groupString: string = '';
   let whereString: string = '';
   const type = conditions.type ? conditions.type.toUpperCase() : 'AND';
+  const newConditions = escapeConditions(conditions, this.schema)
   if (conditions.groups && type === 'OR') {
-    groupString = generateGroupString(conditions, type);
+    groupString = generateGroupString(newConditions, type);
   }
 
   if (!groupString) {
-    whereString = generateWhereString(conditions, type);
+    whereString = generateWhereString(newConditions, type);
   }
 
-  queryString = generatePropString(modelName, newProps);
+  queryString = generatePropString(modelName, prepareDataForStorage(newProps, this.schema));
   const generatedQueryString = new Promise((resolve, reject) => {
       if (groupString) {
         queryString = `${queryString} WHERE ${groupString}`;

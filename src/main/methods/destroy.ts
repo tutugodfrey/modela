@@ -1,7 +1,7 @@
 import functs from '../helpers/functs';
 import { Condition } from '../../main/interfaces';
 
-const { confirmPropMatch, getFieldsToReturn } = functs;
+const { confirmPropMatch, getFieldsToReturn, unEscape, parseJson } = functs;
 function destroy(conditions: Condition, returnFields=[]) {
 		/* 
 			delete the object that meet the conditions 
@@ -21,10 +21,9 @@ function destroy(conditions: Condition, returnFields=[]) {
 				const queryString = this.deleteQuery(this.modelName, conditions, returnFields);
 				this.dbConnection.query(queryString)
 					.then((res: { rowCount: any; rows: any[]; }) => {
-						if (!res.rowCount) 
-							return reject({ message: failMsg });
+						if (!res.rowCount) return reject({ message: failMsg });
 						if (!returnFields.length) return resolve({ message });
-						const deletedModel = res.rows[0];
+						const deletedModel = parseJson(unEscape(res.rows[0]), this.schema);
 						deletedModel.message = message;
 						return resolve(deletedModel);
 					})
@@ -36,7 +35,7 @@ function destroy(conditions: Condition, returnFields=[]) {
 						const deletedModel = this.model.splice(index, 1);
 						if (!returnFields.length) return resolve({ message });
 
-						const fieldsToReturn = getFieldsToReturn(deletedModel[0], returnFields);
+						const fieldsToReturn = getFieldsToReturn(parseJson(unEscape(deletedModel[0]), this.schema), returnFields);
 						fieldsToReturn['message'] = message;
 						return resolve(fieldsToReturn);
 					}
