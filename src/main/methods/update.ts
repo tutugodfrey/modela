@@ -1,7 +1,7 @@
 import functs from '../helpers/functs';
 import { Condition } from '../../main/interfaces';
 
-const { confirmPropMatch, getFieldsToReturn  } = functs;
+const { confirmPropMatch, getFieldsToReturn, unEscape, parseJson, prepareDataForStorage } = functs;
 function update(propsToUpdate: any, conditions: Condition, returnFields=[]) {
   /* 
     propsToUpdate contain the new properties to replace the old ones
@@ -34,7 +34,7 @@ function update(propsToUpdate: any, conditions: Condition, returnFields=[]) {
     
     if (this.using_db) {
       propsToUpdate.updatedAt = 'now()';
-      const queryString = this.getQuery(this.modelName, conditions, propsToUpdate);
+      const queryString = this.getQuery(this.modelName, conditions, returnFields);
       this.dbConnection.query(queryString)
         .then(res => {
           return res.rows[0]
@@ -47,7 +47,7 @@ function update(propsToUpdate: any, conditions: Condition, returnFields=[]) {
           if (!res.rows.length) {
             return reject({ message: `${this.singleModel} not found` });
           }
-          return resolve(res.rows[0])
+          return resolve(parseJson(unEscape(res.rows[0]), this.schema));
         })
         .catch(err => reject(err));
     } else {
@@ -70,10 +70,10 @@ function update(propsToUpdate: any, conditions: Condition, returnFields=[]) {
         return resolve(getFieldsToReturn(model, returnFields))
       });
       // return a single object
-      if (updatedModels.length === 1) resolve(updatedModels[0]);
+      if (updatedModels.length === 1) resolve(parseJson(unEscape(updatedModels[0]), this.schema));
 
       // return an array of the modified models
-      resolve(updatedModels);
+      resolve(parseJson(unEscape(updatedModels), this.schema));
     }
   });
   return result;

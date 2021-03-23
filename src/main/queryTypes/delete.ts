@@ -5,9 +5,10 @@ const {
   log,
   addReturnString,
   generateWhereString,
-  generateGroupString
+  generateGroupString,
+  escapeConditions,
 } = functs;
-const deleteQuery = (modelName: string, conditions: Condition, returnFields: Array<any>=[]) => {
+function deleteQuery(modelName: string, conditions: Condition, returnFields: Array<any>=[]) {
   const typeOfCondition = (typeof conditions);
   if (typeOfCondition !== 'object') {
     return { message: 'type error! expecting an object' };
@@ -15,8 +16,9 @@ const deleteQuery = (modelName: string, conditions: Condition, returnFields: Arr
 
   const type = conditions.type ? conditions.type.toUpperCase() : 'AND';
   let queryString = `DELETE FROM ${modelName}`;
-  const groupString = conditions.groups ? generateGroupString(conditions, type) : null;
-  const whereString = generateWhereString(conditions, type);
+  const newConditions = escapeConditions(conditions, this.schema);
+  const groupString = conditions.groups ? generateGroupString(newConditions, type) : null;
+  const whereString = generateWhereString(newConditions, type);
   queryString = groupString !== null ?
     `${queryString} WHERE ${groupString}` :
     `${queryString} WHERE ${whereString}`;

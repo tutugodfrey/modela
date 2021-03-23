@@ -1,7 +1,8 @@
 import functs from '../helpers/functs';
+// import escape from 'pg-escape';
 
 const { log, addReturnString } = functs;
-const createQuery = (modelName: string, modelToCreate: any, returnFields=[]) => {
+function createQuery(modelName: string, modelToCreate: any, returnFields=[]) {
   if (!modelToCreate) {
     return { message: 'type error! expecting an object' };
   }
@@ -33,17 +34,13 @@ const createQuery = (modelName: string, modelToCreate: any, returnFields=[]) => 
     let itemValueString: string = '(';
     keys.forEach((key) => {
       if (itemValueString === '(') {
-        if (Array.isArray(item[key])) {
-          itemValueString = `${itemValueString}ARRAY [${item[key].map((value: any) => `'${value}'`)}]`;
-        } else {
-          itemValueString = `${itemValueString}'${item[key]}'`;
-        }
+        itemValueString = Array.isArray(item[key]) ?
+          `${itemValueString}ARRAY [ ${item[key].map(value => `'${value}'`)} ]` :
+          `${itemValueString}'${item[key]}'`;
       } else {
-        if (Array.isArray(item[key])) {
-          itemValueString = `${itemValueString}, ARRAY [${item[key].map((value: any) => `'${value}'`)}]`;
-        } else {
-          itemValueString = `${itemValueString}, '${item[key]}'`;
-        }
+        itemValueString = Array.isArray(item[key]) ?
+          `${itemValueString}, ARRAY [ ${item[key].map(value => `'${value}'`)} ]` :
+          `${itemValueString}, '${item[key]}'`;
       }
     });
     itemValueString = `${itemValueString})`;
@@ -54,7 +51,6 @@ const createQuery = (modelName: string, modelToCreate: any, returnFields=[]) => 
     }
   });
   queryString = addReturnString(`${queryString} ${keyString} ${valueString}`, returnFields)
-
   return log(queryString);
 }
 

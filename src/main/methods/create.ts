@@ -4,6 +4,9 @@ const {
   getFieldsToReturn,
   checkDatatype,
   updateTimestamp,
+  unEscape,
+  parseJson,
+  prepareDataForStorage,
 } = functs;
 
 function create(modelToCreate: any, returnFields=[]) {
@@ -49,8 +52,9 @@ function create(modelToCreate: any, returnFields=[]) {
     const dataTypeChecking = checkDatatype(this.allowedFields, this.schema, modelToCreate);
     if (dataTypeChecking[0]) return reject({ message: dataTypeChecking[1] });
 
-    if (this.using_db)
-      return this.createModelWithDB(modelToCreate, returnFields, resolve, reject);
+    if (this.using_db) {      
+      return this.createModelWithDB(prepareDataForStorage(modelToCreate, this.schema), returnFields, resolve, reject);
+    }
     return this.createModel(modelToCreate, returnFields, resolve, reject);
   });
   return result;
@@ -97,7 +101,12 @@ function createModel(modelToCreate: any, returnFields: Array<any>, resolve: Func
   }
 }
 
-function createModelWithDB(modelToCreate: any, returnFields: Array<any>, resolve: Function, reject: Function) {
+function createModelWithDB(
+  modelToCreate: any,
+  returnFields: Array<any>,
+  resolve: Function,
+  reject: Function
+) {
   if (Array.isArray(modelToCreate)) {
     modelToCreate.forEach((_modelToCreate)=> {
       updateTimestamp.call(this, _modelToCreate); // update createdAt and updatedAt
@@ -106,18 +115,20 @@ function createModelWithDB(modelToCreate: any, returnFields: Array<any>, resolve
     updateTimestamp.call(this, modelToCreate);
   }
 
-  const queryString = this.createQuery(this.modelName, modelToCreate, returnFields);
+  const queryString =
+    this.createQuery(this.modelName, modelToCreate, returnFields);
   return this.dbConnection.query(queryString)
     .then((res: object | any )=> {
-      if (Array.isArray(modelToCreate))
-        return resolve(res.rows);
-      return resolve(res.rows[0]);
+      if (Array.isArray(modelToCreate)) return resolve(parseJson(unEscape(res.rows), this.schema));
+      return resolve(parseJson(unEscape(res.rows[0]), this.schema));
     })
     .catch((err: any) => {
       if (err.detail && err.detail.includes('already exists')) {
         const key = err.detail.split('=')[0].split('(')[1].split(')')[0];
         const value = err.detail.split('=')[1].split(')')[0].split('(')[1];
-        return reject({ message: `${this.singleModel} with ${key} = ${value} already exists` });
+        return reject({ message:
+          `${this.singleModel} with ${key} = ${unEscape(value)} already exists`,
+        });
       }
       if (err.code === '42P01') {
         const createTableQuery = this.createTableQuery();
@@ -127,11 +138,11 @@ function createModelWithDB(modelToCreate: any, returnFields: Array<any>, resolve
           })
           .then((res: any) => {
             if (Array.isArray(modelToCreate))
-              return resolve(res.rows);
-            return resolve(res.rows[0]);
+              return resolve(parseJson(unEscape(res.rows), this.schema));
+            return resolve(parseJson(unEscape(res.rows[0]), this.schema));
           });
       }
-      return reject(err.detail);
+      return reject(err.message);
     })
     .catch((err: object )=> reject(err))
 };

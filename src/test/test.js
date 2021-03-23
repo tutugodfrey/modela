@@ -48,8 +48,8 @@ const todos = new DataModela('todos', {
 	},
 	links: {
 		dataType: 'array',
-		arrayOfType: 'char',
-		charLength: `30`
+		arrayOfType: 'varchar',
+		charLength: 500
 	},
 	createdAt: {
 		dataType: 'timestamp'
@@ -246,6 +246,8 @@ describe('Dummy Data Model', () => {
 				});
 			});
 		});
+
+
 	});
 
 	describe('Bulk Create method', () => {
@@ -1124,6 +1126,33 @@ describe('Dummy Data Model', () => {
 				expect(res).to.have.property('updatedAt');
 			})
 		});
+
+		it('should create model with special character (enable string escaping)', () => {
+			return todos.create({
+				title: "Test escape's string",
+				userId: 12,
+				completed: true,
+				deadline: new Date(1605788451842).toISOString(),
+				links: [{link1: 'http://linktoasite.com'}, {link2: 'http://linktoanothersite.com' }],
+			})
+				.then(res => {
+					expect(res.title).to.equal("Test escape's string");
+				})
+		})
+
+		it('should create model with data have array that contains an object', () => {
+			return todos.create({
+				title: "Test escape link with object",
+				userId: 12,
+				completed: true,
+				deadline: new Date(1605788451842).toISOString(),
+				links: [{link1: 'http://linktoasite.com'}, {link2: 'http://linktoanothersite.com' }],
+			})
+				.then(res => {
+					expect(res).to.have.property('links').to.have.length(2)
+					expect(res.links[0]).to.be.an('object')
+				})
+		})
 
 		it('should get todos matching search criteria', () => {
 			return todos.findAll({

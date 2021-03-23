@@ -1,7 +1,7 @@
 import functs from '../helpers/functs';
 import { Condition } from '../../main/interfaces';
 
-const { confirmPropMatch, getFieldsToReturn } = functs;
+const { confirmPropMatch, getFieldsToReturn, unEscape, parseJson } = functs;
 function find(condition: Condition, returnFields=[]) {
   /* return a single object that meet the condition
     condition is single object with property where whose value is further
@@ -20,14 +20,10 @@ function find(condition: Condition, returnFields=[]) {
       const queryString = this.getQuery(this.modelName, condition, returnFields);
       this.dbConnection.query(queryString)
         .then((res: any) => {
-          if (!res.rows.length) {
-            reject({ message: `${this.singleModel} not found` });
-          }
-          resolve(res.rows[0])
+          if (!res.rows.length) return reject({ message: `${this.singleModel} not found` });
+          return resolve(parseJson(unEscape(res.rows[0]), this.schema));
         })
-        .catch((err: any) => {
-          reject(err)
-        });
+        .catch((err: any) => reject(err));
     } else {
       this.model.find((model: any) => {
         const findMatchProps = confirmPropMatch(model, condition);
