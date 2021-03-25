@@ -13,19 +13,7 @@ var DataModela = /** @class */ (function () {
     function DataModela(modelName, schema) {
         var _this = this;
         if (schema === void 0) { schema = {}; }
-        if (Object.prototype.toString.call(schema) !== '[object Object]') {
-            return { typeError: 'expected argument 2 (schema) to be an object' };
-        }
-        this.using_db = 0;
-        if (parseInt(process.env.USE_DB) === 1) {
-            this.dbConnection = null;
-            this.using_db = 1;
-        }
-        ;
-        this.modelName = modelName;
-        this.singleModel = modelName.substring(0, modelName.length - 1);
-        this.schema = schema;
-        this.allowedFields = Object.keys(this.schema);
+        this.allowedFields = [];
         this.uniqueKeys = [];
         this.requiredFields = [];
         this.model = [];
@@ -39,9 +27,10 @@ var DataModela = /** @class */ (function () {
             'time',
             'date',
             'timestamp',
-            'timestamptz'
+            'timestamptz',
+            'bigint',
         ];
-        this.create = create_1.create.bind(this);
+        this.create = create_1.create;
         this.createModel = create_1.createModel.bind(this);
         this.createModelWithDB = create_1.createModelWithDB.bind(this);
         this.bulkCreate = bulkCreate_1["default"].bind(this);
@@ -53,6 +42,8 @@ var DataModela = /** @class */ (function () {
         this.findAll = findAll_1["default"].bind(this);
         this.destroy = destroy_1["default"].bind(this);
         this.clear = clear_1["default"].bind(this);
+        this.dbConnection = null;
+        this.using_db = 0;
         // db methods
         this.createQuery = queryTypes_1.createQuery.bind(this);
         this.getQuery = queryTypes_1.getQuery.bind(this);
@@ -60,22 +51,37 @@ var DataModela = /** @class */ (function () {
         this.deleteQuery = queryTypes_1.deleteQuery.bind(this);
         this.rawQuery = queryTypes_1.rawQuery.bind(this);
         this.createTableQuery = queryTypes_1.createTableQuery.bind(this);
+        if (Object.prototype.toString.call(schema) !== '[object Object]') {
+            return { typeError: 'expected argument 2 (schema) to be an object' };
+        }
+        if (parseInt(process.env.USE_DB) === 1) {
+            this.dbConnection = null;
+            this.using_db = 1;
+        }
+        ;
+        this.modelName = modelName;
+        this.singleModel = this.modelName.substring(0, this.modelName.length - 1);
+        this.schema = schema;
+        this.allowedFields = Object.keys(schema);
+        this.uniqueKeys = [];
+        this.requiredFields = [];
+        this.model = [];
         this.allowedFields.forEach(function (field) {
-            if (_this.schema[field].required)
+            if (schema[field].required)
                 return _this.requiredFields.push(field);
         });
         this.allowedFields.forEach(function (field) {
-            if (_this.schema[field].unique)
+            if (schema[field].unique)
                 return _this.uniqueKeys.push(field);
         });
         var unsupportedTypeField = this.allowedFields.find(function (field) {
-            if (_this.schema[field].dataType) {
-                return !_this.supportedDataTypes.includes(_this.schema[field].dataType);
+            if (schema[field].dataType) {
+                return !_this.supportedDataTypes.includes(schema[field].dataType);
             }
         });
         if (unsupportedTypeField) {
             throw ({
-                message: "dataType " + this.schema[unsupportedTypeField].dataType + " in " + unsupportedTypeField + " is not supported",
+                message: "dataType " + schema[unsupportedTypeField].dataType + " in " + unsupportedTypeField + " is not supported",
                 supportedDataTypes: this.supportedDataTypes
             });
         }

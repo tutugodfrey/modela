@@ -59,44 +59,57 @@ const functObj = {
     returnString = returnString.substr(0, returnString.length - 1)
     return `${queryString} returning ${returnString.trim()}`;
   },
-  checkDatatype: (allowedFields: Array<string>, schema: object, modelToCreate: object) => {
+  checkDatatype: (schema: object, modelToCreate: object) => {
+    // Return datatype fields that fail validation and a message
+    const allowedFields = Object.keys(schema);
     let datatypeValidationMessage = '';
     const datatypeField = allowedFields.find(field => {
-      if (modelToCreate[field] === undefined && schema[field].default !== undefined) {
+      if ((modelToCreate[field] === undefined) && 
+        (schema[field].default !== undefined || !schema[field].required
+      )) { return false; }
+
+      const fieldDatatype = schema[field].dataType;
+      const modelFieldValue = modelToCreate[field];
+      const valuePrototype = Object.prototype.toString.call(modelFieldValue);
+      datatypeValidationMessage = `Expected input of type ${fieldDatatype} for ${field}`;
+      if (fieldDatatype) {
+        // Feiled having datatype defined
+        if (['varchar', 'char', 'string'].includes(fieldDatatype) && valuePrototype !== '[object String]') {
+          return true;
+        } else if (fieldDatatype === 'array' && valuePrototype !== '[object Array]') {
+          return true;
+        } else if (fieldDatatype === 'boolean' && valuePrototype !== '[object Boolean]') {
+          return true;
+        } else if ([ 'timestamp', 'timestamptz' ].includes(fieldDatatype)) {
+          let dateObj = new Date(modelFieldValue);
+          if (dateObj.toString() === 'Invalid Date') {
+            dateObj = new Date(Number(modelFieldValue));
+            if (dateObj.toString() === 'Invalid Date') {
+              if (field === 'createdAt' || field === 'updatedAt') {
+                // This field will be supplied at creation time if not provided
+                return false;
+              }
+              return true;
+            }
+            return true;
+          }
+          return false;
+        } else if ([ 'number' ].includes(fieldDatatype) && valuePrototype !== '[object Number]'){
+          return true;
+        } else if ([ 'bigint' ].includes(fieldDatatype) && valuePrototype !== '[object BigInt]') {
+          return true;
+        } else if ([ 'time', 'date'].includes(fieldDatatype) && valuePrototype !== '[object Date]') {
+          return true;
+        } 
+        return false
+      } else {
+        // Field not having datatype defined
+        // Assume string for field not having dataType defined when storing in db
+        // or store as is when storing in-memory 
+        // Safe to return false
         return false;
       }
-      if (schema[field].dataType) {
-        if (typeof modelToCreate[field] === 'object') {
-          let type = '';
-          if (Object.prototype.toString.call(modelToCreate[field]) === '[object Array]') {
-            type = 'array';
-          }
 
-          if (type !== schema[field].dataType) {
-            if (field !== 'createdAt' || field !== 'updatedAt') {
-              datatypeValidationMessage = `Expected input of type ${schema[field].dataType} for ${field}`;
-              return true;
-            }
-          }
-        } else {
-          if (typeof modelToCreate[field] !== schema[field].dataType) {
-            if (field === 'createdAt' || field === 'updatedAt') {
-              // in case these fields are specified in schema but not in model creation
-              // pass;
-            }  else if (schema[field].dataType === 'timestamp' || schema[field].dataType === 'timestamptz') {
-              if (new Date(modelToCreate[field]) === 'Invalid Date') {
-                datatypeValidationMessage = `Expected input of type ${schema[field].dataType} for ${field}`;
-                return true;
-              }
-            } else if (schema[field].dataType === 'varchar' || schema[field].dataType === 'char') {
-              // pass
-            } else {
-              datatypeValidationMessage = `Expected input of type ${schema[field].dataType} for ${field}`;
-              return true;
-            }
-          }
-        }
-      }
     });
     return [datatypeField, datatypeValidationMessage]
   },
@@ -120,9 +133,10 @@ const functObj = {
       }
       let groupStr = '';
       group.forEach(prop => {
-        if (Array.isArray(whereCondition[prop])) {
+        const whereProp = whereCondition[prop];
+        if (Array.isArray(whereProp )) {
           let str = '';
-          const matchValue = whereCondition[prop]
+          const matchValue = whereProp;
           matchValue.forEach(value => {
             if (!str) {
               str = `(${str} "${prop}" = '${value}'`;
@@ -132,9 +146,9 @@ const functObj = {
           });
           groupStr = groupStr ? `${groupStr} ${type} ${str}` : `${str}`;
         } else if (!groupStr) {
-          groupStr = `("${prop}" = '${whereCondition[prop]}'`;
+          groupStr = `("${prop}" = '${whereProp}'`;
         } else {
-          groupStr = `${groupStr} AND "${prop}" = '${whereCondition[prop]}'`;
+          groupStr = `${groupStr} AND "${prop}" = '${whereProp}'`;
         }
       });
       groupString = `${groupString} ${groupStr})`;
@@ -146,10 +160,10 @@ const functObj = {
     const whereCondition = conditions.where;
     const whereKeys = Object.keys(whereCondition);
     whereKeys.forEach((prop) => {
-
-      if (Array.isArray(whereCondition[prop])) {
+      const whereProp = whereCondition[prop];
+      if (Array.isArray(whereProp )) {
         let str = '';
-        const matchValue = whereCondition[prop];
+        const matchValue = whereProp;
         matchValue.forEach(value => {
           if (!str) {
             str = `${str} "${prop}" = '${value}'`;
@@ -159,9 +173,9 @@ const functObj = {
         });
         whereString = whereString ? `${whereString} ${type} ${str}` : `${str}`;
       } else if (!whereString) {
-        whereString = `${whereString}"${prop}" = '${whereCondition[prop]}'`;
+        whereString = `${whereString}"${prop}" = '${whereProp}'`;
       } else {
-        whereString = `${whereString} ${type} "${prop}" = '${whereCondition[prop]}'`;
+        whereString = `${whereString} ${type} "${prop}" = '${whereProp}'`;
       }
     });
     return whereString;
@@ -171,7 +185,7 @@ const functObj = {
       `Array [${data.map((value) => `'${functObj.escapeString(JSON.stringify(value), field, schema)}'`)}]`;
     return arrayFieldData;
   },
-  generatePropString: function(modelName: string, newProps: object) {
+  generatePropString: function(modelName: string, newProps: Object) {
     let queryString: string;
     let propString = '';
     const newPropsKeys = Object.keys(newProps);
@@ -212,10 +226,10 @@ const functObj = {
     });
     return preparedDataObj;
   },
-  escapeConditions: (conditions: object, schema: object) => {
+  escapeConditions: (conditions: Condition, schema: object) => {
     const newConditionsObj = { ...conditions };
     if (newConditionsObj.where) {
-      const whereCondition2 = newConditionsObj.where;
+      const whereCondition2: Object = newConditionsObj.where;
       const whereKeyss = Object.keys(whereCondition2);
       whereKeyss.forEach(key => {
         if (Array.isArray(whereCondition2[key])) {
