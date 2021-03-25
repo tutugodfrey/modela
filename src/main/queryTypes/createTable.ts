@@ -25,6 +25,8 @@ function createTableQuery() {
           fieldContraint = `${fieldContraint} TEXT`;
         } else if (schema[field].dataType === 'number') {
           fieldContraint = `${fieldContraint} INT`;
+        } else if (schema[field].dataType === 'bigint') {
+          fieldContraint = `${fieldContraint} BIGINT`;
         } else if (schema[field].dataType === 'boolean') {
           fieldContraint = `${fieldContraint} BOOLEAN`;
         } else if (schema[field].dataType === 'char') {

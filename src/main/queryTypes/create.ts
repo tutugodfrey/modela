@@ -33,14 +33,25 @@ function createQuery(modelName: string, modelToCreate: any, returnFields=[]) {
   arrayOfModels.forEach(item => {
     let itemValueString: string = '(';
     keys.forEach((key) => {
+      const dataValue = item[key];
+      const fieldDataType = this.schema[key].dataType;
       if (itemValueString === '(') {
-        itemValueString = Array.isArray(item[key]) ?
-          `${itemValueString}ARRAY [ ${item[key].map(value => `'${value}'`)} ]` :
-          `${itemValueString}'${item[key]}'`;
+        itemValueString = Array.isArray(dataValue) ?
+          `${itemValueString}ARRAY [ ${dataValue.map(value => `'${value}'`)} ]` :
+          `${itemValueString}'${dataValue}'`;
       } else {
-        itemValueString = Array.isArray(item[key]) ?
-          `${itemValueString}, ARRAY [ ${item[key].map(value => `'${value}'`)} ]` :
-          `${itemValueString}, '${item[key]}'`;
+        if (Array.isArray(dataValue)) {
+          itemValueString = `${itemValueString}, ARRAY [ ${dataValue.map(value => `'${value}'`)} ]`;
+        } else if ([ 'timestamp', 'timestampz' ].includes(fieldDataType)) {
+          console.log('How come about that', dataValue)
+          if (typeof dataValue === 'number') {
+            itemValueString = `${itemValueString}, (SELECT to_timestamp(${dataValue}))`;
+          } else {
+            itemValueString = `${itemValueString}, '${dataValue}'`;
+          }
+        } else {
+          itemValueString = `${itemValueString}, '${dataValue}'`;
+        }
       }
     });
     itemValueString = `${itemValueString})`;

@@ -7,7 +7,6 @@ function findAll(conditions: any = 'all', returnFields=[]) {
     conditions is single object with property where whose value is further
     an object with key => value pair of the properties of the object to find
   */
-
   const result = new Promise((resolve, reject)  => {
     if (!Array.isArray(returnFields)) {
       reject({ message: 'Expected an array of fields to return'});
