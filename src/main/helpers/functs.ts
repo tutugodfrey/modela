@@ -52,10 +52,20 @@ const functObj = {
         modelToReturn[field] = model[field]: null);
     return modelToReturn;
   },
-  addReturnString: (queryString: string, returnFields: Array<string>) => {
+  addReturnString: function (queryString: string, returnFields: Array<string>) {
+    const schema = this.schema;
+    const schemaFields = Object.keys(schema);
+    const fields = returnFields.length ? returnFields : schemaFields;
     let returnString = '';
-    if (!returnFields.length) return `${queryString} returning *`;
-    returnFields.forEach(field => returnString = `${returnString} "${field}",`);
+    fields.forEach(field => {
+      const fieldDataType = schema[field].dataType;
+      if ([ 'timestamp', 'timestamptz' ].includes(fieldDataType)) {
+        returnString = `${returnString} extract(epoch FROM timestamptz ("${field}")) as "${field}",`
+      } else {
+        returnString = `${returnString} "${field}",`
+      }
+      return returnString;
+    });
     returnString = returnString.substr(0, returnString.length - 1)
     return `${queryString} returning ${returnString.trim()}`;
   },
@@ -185,23 +195,37 @@ const functObj = {
       `Array [${data.map((value) => `'${functObj.escapeString(JSON.stringify(value), field, schema)}'`)}]`;
     return arrayFieldData;
   },
-  generatePropString: function(modelName: string, newProps: Object) {
+  generatePropString: function(modelName: string, newProps: Object, schema) {
     let queryString: string;
     let propString = '';
     const newPropsKeys = Object.keys(newProps);
     queryString = `UPDATE ${modelName} SET`;
     newPropsKeys.forEach((prop: string) => {
+      const propValue = newProps[prop];
+      const fieldDataType = schema[prop].dataType;
       if (propString === '') {
-        if (Array.isArray(newProps[prop]) && newProps[prop].length) {
-          propString = `${propString}"${prop}" = ARRAY [ ${newProps[prop].map(value => `'${value}'`)} ]`;
+        if ([ 'timestamp', 'timestampz' ].includes(fieldDataType)) {
+          if (typeof propValue === 'number') {
+            propString = `${propString}"${prop}" = (SELECT to_timestamp(${propValue}))`;
+          } else {
+            propString= `${propString}"${prop}" = '${propValue}'`;
+          }
+        } else if (Array.isArray(propValue) && propValue.length) {
+          propString = `${propString}"${prop}" = ARRAY [ ${propValue.map(value => `'${value}'`)} ]`;
         } else {
-          propString = `${propString}"${prop}" = '${newProps[prop]}'`;
+          propString = `${propString}"${prop}" = '${propValue}'`;
         }
       } else {
-        if (Array.isArray(newProps[prop]) && newProps[prop].length) {
-          propString = `${propString}, "${prop}" = ARRAY [ ${newProps[prop].map(value => `'${value}'`)} ]`;
+        if ([ 'timestamp', 'timestampz' ].includes(fieldDataType)) {
+          if (typeof propValue === 'number') {
+            propString = `${propString}, "${prop}" = (SELECT to_timestamp(${propValue}))`;
+          } else {
+            propString= `${propString}, "${prop}" = '${propValue}'`;
+          }
+        } else if (Array.isArray(propValue) && propValue.length) {
+          propString = `${propString}, "${prop}" = ARRAY [ ${propValue.map(value => `'${value}'`)} ]`;
         } else {
-          propString = `${propString}, "${prop}" = '${newProps[prop]}'`;
+          propString = `${propString}, "${prop}" = '${propValue}'`;
         }
       }
     });
@@ -210,18 +234,22 @@ const functObj = {
   },
   prepareDataForStorage: (dataObj: object, schema: object) => {
     const fields = Object.keys(dataObj);
-    const preparedDataObj: object = {};
+    const preparedDataObj: Object = {};
     fields.forEach((field: any) => {
-      if (typeof dataObj[field] === 'string') {
-        preparedDataObj[field] = functObj.escapeString(dataObj[field], field, schema);
-      } else if (Array.isArray(dataObj[field])) {
-        if (dataObj[field].length) {
+      const fieldDataType = schema[field].dataType;
+      const fieldValue = dataObj[field];
+      if (fieldDataType === 'string' || fieldDataType === undefined) {
+        preparedDataObj[field] = functObj.escapeString(fieldValue, field, schema);
+      } else if ([ 'timestamp', 'timestampz' ].includes(fieldDataType)) {
+        preparedDataObj[field] = functObj.escapeString(fieldValue, field, schema);
+      } else if (Array.isArray(fieldValue)) {
+        if (fieldValue.length) {
           // Only add arrays containing data into the final object to store
-          const arrayData = dataObj[field].map(row => functObj.escapeString(JSON.stringify(row), field, schema));
+          const arrayData = fieldValue.map(row => functObj.escapeString(JSON.stringify(row), field, schema));
           preparedDataObj[field] = arrayData;
         }
       } else {
-        preparedDataObj[field] = dataObj[field];
+        preparedDataObj[field] = fieldValue;
       }
     });
     return preparedDataObj;
@@ -248,7 +276,7 @@ const functObj = {
     }
     return newConditionsObj;
   },
-  escapeString: function(value: object, field: string, schema: object) {
+  escapeString: function(value: any, field: String, schema: object) {
     if (schema[field] && schema[field].dataType && schema[field].dataType.includes('timestamp')) {
       return value;
     } else {
