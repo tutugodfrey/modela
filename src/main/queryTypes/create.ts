@@ -43,7 +43,6 @@ function createQuery(modelName: string, modelToCreate: any, returnFields=[]) {
         if (Array.isArray(dataValue)) {
           itemValueString = `${itemValueString}, ARRAY [ ${dataValue.map(value => `'${value}'`)} ]`;
         } else if ([ 'timestamp', 'timestampz' ].includes(fieldDataType)) {
-          console.log('How come about that', dataValue)
           if (typeof dataValue === 'number') {
             itemValueString = `${itemValueString}, (SELECT to_timestamp(${dataValue}))`;
           } else {
@@ -61,7 +60,7 @@ function createQuery(modelName: string, modelToCreate: any, returnFields=[]) {
       valueString = `${itemValueString}`
     }
   });
-  queryString = addReturnString(`${queryString} ${keyString} ${valueString}`, returnFields)
+  queryString = addReturnString.call(this, `${queryString} ${keyString} ${valueString}`, returnFields)
   return log(queryString);
 }
 

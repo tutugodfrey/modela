@@ -30,7 +30,7 @@ var DataModela = /** @class */ (function () {
             'timestamptz',
             'bigint',
         ];
-        this.create = create_1.create;
+        this.create = create_1.create.bind(this);
         this.createModel = create_1.createModel.bind(this);
         this.createModelWithDB = create_1.createModelWithDB.bind(this);
         this.bulkCreate = bulkCreate_1["default"].bind(this);

@@ -22,7 +22,7 @@ function deleteQuery(modelName: string, conditions: Condition, returnFields: Arr
   queryString = groupString !== null ?
     `${queryString} WHERE ${groupString}` :
     `${queryString} WHERE ${whereString}`;
-  queryString = addReturnString(queryString, returnFields);
+  queryString = addReturnString.call(this, queryString, returnFields);
 
   return log(queryString);
 }

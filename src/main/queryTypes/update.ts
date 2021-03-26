@@ -34,7 +34,7 @@ function updateQuery(modelName: string, conditions: Condition, newProps: object,
     whereString = generateWhereString(newConditions, type);
   }
 
-  queryString = generatePropString(modelName, prepareDataForStorage(newProps, this.schema));
+  queryString = generatePropString(modelName, prepareDataForStorage(newProps, this.schema), this.schema);
   const generatedQueryString = new Promise((resolve, reject) => {
       if (groupString) {
         queryString = `${queryString} WHERE ${groupString}`;
@@ -42,7 +42,7 @@ function updateQuery(modelName: string, conditions: Condition, newProps: object,
         queryString = `${queryString} WHERE ${whereString}`;
       }
 
-      queryString = addReturnString(queryString, returnFields)
+      queryString = addReturnString.call(this, queryString, returnFields)
 
       if (queryString) resolve(log(queryString));
   });

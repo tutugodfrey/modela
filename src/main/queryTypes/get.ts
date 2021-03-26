@@ -14,8 +14,7 @@ function getQuery(modelName: string, conditions: Condition| any, returnFields: A
     return { message: 'type error!' };
   }
 
-  const returnString = returnFields.length ?
-    addReturnString('', returnFields).substr(11) : '*';
+  const returnString = addReturnString.call(this, '', returnFields).substr(11);
   let queryString = `SELECT ${returnString} FROM ${modelName}`;
   if (conditions === 'all') return log(queryString);
   if (typeof conditions === 'number') return log(`${queryString} WHERE "id" = ${conditions}`);
