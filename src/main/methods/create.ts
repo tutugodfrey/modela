@@ -125,7 +125,7 @@ function createModelWithDB(
   const schema = this.schema;
   const modelName = this.modelName;
   const dbConnection = this.dbConnection;
-  const createTableQuery = this.createTableQuery();
+  const createTableQuery = this.createTableQuery;
   const createQuery = this.createQuery;
   const singleModel = this.singleModel;
   if (Array.isArray(modelToCreate)) {
@@ -152,7 +152,7 @@ function createModelWithDB(
         });
       }
       if (err.code === '42P01') {
-        return dbConnection.query(createTableQuery)
+        return dbConnection.query(createTableQuery())
           .then(( /* create table query result */ ) => {
             return dbConnection.query(queryString);
           })

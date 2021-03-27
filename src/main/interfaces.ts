@@ -5,6 +5,10 @@ interface Condition {
   type?: string;
 }
 
+interface Error {
+  message: String
+}
+
 interface DataModelaType {
 	modelName: String | undefined;
   singleModel: String | undefined;
@@ -41,5 +45,6 @@ interface DataModelaType {
 export {
   DataModelaType,
   Condition,
+  Error,
 }
 

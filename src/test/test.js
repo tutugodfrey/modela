@@ -4,6 +4,7 @@ import { connect } from '../main/connection';
 import { testData } from './helpers';
 
 console.time('timeChecked');
+const usingDB = process.env.USE_DB
 const { expect } = chai;
 const users = new DataModela('users', {
 	id: {},
@@ -69,7 +70,7 @@ const messages = new DataModela('messages', {
 		dataType: 'timestamp',
 	}
 });
-if (parseInt(process.env.USE_DB)) {
+if (parseInt(usingDB)) {
 	const connection = connect(process.env.DATABASE_URL, [ users, messages, todos ]);
 }
 const {
@@ -115,6 +116,17 @@ describe('Dummy Data Model', () => {
 					expect(err).to.have.property('supportedDataTypes').to.be.an('array');
 				}
 		});
+	});
+
+	describe('Clear Tables (Relation) that does not exist', () => {
+		return users.clear()
+			.then(res => {
+				// When using DB the table might exist or might not already exit
+				// If table does not already exits we still handle as successful
+				expect(res).to.have.property('message');
+				expect(['Table users does not exist', 'Successfully cleared users'])
+					.to.to.includes(res.message);
+			})
 	});
 
 	describe('Users', () => {
@@ -1218,7 +1230,7 @@ describe('Dummy Data Model', () => {
 		});
 	});
 
-	if (parseInt(process.env.USE_DB)) {
+	if (parseInt(usingDB)) {
 		let createdMessage = {}
 		describe('Testing rawQuery func', () => {
 			const message = 'good day everyone';
