@@ -1,49 +1,50 @@
-interface Condition {
-  where: object;
-  groups?: Array<Array<any>>;
-  type?: string;
-}
+import { Condition, IMapping } from '../interfaces';
 
 const functObj = {
-  confirmPropMatch: (model: object, conditions: Condition) => {
-    const whereConditions = conditions.where;
+  confirmPropMatch: (model: IMapping, conditions: Condition) => {
+    const whereConditions: IMapping = conditions.where;
     const groupConditions = conditions.groups ? conditions.groups : null;
     const props = Object.keys(whereConditions);
     const matchType = conditions.type ? conditions.type : 'and';
     if (groupConditions && groupConditions.length && matchType === 'or') {
-      const groupsPassingState = {};
+      const groupsPassingState: IMapping = {};
       groupConditions.forEach((groupProps, index) => {
         groupsPassingState[index] = !groupProps.find((prop) => {
-          if (Array.isArray(whereConditions[prop]))
-            return whereConditions[prop].includes(model[prop]);
-          return whereConditions[prop] !== model[prop];
+          const wherePropValues = whereConditions[prop];
+          const fieldValue = model[prop];
+          if (Array.isArray(wherePropValues))
+            return wherePropValues.includes(fieldValue);
+          return wherePropValues !== fieldValue;
         });
       });
       return Object.keys(groupsPassingState)
         .map(key => groupsPassingState[key]).includes(true);   
-    } else {
-      if (matchType === 'or') {
-        const result = props.find((prop) => {
-          if (Array.isArray(whereConditions[prop]))
-            return (whereConditions[prop].includes(model[prop]));
-          return (whereConditions[prop] === model[prop]);
-        });
-
-        if (result) return true;
-        return false;
-      }
-
-      const finalResult = [];
-      props.find((prop) => {
-        if (Array.isArray(whereConditions[prop])) {
-          finalResult.push(whereConditions[prop].includes(model[prop]));
-        } else {
-          finalResult.push(whereConditions[prop] === model[prop]);
-        }
+    }
+    if (matchType === 'or') {
+      const result = props.find((prop) => {
+        const wherePropValues = whereConditions[prop];
+        const fieldValue = model[prop]
+        if (Array.isArray(wherePropValues))
+          return (wherePropValues.includes(fieldValue));
+        return (wherePropValues === fieldValue);
       });
 
-      return !finalResult.includes(false);
+      if (result) return true;
+      return false;
     }
+
+    const finalResult: Array<boolean> = [];
+    props.find((prop) => {
+      const wherePropValues = whereConditions[prop];
+      const fieldValue = model[prop]
+      if (Array.isArray(wherePropValues)) {
+        finalResult.push(wherePropValues.includes(fieldValue));
+      } else {
+        finalResult.push(wherePropValues === fieldValue);
+      }
+    });
+
+    return !finalResult.includes(false);
   },
   getFieldsToReturn: (model: object, returnFields=[]) => {
     if (!returnFields.length) return model;
@@ -74,12 +75,14 @@ const functObj = {
     const allowedFields = Object.keys(schema);
     let datatypeValidationMessage = '';
     const datatypeField = allowedFields.find(field => {
-      if ((modelToCreate[field] === undefined) && 
-        (schema[field].default !== undefined || !schema[field].required
+      const fieldValue = modelToCreate[field];
+      const schemaField = schema[field];
+      if ((fieldValue === undefined) && 
+        (schemaField.default !== undefined || !schemaField.required
       )) { return false; }
 
-      const fieldDatatype = schema[field].dataType;
-      const modelFieldValue = modelToCreate[field];
+      const fieldDatatype = schemaField.dataType;
+      const modelFieldValue = fieldValue;
       const valuePrototype = Object.prototype.toString.call(modelFieldValue);
       datatypeValidationMessage = `Expected input of type ${fieldDatatype} for ${field}`;
       if (fieldDatatype) {
@@ -124,19 +127,20 @@ const functObj = {
     return [datatypeField, datatypeValidationMessage]
   },
   updateTimestamp: function (model: any) {
-    if (this.schema.createdAt && model.createdAt === undefined) {
+    const schema = this.schema;
+    if (schema.createdAt && model.createdAt === undefined) {
       model.createdAt = new Date().toISOString();
     }
 
-    if (this.schema.updatedAt && model.updatedAt === undefined) {
+    if (schema.updatedAt && model.updatedAt === undefined) {
       model.updatedAt = new Date().toISOString();
     }
     return model;
   },
   generateGroupString: function(conditions: Condition, type: string) {
     let groupString = '';
-    const groupCondition = conditions.groups;
-    const whereCondition = conditions.where;
+    const groupCondition: Array<Array<any>> = conditions.groups;
+    const whereCondition: IMapping = conditions.where;
     groupCondition.forEach(group => {
       if (groupString) {
         groupString = `${groupString} ${type}`;
@@ -147,13 +151,7 @@ const functObj = {
         if (Array.isArray(whereProp )) {
           let str = '';
           const matchValue = whereProp;
-          matchValue.forEach(value => {
-            if (!str) {
-              str = `(${str} "${prop}" = '${value}'`;
-            } else {
-              str = `${str} OR "${prop}" = '${value}'`;
-            }
-          });
+          matchValue.forEach(value => str = !str ? `(${str} "${prop}" = '${value}'` : `${str} OR "${prop}" = '${value}'`);
           groupStr = groupStr ? `${groupStr} ${type} ${str}` : `${str}`;
         } else if (!groupStr) {
           groupStr = `("${prop}" = '${whereProp}'`;
@@ -167,20 +165,15 @@ const functObj = {
   },
   generateWhereString: function(conditions: Condition, type: string) {
     let whereString = '';
-    const whereCondition = conditions.where;
+    const whereCondition: IMapping = conditions.where;
     const whereKeys = Object.keys(whereCondition);
     whereKeys.forEach((prop) => {
       const whereProp = whereCondition[prop];
       if (Array.isArray(whereProp )) {
         let str = '';
         const matchValue = whereProp;
-        matchValue.forEach(value => {
-          if (!str) {
-            str = `${str} "${prop}" = '${value}'`;
-          } else {
-            str = `${str} OR "${prop}" = '${value}'`;
-          }
-        });
+        matchValue.forEach(value => str = !str ? 
+          `${str} "${prop}" = '${value}'` : `${str} OR "${prop}" = '${value}'`);
         whereString = whereString ? `${whereString} ${type} ${str}` : `${str}`;
       } else if (!whereString) {
         whereString = `${whereString}"${prop}" = '${whereProp}'`;
@@ -190,12 +183,12 @@ const functObj = {
     });
     return whereString;
   },
-  getArrayField: (data, field, schema) => {
+  getArrayField: (data: IMapping, field: string, schema: IMapping) => {
     const arrayFieldData = 
-      `Array [${data.map((value) => `'${functObj.escapeString(JSON.stringify(value), field, schema)}'`)}]`;
+      `Array [${data.map((value: string) => `'${functObj.escapeString(JSON.stringify(value), field, schema)}'`)}]`;
     return arrayFieldData;
   },
-  generatePropString: function(modelName: string, newProps: Object, schema) {
+  generatePropString: function(modelName: string, newProps: IMapping, schema: IMapping) {
     let queryString: string;
     let propString = '';
     const newPropsKeys = Object.keys(newProps);
@@ -232,9 +225,9 @@ const functObj = {
     queryString = `${queryString} ${propString}`;
     return queryString;
   },
-  prepareDataForStorage: (dataObj: object, schema: object) => {
+  prepareDataForStorage: (dataObj: IMapping, schema: IMapping) => {
     const fields = Object.keys(dataObj);
-    const preparedDataObj: Object = {};
+    const preparedDataObj: IMapping = {};
     fields.forEach((field: any) => {
       const fieldDataType = schema[field].dataType;
       const fieldValue = dataObj[field];
@@ -257,42 +250,43 @@ const functObj = {
   escapeConditions: (conditions: Condition, schema: object) => {
     const newConditionsObj = { ...conditions };
     if (newConditionsObj.where) {
-      const whereCondition2: Object = newConditionsObj.where;
-      const whereKeyss = Object.keys(whereCondition2);
-      whereKeyss.forEach(key => {
-        if (Array.isArray(whereCondition2[key])) {
-          whereCondition2[key] = whereCondition2[key]
+      const whereCondition: IMapping = newConditionsObj.where;
+      const whereKeys = Object.keys(whereCondition);
+      whereKeys.forEach(key => {
+        const whereKeyValue: IMapping = whereCondition[key];
+        if (Array.isArray(whereCondition[key])) {
+          whereCondition[key] = whereKeyValue
             .map((value: string) => functObj.escapeString(value, key, schema));
         } else {
-          whereCondition2[key] = functObj.escapeString(whereCondition2[key], key, schema);
+          whereCondition[key] = functObj.escapeString(whereKeyValue, key, schema);
         }
       });
       if (newConditionsObj.groups) {
-        const newGroups = newConditionsObj.groups.map(group => group.map(value => {
-          return functObj.escapeString(value, 'group', schema)
-        }));
+        const newGroups = newConditionsObj.groups
+          .map(group => group.map(value => functObj.escapeString(value, 'group', schema)));
         newConditionsObj.groups = newGroups;
       }
     }
     return newConditionsObj;
   },
-  escapeString: function(value: any, field: String, schema: object) {
+  escapeString: function(value: any, field: string, schema: IMapping) {
     if (schema[field] && schema[field].dataType && schema[field].dataType.includes('timestamp')) {
       return value;
     } else {
       return escape(value);
     }
   },
-  unescapeObj: (data: object) => {
+  unescapeObj: (data: IMapping) => {
     const keys = Object.keys(data);
-    const unescapedObj = {};
+    const unescapedObj: IMapping = {};
     keys.forEach((key: string) => {
-      if (data[key] && typeof data[key] === 'string') {
-        unescapedObj[key] = unescape(data[key]);
-      } else if (Array.isArray(data[key])) {
-        unescapedObj[key] = data[key].map(value => unescape(value))
+      const fieldValue = data[key]
+      if (fieldValue && typeof fieldValue === 'string') {
+        unescapedObj[key] = unescape(fieldValue);
+      } else if (Array.isArray(fieldValue)) {
+        unescapedObj[key] = fieldValue.map((value: string) => unescape(value))
       } else {
-        unescapedObj[key] = data[key];
+        unescapedObj[key] = fieldValue;
       }
     });
     return unescapedObj;
@@ -309,32 +303,29 @@ const functObj = {
       return functObj.unescapeObj(data)
     }
   },
-  jsonParser: (data: object, schema: object) => {
+  jsonParser: (data: IMapping, schema: IMapping) => {
     const keys = Object.keys(data);
-    const newObj = {}
+    const newObj: IMapping = {}
+
     keys.forEach((key: string) => {
-      if (schema[key].dataType === 'array') {
+      const fieldValue = data[key];
+      const fieldDataType = schema[key].dataType;
+      if (fieldDataType === 'array') {
         try {
-          const newArray = data[key].map(value => JSON.parse(value));
+          const newArray = fieldValue.map((value: string) => JSON.parse(value));
           newObj[key] = newArray;
         } catch(err) {
-          newObj[key] = data[key];
+          newObj[key] = fieldValue;
         }
       } else {
-        newObj[key] = data[key];
+        newObj[key] = fieldValue;
       }
     });
     return newObj;
   },
-  parseJson: function (data: object, schema: object) {
-    if (Array.isArray(data)) {
-      const result = data.map(row => {
-        return functObj.jsonParser(row, schema);
-      });
-      return result;
-    } else {
-      return functObj.jsonParser(data, schema);
-    }
+  parseJson: function (data: Object, schema: Object) {
+    if (Array.isArray(data)) return data.map(row => functObj.jsonParser(row, schema));
+    return functObj.jsonParser(data, schema);
   },
   log: function  (queryString: string) {
     /* eslint-disable no-console */

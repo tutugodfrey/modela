@@ -8,8 +8,9 @@ const {
   generateGroupString,
   escapeConditions,
 } = functs;
-function getQuery(modelName: string, conditions: Condition| any, returnFields: Array<any>=[]) {
+function getQuery(modelName: string, conditions: Condition | any, returnFields: Array<any>=[]) {
   const typeOfCondition = (typeof conditions);
+  const schema = this.schema;
   if (typeOfCondition !== 'string' && typeOfCondition !== 'object' && typeOfCondition !== 'number') {
     return { message: 'type error!' };
   }
@@ -21,7 +22,7 @@ function getQuery(modelName: string, conditions: Condition| any, returnFields: A
 
   /* eslint-disable prefer-destructuring */
   const type = conditions.type ? conditions.type.toUpperCase() : 'AND';
-  const newConditions = escapeConditions(conditions, this.schema);
+  const newConditions = escapeConditions(conditions, schema);
   const whereString = generateWhereString(newConditions, type);
   const groupString = conditions.groups ? generateGroupString(newConditions, type) : null;
   queryString = groupString !== null ? `${queryString} WHERE ${groupString}` : `${queryString} WHERE ${whereString}`;

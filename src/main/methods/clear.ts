@@ -1,4 +1,4 @@
-import { Error } from '../interfaces';
+import { Error, DataModelaType } from '../interfaces';
 
 function clear() {
   const result = new Promise((resolve, reject) => {
