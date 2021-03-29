@@ -1,18 +1,22 @@
 
 interface Condition {
-  where: object;
+  where: Object;
   groups?: Array<Array<any>>;
-  type?: string;
+  type?: String;
 }
 
 interface Error {
   message: String
 }
 
+interface IMapping {
+  [propertyName: string]: any;
+}
+
 interface DataModelaType {
 	modelName: String | undefined;
   singleModel: String | undefined;
-  schema: object | any;
+  schema: Object | any;
   allowedFields: Array<any>;
   uniqueKeys: Array<any>;
   requiredFields: Array<any>;
@@ -30,7 +34,7 @@ interface DataModelaType {
   findAll: Function;
   destroy: Function;
 	clear: Function;
-	dbConnection: object | null;
+	dbConnection: Object | null;
 	using_db: number;
 	
 	// db methods
@@ -45,6 +49,7 @@ interface DataModelaType {
 export {
   DataModelaType,
   Condition,
+  IMapping,
   Error,
 }
 

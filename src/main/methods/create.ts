@@ -116,7 +116,7 @@ function createModel(modelToCreate: any, returnFields: Array<any>, resolve: Func
   }
 }
 
-function createModelWithDB(
+function createModelWithDB(this: any, 
   modelToCreate: any,
   returnFields: Array<any>,
   resolve: Function,

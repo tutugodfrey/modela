@@ -2,11 +2,13 @@ function bulkCreate(modelsToCreate: any, returnFields: Array<any>=[]) {
   // create a new model
   let createdModels: Array<object> = [];
   const failingObj: Array<object> = [];
+  const useDB = this.using_db;
+  const requiredFieldsLength = this.requiredFields.length;
   if (!Array.isArray(returnFields)) {
     throw new TypeError('Expected an array of fields to return');
   }
-  if (!this.requiredFields.length) {
-    if (this.using_db) {
+  if (!requiredFieldsLength) {
+    if (useDB) {
       return this.createBulkItemWithDB(modelsToCreate, returnFields);
     } else {
       const result = new Promise((resolve, reject) => {
@@ -22,7 +24,7 @@ function bulkCreate(modelsToCreate: any, returnFields: Array<any>=[]) {
     }
   }
 
-  if (this.requiredFields.length) {
+  if (requiredFieldsLength) {
     const requiredFieldsChecked = modelsToCreate.filter((modelToCreate: any) => {
       return this.requiredFields.filter((field: string) => {
         return !modelToCreate[field];
@@ -32,7 +34,7 @@ function bulkCreate(modelsToCreate: any, returnFields: Array<any>=[]) {
     if (requiredFieldsChecked.length) {
       failingObj.push({ message: 'missing required field' });
     } else {
-      if (this.using_db) {
+      if (useDB) {
         return this.createBulkItemWithDB(modelsToCreate, returnFields);
       } else {
         modelsToCreate.forEach((modelToCreate: any) => {

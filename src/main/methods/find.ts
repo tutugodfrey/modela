@@ -18,19 +18,18 @@ function find(condition: Condition, returnFields=[]) {
 
     if (this.using_db) {
       const queryString = this.getQuery(this.modelName, condition, returnFields);
-      this.dbConnection.query(queryString)
+      return this.dbConnection.query(queryString)
         .then((res: any) => {
           if (!res.rows.length) return reject({ message: `${this.singleModel} not found` });
           return resolve(parseJson(unEscape(res.rows[0]), this.schema));
         })
         .catch((err: any) => reject(err));
-    } else {
-      this.model.find((model: any) => {
-        const findMatchProps = confirmPropMatch(model, condition);
-        if (findMatchProps) return resolve(getFieldsToReturn(model, returnFields));
-      });
-      reject({ message: `${this.singleModel} not found`});
     }
+    this.model.find((model: any) => {
+      const findMatchProps = confirmPropMatch(model, condition);
+      if (findMatchProps) return resolve(getFieldsToReturn(model, returnFields));
+    });
+    reject({ message: `${this.singleModel} not found`});
   });
   return result;
 };
