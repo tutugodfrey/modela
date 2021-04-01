@@ -1,8 +1,9 @@
 
 interface Condition {
-  where: Object;
+  where?: Object;
   groups?: Array<Array<any>>;
   type?: String;
+  limit?: Number
 }
 
 interface Error {

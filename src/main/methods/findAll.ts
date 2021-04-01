@@ -14,6 +14,8 @@ function findAll(conditions: Condition | String = 'all', returnFields=[]) {
   const getQuery = this.getQuery;
   const useDB = this.using_db;
   const checkWhere = conditions.where;
+  const checkGroup = conditions.group;
+  const checkLimit = conditions.limit;
   const result = new Promise((resolve, reject)  => {
     if (!Array.isArray(returnFields)) reject({ message: 'Expected an array of fields to return'});
 
@@ -27,9 +29,13 @@ function findAll(conditions: Condition | String = 'all', returnFields=[]) {
     if ((!checkAll && !checkObjType) ||
        (!checkAll && !checkWhere) ||
        (checkWhere && !checkWhereKeys)) {
+        if (checkLimit) {
+          // pass if limit is provided
+        } else {
         reject({ message:
           'Expected an object with key \'where\' or the string \'all\' at position 1', 
         });
+      }
     }
 
     if (useDB) {
@@ -51,10 +57,24 @@ function findAll(conditions: Condition | String = 'all', returnFields=[]) {
       return resolve(model);
     }
     // array of objects that meet the conditions
-    const modelsToReturn = models.filter((model_: Object) => {
-      const findMatchProps = confirmPropMatch(model_, conditions);
-      if (findMatchProps) return model_;
-    });
+    let modelsToReturn: Array<object> = [];
+    let countLimit: number = 0
+      for (let model_ of models) {
+        if (countLimit === checkLimit) {
+          break;
+        }
+        if (checkWhere || checkGroup) {
+          const findMatchProps = confirmPropMatch(model_, conditions);
+          if (findMatchProps) {
+            modelsToReturn.push(model_);
+            countLimit++;
+          }
+        } else {
+          // No condition specified
+          modelsToReturn.push(model_);
+          countLimit++
+        }
+      }
     return resolve(modelsToReturn.map((model_: Object) => getFieldsToReturn(model_, returnFields)));
     
   });

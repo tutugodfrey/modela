@@ -721,6 +721,24 @@ describe('Dummy Data Model', () => {
 				expect(allUsers[0]).to.not.have.property('email');
 			});
 		});
+
+		// Testing for search limit
+		it('should return result base on the limit specified in condition', () => {
+			return users.findAll({ limit: 4 })
+				.then(res => {
+					expect(res).to.be.an('array');
+					expect(res).to.have.length.not.greaterThan(4);
+				});
+		});
+
+		it('should return result base on the limit with where conditions', () => {
+			// should have returned 3 but we are limiting it to two
+			return users.findAll({ where: {name: [createdUser1.name, createdUser2.name, createdUser3.name]}, limit: 2 })
+				.then(res => {
+					expect(res).to.be.an('array');
+					expect(res).to.have.length.not.greaterThan(2);
+				});
+		});
 	});
 
 	describe('update method', () => {
