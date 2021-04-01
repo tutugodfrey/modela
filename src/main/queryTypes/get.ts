@@ -10,11 +10,11 @@ const {
 } = functs;
 function getQuery(modelName: string, conditions: Condition | any, returnFields: Array<any>=[]) {
   const typeOfCondition = (typeof conditions);
-  const schema = this.schema;
+  const { schema } = this;
   if (typeOfCondition !== 'string' && typeOfCondition !== 'object' && typeOfCondition !== 'number') {
     return { message: 'type error!' };
   }
-
+  const { limit } = conditions;
   const returnString = addReturnString.call(this, '', returnFields).substr(11);
   let queryString = `SELECT ${returnString} FROM ${modelName}`;
   if (conditions === 'all') return log(queryString);
@@ -23,9 +23,17 @@ function getQuery(modelName: string, conditions: Condition | any, returnFields: 
   /* eslint-disable prefer-destructuring */
   const type = conditions.type ? conditions.type.toUpperCase() : 'AND';
   const newConditions = escapeConditions(conditions, schema);
-  const whereString = generateWhereString(newConditions, type);
+  let whereString: string = '';
   const groupString = conditions.groups ? generateGroupString(newConditions, type) : null;
-  queryString = groupString !== null ? `${queryString} WHERE ${groupString}` : `${queryString} WHERE ${whereString}`;
+  if (!groupString && newConditions.where) {
+    whereString = generateWhereString(newConditions, type);
+  }
+  if (groupString) {
+    queryString = `${queryString} WHERE ${groupString}`;
+  } else if (whereString) {
+    queryString = `${queryString} WHERE ${whereString}`;
+  }
+  queryString = limit ? `${queryString} LIMIT ${limit}` : queryString;
   return log(queryString);
 }
 
