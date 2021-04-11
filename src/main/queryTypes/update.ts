@@ -44,7 +44,7 @@ function updateQuery(modelName: string, conditions: Condition, newProps: object,
 
       queryString = addReturnString.call(this, queryString, returnFields)
 
-      if (queryString) resolve(log(queryString));
+      if (queryString) resolve(log.call(this, queryString));
   });
   return generatedQueryString;
 }

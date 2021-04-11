@@ -10,7 +10,7 @@ var clear_1 = require("./methods/clear");
 var queryTypes_1 = require("./queryTypes");
 var bulkCreate_1 = require("./methods/bulkCreate");
 var DataModela = /** @class */ (function () {
-    function DataModela(modelName, schema) {
+    function DataModela(modelName, schema, options) {
         var _this = this;
         if (schema === void 0) { schema = {}; }
         this.allowedFields = [];
@@ -62,6 +62,7 @@ var DataModela = /** @class */ (function () {
         this.modelName = modelName;
         this.singleModel = this.modelName.substring(0, this.modelName.length - 1);
         this.schema = schema;
+        this.options = options;
         this.allowedFields = Object.keys(schema);
         this.uniqueKeys = [];
         this.requiredFields = [];

@@ -61,7 +61,7 @@ function createQuery(modelName: string, modelToCreate: any, returnFields=[]) {
     }
   });
   queryString = addReturnString.call(this, `${queryString} ${keyString} ${valueString}`, returnFields)
-  return log(queryString);
+  return log.call(this, queryString);
 }
 
 export default createQuery;

@@ -14,6 +14,10 @@ interface IMapping {
   [propertyName: string]: any;
 }
 
+interface Options {
+  logQuery?: string
+}
+
 interface DataModelaType {
 	modelName: String | undefined;
   singleModel: String | undefined;
@@ -37,6 +41,7 @@ interface DataModelaType {
 	clear: Function;
 	dbConnection: Object | null;
 	using_db: number;
+  options: Options;
 	
 	// db methods
 	createQuery: Function;
@@ -49,6 +54,7 @@ interface DataModelaType {
 
 export {
   DataModelaType,
+  Options,
   Condition,
   IMapping,
   Error,

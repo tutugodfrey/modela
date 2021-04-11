@@ -74,7 +74,7 @@ function createTableQuery() {
   });
 
   tableQuery = tableQuery.slice(0, tableQuery.length - 1);
-  return log(`${tableQuery});`);
+  return log.call(this, `${tableQuery});`);
 }
 
 export default createTableQuery;

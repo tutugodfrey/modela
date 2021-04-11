@@ -17,8 +17,8 @@ function getQuery(modelName: string, conditions: Condition | any, returnFields: 
   const { limit } = conditions;
   const returnString = addReturnString.call(this, '', returnFields).substr(11);
   let queryString = `SELECT ${returnString} FROM ${modelName}`;
-  if (conditions === 'all') return log(queryString);
-  if (typeof conditions === 'number') return log(`${queryString} WHERE "id" = ${conditions}`);
+  if (conditions === 'all') return log.call(this, queryString);
+  if (typeof conditions === 'number') return log.call(this, `${queryString} WHERE "id" = ${conditions}`);
 
   /* eslint-disable prefer-destructuring */
   const type = conditions.type ? conditions.type.toUpperCase() : 'AND';
@@ -34,7 +34,7 @@ function getQuery(modelName: string, conditions: Condition | any, returnFields: 
     queryString = `${queryString} WHERE ${whereString}`;
   }
   queryString = limit ? `${queryString} LIMIT ${limit}` : queryString;
-  return log(queryString);
+  return log.call(this, queryString);
 }
 
 export default getQuery;
