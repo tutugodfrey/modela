@@ -24,7 +24,7 @@ function deleteQuery(modelName: string, conditions: Condition, returnFields: Arr
     `${queryString} WHERE ${whereString}`;
   queryString = addReturnString.call(this, queryString, returnFields);
 
-  return log(queryString);
+  return log.call(this, queryString);
 }
 
 export default deleteQuery;

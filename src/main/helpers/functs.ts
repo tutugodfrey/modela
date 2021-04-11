@@ -329,7 +329,9 @@ const functObj = {
   },
   log: function  (queryString: string) {
     /* eslint-disable no-console */
-   process.env.NODE_ENV === 'production' ? null : console.log(queryString);
+    if (this.options && this.options.logQuery === 'yes') {
+      console.log(queryString);
+    }
    return queryString;
  }
 }

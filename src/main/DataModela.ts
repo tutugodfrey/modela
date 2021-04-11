@@ -5,7 +5,7 @@ import findById from './methods/findById'
 import findAll from './methods/findAll';
 import destroy from './methods/destroy';
 import clear from './methods/clear';
-import { DataModelaType } from './interfaces';
+import { DataModelaType, Options } from './interfaces';
 import {
 	createQuery,
 	updateQuery,
@@ -52,6 +52,7 @@ class DataModela implements DataModelaType  {
 	clear: Function = clear.bind(this);
 	dbConnection: object | null =  null;
 	using_db: number = 0;
+	options: Options
 	
 	// db methods
 	createQuery: Function = createQuery.bind(this);
@@ -61,7 +62,7 @@ class DataModela implements DataModelaType  {
 	rawQuery: Function = rawQuery.bind(this);
 	createTableQuery: Function = createTableQuery.bind(this);
 
-	"constructor"(modelName: string, schema: any = {}){
+	"constructor"(modelName: string, schema: any = {}, options: Options){
 		if (Object.prototype.toString.call(schema) !== '[object Object]') {
       return { typeError: 'expected argument 2 (schema) to be an object' };
 		}
@@ -73,6 +74,7 @@ class DataModela implements DataModelaType  {
 		this.modelName = modelName;
 		this.singleModel = this.modelName.substring(0, this.modelName.length - 1);
 		this.schema = schema;
+		this.options = options
 		this.allowedFields = Object.keys(schema);
 		this.uniqueKeys = [];
 		this.requiredFields = [];

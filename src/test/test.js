@@ -22,7 +22,7 @@ const users = new DataModela('users', {
 	updatedAt: {
 		dataType: 'timestamp',
 	}
-});
+}, { logQuery: 'yes'});
 
 // use to test datatype checking
 const todos = new DataModela('todos', {
