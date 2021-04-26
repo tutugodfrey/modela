@@ -4,7 +4,7 @@
   "description": "an application that uses sequelize methods to work with dummy-data when building appliication",
   "main": "./lib/main/index.js",
   "scripts": {
-    "test:lib": "mocha lib/test/",
+    "test:lib": "mocha lib/test/ --exit",
     "build": "babel src -s -d lib",
     "transpile": "tsc",
     "babel:node": "babel-node src/main/createModel",

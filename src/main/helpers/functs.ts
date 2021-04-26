@@ -329,7 +329,10 @@ const functObj = {
   },
   log: function  (queryString: string) {
     /* eslint-disable no-console */
-    if (this.options && this.options.logQuery === 'yes') {
+    if (this.options && this.options.logQuery === 'no') {
+      // console.log(queryString);
+      // Query logging disabled
+    } else {
       console.log(queryString);
     }
    return queryString;
