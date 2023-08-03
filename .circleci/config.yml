@@ -1,0 +1,67 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:18.16.1
+        environment:
+          POSTGRES_USER: postgres
+          PGPASSWORD: dbpass!!x
+          DATABASE_URL: postgresql://postgres@localhost:5432/postgres
+      - image: postgres:latest
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: dbpass!!x
+
+    environment:
+      CC_TEST_REPORTER_ID: c30efe4967139073721ba0e5ae6a97c511c3bc53ce11144c0c2030bae9655c75
+    steps:
+      - checkout
+      - run:
+          name: Down and Setup CodeClimate test reporter
+          command: |
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+            ./cc-test-reporter before-build
+
+      - run:
+          name: Test without DB
+          command: |
+            npm install
+            npm run coverage
+
+      - run:
+          name: Test with DB
+          command: |
+            export USE_DB=1
+            npm run coverage
+
+      - run:
+          name: Send coverage report
+          command: |
+            cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+            ./cc-test-reporter after-build --coverage-input-type lcov --exit-code $?
+
+  publish:
+    docker:
+      - image: cimg/node:18.16.1
+    steps:
+      - checkout
+      - run:
+          name: Publish package to npm
+          command: |
+            ls -al
+            echo Setup publishing to npm
+            # npm adduser --access=public
+            # npm publish --access=public
+    
+
+workflows:
+  default:
+    jobs:
+      - build
+      - publish:
+          requires: [ build ]
+          filters:
+            branches:
+              only: add-circleci-pipeline

@@ -7,7 +7,7 @@ The module also expose the `connect` function which would be used for making the
 ## status
 ---
 
-[![Build Status](https://www.travis-ci.org/tutugodfrey/modela.svg?branch=develop)](https://www.travis-ci.org/tutugodfrey/modela)
+[![CircleCI](https://circleci.com/gh/tutugodfrey/modela.svg?style=svg)](https://circleci.com/gh/tutugodfrey/modela)
 [![Coverage Status](https://coveralls.io/repos/github/tutugodfrey/modela/badge.svg)](https://coveralls.io/github/tutugodfrey/modela)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f9a36d501a936eb890b9/maintainability)](https://codeclimate.com/github/tutugodfrey/modela/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/f9a36d501a936eb890b9/test_coverage)](https://codeclimate.com/github/tutugodfrey/modela/test_coverage)
