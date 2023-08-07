@@ -1,6 +1,6 @@
 {
   "name": "data-modela",
-  "version": "0.0.8",
+  "version": "1.0.0",
   "description": "an application that uses sequelize methods to work with dummy-data when building appliication",
   "main": "./lib/main/index.js",
   "scripts": {
@@ -17,9 +17,7 @@
     "test:db": "npm run build && mocha lib/test/dbclass",
     "test:db2": "mocha lib/test/dbclass",
     "js:lint": "eslint src/",
-    "coverage2": "nyc npm run test && nyc report --reporter=lcov",
-    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./lib/test/",
-    "send:coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec ./lib/test/ && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+    "coverage": "nyc npm run test && nyc report --reporter=lcov"
   },
   "nyc": {
     "exclude": "**/test"
